@@ -1,0 +1,67 @@
+{
+	"familyName": "Apple",
+	"profileTarget": "tbXSK7e39Sb3U3yP2p8gMIIC%2f7k5ByWFPEuKw2EtzbRk8OGooY4swqtLGF%2fRHiO2oePDgx7qymyrecz5NYkK0N2DVqDAUwVT5wICldEBwp1urZuIeWzfcSXTEID0i7UDjpDz7IhKVwYgGTNgStyrY20yUpZxa%2f919s%2fgEfJ7aSY%3d",
+	"region": "EU",
+	"guild": {
+		"name": "TumblrGirls",
+		"region": "EU"
+	},
+	"contributionPoints": 100,
+	"createdOn": "2016-09-24T00:00:00Z",
+	"characters": [
+		{
+			"name": "Blue",
+			"class": "Ninja",
+			"level": 56,
+			"specLevels": {
+				"gathering": "Beginner 6",
+				"fishing": "Master 18",
+				"hunting": "Beginner 1",
+				"cooking": "Beginner 4",
+				"alchemy": "Beginner 1",
+				"processing": "Beginner 9",
+				"training": "Apprentice 1",
+				"trading": "Apprentice 3",
+				"farming": "Beginner 1",
+				"sailing": "Beginner 1",
+				"barter": "Beginner 1"
+			}
+		},
+		{
+			"name": "Purple",
+			"class": "Tamer",
+			"level": 58,
+			"specLevels": {
+				"gathering": "Beginner 6",
+				"fishing": "Beginner 1",
+				"hunting": "Apprentice 1",
+				"cooking": "Apprentice 9",
+				"alchemy": "Beginner 1",
+				"processing": "Apprentice 1",
+				"training": "Apprentice 5",
+				"trading": "Beginner 8",
+				"farming": "Beginner 1",
+				"sailing": "Beginner 1",
+				"barter": "Beginner 1"
+			}
+		},
+		{
+			"name": "Green",
+			"class": "Ranger",
+			"level": 53,
+			"specLevels": {
+				"gathering": "Beginner 1",
+				"fishing": "Beginner 1",
+				"hunting": "Beginner 1",
+				"cooking": "Beginner 1",
+				"alchemy": "Beginner 1",
+				"processing": "Beginner 5",
+				"training": "Beginner 1",
+				"trading": "Beginner 5",
+				"farming": "Beginner 1",
+				"sailing": "Beginner 1",
+				"barter": "Beginner 1"
+			}
+		}
+	]
+}
