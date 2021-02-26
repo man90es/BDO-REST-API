@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"log"
 	"time"
+	"net/url"
 
 	"github.com/gorilla/mux"
 
@@ -15,7 +16,7 @@ func main() {
 	router := mux.NewRouter()
 
 	router.HandleFunc("/v0/guildProfile", getGuildProfile).Methods("GET")
-	// router.HandleFunc("/v0/profile", getProfile).Methods("GET")
+	router.HandleFunc("/v0/profile", getProfile).Methods("GET")
 
 	srv := &http.Server{
 		Handler: 		router,
@@ -40,4 +41,14 @@ func getGuildProfile(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(scraper.ScrapeGuildProfile(regionParams[0], guildNameParams[0]))
 }
 
-// func getProfile(w http.ResponseWriter, r *http.Request) {}
+func getProfile(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+
+	profileTargetParams, ok := r.URL.Query()["profileTarget"]
+
+	if !ok {
+		return
+	}
+
+	json.NewEncoder(w).Encode(scraper.ScrapeProfile(url.QueryEscape(profileTargetParams[0])))
+}

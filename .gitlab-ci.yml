@@ -1,32 +1,8 @@
-image: golang:1.9
-
-variables:
-  BIN_NAME: black-desert-social-rest-api
-  ARTIFACTS_DIR: artifacts
-  GO_PROJECT: gitlab.com/man90/black-desert-social-rest-api
-
-stages:
-  - build
-  - test
-
-before_script:
-  - mkdir -p ${GOPATH}/src/${GO_PROJECT}
-  - mkdir -p ${CI_PROJECT_DIR}/${ARTIFACTS_DIR}
-  - go get -u github.com/golang/dep/cmd/dep
-  - cp -r ${CI_PROJECT_DIR}/* ${GOPATH}/src/${GO_PROJECT}/
-  - cd ${GOPATH}/src/${GO_PROJECT}
-
 build-black-desert-social-rest-api:
+  image: golang:1.15
   stage: build
   script:
-    - dep ensure
-    - go build -o ${CI_PROJECT_DIR}/${ARTIFACTS_DIR}/${BIN_NAME}
+    - go build -o ${CI_PROJECT_DIR}/dist/black-desert-social-rest-api
   artifacts:
     paths:
-      - ${ARTIFACTS_DIR}
-
-test-black-desert-social-rest-api:
-  stage: test
-  script:
-    - dep ensure
-    - go test -v -cover ./...
+      - dist
