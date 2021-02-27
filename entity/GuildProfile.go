@@ -8,4 +8,6 @@ type GuildProfile struct {
 	CreatedOn 	*time.Time 	`json:"createdOn,omitempty"`
 	GuildMaster *Profile 	`json:"guildMaster,omitempty"`
 	Members 	[]Profile 	`json:"members,omitempty"`
+	Kind		string 		`json:"kind,omitempty"`
+	Population	int16 		`json:"population,omitempty"`
 }
