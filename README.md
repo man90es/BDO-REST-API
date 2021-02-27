@@ -4,7 +4,7 @@ An unofficial REST API for Black Desert Online that scrapes guild and player dat
 
 ## Getting the binary
 ### Building from source
-
+Prerequisites: GNU/Linux, Go >=1.15
 ```bash
 go build
 ```
@@ -13,23 +13,46 @@ go build
 You can download prebuild binaries [here](https://gitlab.com/man90/black-desert-social-rest-api/-/pipelines).
 
 ## Routes
+
 ### Guild data
-Assuming that your guild's name is «TumblrGirls» and it's on the EU server:
-```python
-http://localhost:8001/v0/guildProfile?guildName=TumblrGirls&region=EU
-```
+`http://localhost:8001/v0/guildProfile`
+
+| GET Parameter | Required | Wtf?                     |
+|-----------|----------|--------------------------|
+| guildName | Yes.     | The name of the guild.   |
+| region    | Yes.     | Supported values: EU, NA |
+
 You can find an example of a reply [here](https://gitlab.com/man90/black-desert-social-rest-api/-/blob/master/exampleDumps/guildProfile.json).
 
 ### Player data
-Assuming that your profileTarget is «reeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee» (you can get the profileTarget string from guild members data or from player search):
-```python
-http://localhost:8001/v0/profile?profileTarget=reeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
-```
+`http://localhost:8001/v0/profile`
+| GET Parameter     | Required | Wtf?                                                                  |
+|---------------|----------|-----------------------------------------------------------------------|
+| profileTarget | Yes.     | You can get this string from guild members data or from player search |
+
 You can find an example of a reply [here](https://gitlab.com/man90/black-desert-social-rest-api/-/blob/master/exampleDumps/profile.json).
 
+### Guild search
+`http://localhost:8001/v0/guildProfileSearch`
+| GET Parameter | Required | Wtf?                           |
+|---------------|----------|--------------------------------|
+| region        | Yes.     | Supported values: EU, NA       |
+| query         | No.      |                                |
+| page          | No.      | Each page has up to 10 guilds. |
+
+You can find an example of a reply [here](https://gitlab.com/man90/black-desert-social-rest-api/-/blob/master/exampleDumps/guildProfileSearch.json).
+
+### Player search
+`http://localhost:8001/v0/profileSearch`
+| GET Parameter  | Required                           | Wtf?                                        |
+|----------------|------------------------------------|---------------------------------------------|
+| region         | Yes.                               | Supported values: EU, NA                    |
+| query          | No.                                |                                             |
+| searchType     | Only if «query» param is provided. | Supported values: familyName, characterName |
+| page           | No.                                | Each page has up to 20 players.             |
+
+You can find an example of a reply [here](https://gitlab.com/man90/black-desert-social-rest-api/-/blob/master/exampleDumps/profileSearch.json).
 
 ## To-do
-* Guild search route
-* Player search route
 * Cache
 * Error handling
