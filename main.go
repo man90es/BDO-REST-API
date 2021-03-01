@@ -69,6 +69,7 @@ func setCachedResponse(cacheMapKey string, data interface{}) interface{} {
 
 func getGuildProfile(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Access-Control-Allow-Origin", "*")
 
 	regionParams, ok1 := r.URL.Query()["region"]
 	guildNameParams, ok2 := r.URL.Query()["guildName"]
@@ -87,6 +88,7 @@ func getGuildProfile(w http.ResponseWriter, r *http.Request) {
 
 func getProfile(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Access-Control-Allow-Origin", "*")
 
 	profileTargetParams, ok := r.URL.Query()["profileTarget"]
 
@@ -104,6 +106,7 @@ func getProfile(w http.ResponseWriter, r *http.Request) {
 
 func getGuildProfileSearch(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Access-Control-Allow-Origin", "*")
 
 	regionParams, ok1 := r.URL.Query()["region"]
 	pageParams, ok2 := r.URL.Query()["page"]
@@ -135,6 +138,7 @@ func getGuildProfileSearch(w http.ResponseWriter, r *http.Request) {
 
 func getProfileSearch(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Access-Control-Allow-Origin", "*")
 
 	regionParams, ok1 := r.URL.Query()["region"]
 	searchTypeParams, ok2 := r.URL.Query()["searchType"]
