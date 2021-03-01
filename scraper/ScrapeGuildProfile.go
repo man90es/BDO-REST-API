@@ -2,6 +2,7 @@ package scraper
 
 import (
 	"fmt"
+	"log"
 	"time"
 
 	"github.com/gocolly/colly/v2"
@@ -17,7 +18,7 @@ func ScrapeGuildProfile(region, name string) (guildProfile entity.GuildProfile) 
 	guildProfile.Name = name
 
 	c.OnRequest(func(r *colly.Request) {
-		fmt.Println("Visiting", r.URL)
+		log.Println("Visiting", r.URL)
 	})
 
 	c.OnHTML(`.line_list.mob_none .desc`, func(e *colly.HTMLElement) {

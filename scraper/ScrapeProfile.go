@@ -6,6 +6,7 @@ import (
 	"strings"
 	"strconv"
 	"regexp"
+	"log"
 
 	"github.com/gocolly/colly/v2"
 
@@ -19,7 +20,7 @@ func ScrapeProfile(profileTarget string) (profile entity.Profile)  {
 	profile.ProfileTarget = profileTarget
 
 	c.OnRequest(func(r *colly.Request) {
-		fmt.Println("Visiting", r.URL)
+		log.Println("Visiting", r.URL)
 	})
 
 	c.OnHTML(`.nick`, func(e *colly.HTMLElement) {

@@ -54,5 +54,4 @@ You can find an example of a reply [here](https://gitlab.com/man90/black-desert-
 You can find an example of a reply [here](https://gitlab.com/man90/black-desert-social-rest-api/-/blob/master/exampleDumps/profileSearch.json).
 
 ## To-do
-* Cache
 * Error handling

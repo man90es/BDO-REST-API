@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strconv"
 	"time"
+	"log"
 
 	"github.com/gocolly/colly/v2"
 
@@ -15,7 +16,7 @@ func ScrapeProfileSearch(region, query string, searchType int8, page int32) (pro
 	c.SetRequestTimeout(time.Minute / 2)
 
 	c.OnRequest(func(r *colly.Request) {
-		fmt.Println("Visiting", r.URL)
+		log.Println("Visiting", r.URL)
 	})
 
 	c.OnHTML(`.box_list_area li:not(.no_result)`, func(e *colly.HTMLElement) {

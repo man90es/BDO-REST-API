@@ -3,6 +3,7 @@ package scraper
 import (
 	"fmt"
 	"time"
+	"log"
 	"strconv"
 
 	"github.com/gocolly/colly/v2"
@@ -15,7 +16,7 @@ func ScrapeGuildProfileSearch(region, query string, page int32) (guildProfiles [
 	c.SetRequestTimeout(time.Minute / 2)
 
 	c.OnRequest(func(r *colly.Request) {
-		fmt.Println("Visiting", r.URL)
+		log.Println("Visiting", r.URL)
 	})
 
 	c.OnHTML(`.box_list_area li:not(.no_result)`, func(e *colly.HTMLElement) {
