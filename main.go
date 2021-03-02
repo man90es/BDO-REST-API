@@ -8,6 +8,7 @@ import (
 	"strconv"
 	"net/url"
 	"fmt"
+	"os"
 
 	"github.com/gorilla/mux"
 
@@ -29,14 +30,19 @@ func main() {
 	router.HandleFunc("/v0/guildProfileSearch", getGuildProfileSearch).Methods("GET")
 	router.HandleFunc("/v0/profileSearch", getProfileSearch).Methods("GET")
 
+	port := os.Getenv("PORT")
+	if len(port) < 1 {
+		port = "8001"
+	}
+
 	srv := &http.Server{
 		Handler: 		router,
-		Addr: 			"127.0.0.1:8001",
+		Addr: 			fmt.Sprintf("127.0.0.1:%v", port),
 		WriteTimeout: 	15 * time.Second,
 		ReadTimeout:  	15 * time.Second,
 	}
 
-	log.Println("Listening for requests on port 8001.")
+	log.Printf("Listening for requests on port %v.", port)
 	log.Fatal(srv.ListenAndServe())
 }
 
