@@ -37,7 +37,7 @@ func main() {
 
 	srv := &http.Server{
 		Handler: 		router,
-		Addr: 			fmt.Sprintf("127.0.0.1:%v", port),
+		Addr: 			fmt.Sprintf("0.0.0.0:%v", port),
 		WriteTimeout: 	15 * time.Second,
 		ReadTimeout:  	15 * time.Second,
 	}
