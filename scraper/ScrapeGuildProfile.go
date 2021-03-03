@@ -10,7 +10,7 @@ import (
 	"gitlab.com/man90/black-desert-social-rest-api/entity"
 )
 
-func ScrapeGuildProfile(region, name string) (guildProfile entity.GuildProfile)  {
+func ScrapeGuildProfile(region, name string) (guildProfile entity.GuildProfile, err error)  {
 	c := colly.NewCollector()
 	c.SetRequestTimeout(time.Minute / 2)
 
@@ -19,6 +19,10 @@ func ScrapeGuildProfile(region, name string) (guildProfile entity.GuildProfile) 
 
 	c.OnRequest(func(r *colly.Request) {
 		log.Println("Visiting", r.URL)
+	})
+
+	c.OnHTML(`.closetime_message`, func(e *colly.HTMLElement) {
+		err = fmt.Errorf(closetimeMessage)
 	})
 
 	c.OnHTML(`.line_list.mob_none .desc`, func(e *colly.HTMLElement) {

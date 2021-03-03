@@ -20,6 +20,10 @@ type responseCache struct {
 	data interface{}
 }
 
+type errorResponse struct {
+	Error string `json:"error"`
+}
+
 var (
 	globalCacheMap map[string]responseCache = make(map[string]responseCache)
 	lastCacheCleanUp time.Time = time.Now()
@@ -86,7 +90,7 @@ func getCachedResponse(cacheMapKey string) (interface{}, bool) {
 	return nil, false
 }
 
-func setCachedResponse(cacheMapKey string, data interface{}) interface{} {
+func setCachedResponse(cacheMapKey string, data interface{}) {
 	if time.Now().Sub(lastCacheCleanUp) > cacheTTL {
 		go cleanUpCache()
 	}
@@ -97,8 +101,6 @@ func setCachedResponse(cacheMapKey string, data interface{}) interface{} {
 	}
 
 	log.Printf("Adding \"%v\" to cache.", cacheMapKey)
-
-	return data
 }
 
 func getGuildProfile(w http.ResponseWriter, r *http.Request) {
@@ -116,7 +118,12 @@ func getGuildProfile(w http.ResponseWriter, r *http.Request) {
 	if cachedReponseData, ok := getCachedResponse(cacheMapKey); ok {
 		json.NewEncoder(w).Encode(cachedReponseData)
 	} else {
-		json.NewEncoder(w).Encode(setCachedResponse(cacheMapKey, scraper.ScrapeGuildProfile(regionParams[0], guildNameParams[0])))
+		if data, err := scraper.ScrapeGuildProfile(regionParams[0], guildNameParams[0]); err == nil {
+			setCachedResponse(cacheMapKey, data)
+			json.NewEncoder(w).Encode(data)
+		} else {
+			json.NewEncoder(w).Encode(errorResponse{ err.Error() })
+		}
 	}
 }
 
@@ -134,7 +141,12 @@ func getProfile(w http.ResponseWriter, r *http.Request) {
 	if cachedReponseData, ok := getCachedResponse(cacheMapKey); ok {
 		json.NewEncoder(w).Encode(cachedReponseData)
 	} else {
-		json.NewEncoder(w).Encode(setCachedResponse(cacheMapKey, scraper.ScrapeProfile(url.QueryEscape(profileTargetParams[0]))))
+		if data, err := scraper.ScrapeProfile(url.QueryEscape(profileTargetParams[0])); err == nil {
+			setCachedResponse(cacheMapKey, data)
+			json.NewEncoder(w).Encode(data)
+		} else {
+			json.NewEncoder(w).Encode(errorResponse{ err.Error() })
+		}
 	}
 }
 
@@ -166,7 +178,12 @@ func getGuildProfileSearch(w http.ResponseWriter, r *http.Request) {
 	if cachedReponseData, ok := getCachedResponse(cacheMapKey); ok {
 		json.NewEncoder(w).Encode(cachedReponseData)
 	} else {
-		json.NewEncoder(w).Encode(setCachedResponse(cacheMapKey, scraper.ScrapeGuildProfileSearch(regionParams[0], query, int32(page))))
+		if data, err := scraper.ScrapeGuildProfileSearch(regionParams[0], query, int32(page)); err == nil {
+			setCachedResponse(cacheMapKey, data)
+			json.NewEncoder(w).Encode(data)
+		} else {
+			json.NewEncoder(w).Encode(errorResponse{ err.Error() })
+		}
 	}
 }
 
@@ -214,6 +231,11 @@ func getProfileSearch(w http.ResponseWriter, r *http.Request) {
 	if cachedReponseData, ok := getCachedResponse(cacheMapKey); ok {
 		json.NewEncoder(w).Encode(cachedReponseData)
 	} else {
-		json.NewEncoder(w).Encode(setCachedResponse(cacheMapKey, scraper.ScrapeProfileSearch(regionParams[0], query, searchType, int32(page))))
+		if data, err := scraper.ScrapeProfileSearch(regionParams[0], query, searchType, int32(page)); err == nil {
+			setCachedResponse(cacheMapKey, data)
+			json.NewEncoder(w).Encode(data)
+		} else {
+			json.NewEncoder(w).Encode(errorResponse{ err.Error() })
+		}
 	}
 }

@@ -11,12 +11,16 @@ import (
 	"gitlab.com/man90/black-desert-social-rest-api/entity"
 )
 
-func ScrapeProfileSearch(region, query string, searchType int8, page int32) (profiles []entity.Profile)  {
+func ScrapeProfileSearch(region, query string, searchType int8, page int32) (profiles []entity.Profile, err error)  {
 	c := colly.NewCollector()
 	c.SetRequestTimeout(time.Minute / 2)
 
 	c.OnRequest(func(r *colly.Request) {
 		log.Println("Visiting", r.URL)
+	})
+
+	c.OnHTML(`.closetime_message`, func(e *colly.HTMLElement) {
+		err = fmt.Errorf(closetimeMessage)
 	})
 
 	c.OnHTML(`.box_list_area li:not(.no_result)`, func(e *colly.HTMLElement) {

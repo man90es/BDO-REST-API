@@ -13,7 +13,7 @@ import (
 	"gitlab.com/man90/black-desert-social-rest-api/entity"
 )
 
-func ScrapeProfile(profileTarget string) (profile entity.Profile)  {
+func ScrapeProfile(profileTarget string) (profile entity.Profile, err error)  {
 	c := colly.NewCollector()
 	c.SetRequestTimeout(time.Minute / 2)
 
@@ -21,6 +21,10 @@ func ScrapeProfile(profileTarget string) (profile entity.Profile)  {
 
 	c.OnRequest(func(r *colly.Request) {
 		log.Println("Visiting", r.URL)
+	})
+
+	c.OnHTML(`.closetime_message`, func(e *colly.HTMLElement) {
+		err = fmt.Errorf(closetimeMessage)
 	})
 
 	c.OnHTML(`.nick`, func(e *colly.HTMLElement) {
