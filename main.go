@@ -20,7 +20,11 @@ type responseCache struct {
 	data interface{}
 }
 
-var globalCacheMap map[string]responseCache = make(map[string]responseCache)
+var (
+	globalCacheMap map[string]responseCache = make(map[string]responseCache)
+	lastCacheCleanUp time.Time = time.Now()
+	cacheTTL time.Duration = time.Minute * 5
+)
 
 func main() {
 	router := mux.NewRouter()
@@ -50,19 +54,43 @@ func validateRegion(r string) bool {
 	return r == "EU" || r == "NA"
 }
 
+func cleanUpCache() {
+	counter := 0
+	log.Printf("Cleaning up the cache.")
+
+	for key, element := range globalCacheMap {
+		if time.Now().Sub(element.time) > cacheTTL {
+			delete(globalCacheMap, key)
+			counter++
+		}
+	}
+
+	log.Printf("%v entries removed from the cache.", counter)
+	lastCacheCleanUp = time.Now()
+}
+
 func getCachedResponse(cacheMapKey string) (interface{}, bool) {
 	cachedReponse, ok := globalCacheMap[cacheMapKey]
 
-	if ok && time.Now().Sub(cachedReponse.time) < time.Hour {
-		log.Printf("Serving \"%v\" from cache.\n", cacheMapKey)
-		return cachedReponse.data, true
+	if ok {
+		if time.Now().Sub(cachedReponse.time) < cacheTTL {
+			log.Printf("Serving \"%v\" from cache.\n", cacheMapKey)
+			return cachedReponse.data, true
+		} else {
+			log.Printf("\"%v\" cache has expired.", cacheMapKey)
+		}
 	} else {
 		log.Printf("\"%v\" not found in cache.", cacheMapKey)
-		return nil, false
 	}
+	
+	return nil, false
 }
 
 func setCachedResponse(cacheMapKey string, data interface{}) interface{} {
+	if time.Now().Sub(lastCacheCleanUp) > cacheTTL {
+		go cleanUpCache()
+	}
+
 	globalCacheMap[cacheMapKey] = responseCache{
 		time: time.Now(),
 		data: data,
