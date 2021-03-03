@@ -6,3 +6,5 @@ build-black-desert-social-rest-api:
   artifacts:
     paths:
       - dist
+  only:
+    - master
