@@ -27,7 +27,7 @@ type errorResponse struct {
 var (
 	globalCacheMap map[string]responseCache = make(map[string]responseCache)
 	lastCacheCleanUp time.Time = time.Now()
-	cacheTTL time.Duration = time.Minute * 5
+	cacheTTL time.Duration = time.Hour * 2
 )
 
 func main() {
