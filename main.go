@@ -196,23 +196,13 @@ func getProfileSearch(w http.ResponseWriter, r *http.Request) {
 	pageParams, ok3 := r.URL.Query()["page"]
 	queryParams, ok4 := r.URL.Query()["query"]
 
-	if !ok1 || !validateRegion(regionParams[0]) {
+	searchType := map[string]int8 {
+		"characterName": 1,
+		"familyName": 2,
+	}[searchTypeParams[0]]
+
+	if !ok1 || !ok2 || !ok4 || !validateRegion(regionParams[0]) || searchType < 1 || searchType > 2 {
 		return
-	}
-
-	var searchType int8
-
-	if ok2 {
-		sT := map[string]int8 {
-			"characterName": 1,
-			"familyName": 2,
-		}
-
-		var ok bool
-
-		if searchType, ok = sT[searchTypeParams[0]]; !ok {
-			searchType = 3
-		}
 	}
 
 	page := 1
@@ -221,17 +211,11 @@ func getProfileSearch(w http.ResponseWriter, r *http.Request) {
 		page, _ = strconv.Atoi(pageParams[0])
 	}
 
-	var query string
-
-	if ok4 {
-		query = queryParams[0]
-	}
-
-	cacheMapKey := fmt.Sprintf("getProfileSearch+%v+%v+%v+%v", regionParams[0], query, searchType, int32(page))
+	cacheMapKey := fmt.Sprintf("getProfileSearch+%v+%v+%v+%v", regionParams[0], queryParams[0], searchType, int32(page))
 	if cachedReponseData, ok := getCachedResponse(cacheMapKey); ok {
 		json.NewEncoder(w).Encode(cachedReponseData)
 	} else {
-		if data, err := scraper.ScrapeProfileSearch(regionParams[0], query, searchType, int32(page)); err == nil {
+		if data, err := scraper.ScrapeProfileSearch(regionParams[0], queryParams[0], searchType, int32(page)); err == nil {
 			setCachedResponse(cacheMapKey, data)
 			json.NewEncoder(w).Encode(data)
 		} else {

@@ -48,11 +48,7 @@ func ScrapeProfileSearch(region, query string, searchType int8, page int32) (pro
 		profiles = append(profiles, profile)
 	})
 
-	if (len(query) < 1) {
-		c.Visit(fmt.Sprintf("https://www.naeu.playblackdesert.com/en-US/Adventure?region=%v&searchType=3&Page=%v", region, page))
-	} else {
-		c.Visit(fmt.Sprintf("https://www.naeu.playblackdesert.com/en-US/Adventure?region=%v&searchType=%v&searchKeyword=%v&Page=%v", region, searchType, query, page))
-	}
+	c.Visit(fmt.Sprintf("https://www.naeu.playblackdesert.com/en-US/Adventure?region=%v&searchType=%v&searchKeyword=%v&Page=%v", region, searchType, query, page))
 
 	return
 }

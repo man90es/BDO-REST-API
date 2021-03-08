@@ -47,8 +47,8 @@ You can find an example of a reply [here](https://gitlab.com/man90/black-desert-
 | GET Parameter  | Required                           | Wtf?                                        |
 |----------------|------------------------------------|---------------------------------------------|
 | region         | Yes.                               | Supported values: EU, NA                    |
-| query          | No.                                |                                             |
-| searchType     | Only if «query» param is provided. | Supported values: familyName, characterName |
+| query          | Yes.                               |                                             |
+| searchType     | Yes.                               | Supported values: familyName, characterName |
 | page           | No.                                | Each page has up to 20 players.             |
 
 You can find an example of a reply [here](https://gitlab.com/man90/black-desert-social-rest-api/-/blob/master/exampleDumps/profileSearch.json).
