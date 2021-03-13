@@ -44,6 +44,10 @@ func ScrapeProfile(profileTarget string) (profile entity.Profile, err error)  {
 		}
 	})
 
+	c.OnHTML(`.desc.guild span`, func(e *colly.HTMLElement) {
+		profile.Privacy = profile.Privacy | entity.PrivateGuild
+	})
+
 	c.OnHTML(`.line_list .desc:not(.guild)`, func(e *colly.HTMLElement) {
 		createdOn, _ := time.Parse("2006-01-02", dry(e.Text))
 		profile.CreatedOn = &createdOn
@@ -53,6 +57,8 @@ func ScrapeProfile(profileTarget string) (profile entity.Profile, err error)  {
 		if e.Text != "Private" {
 			contributionPoints, _ := strconv.Atoi(e.Text)
 			profile.ContributionPoints = int16(contributionPoints)
+		} else {
+			profile.Privacy = profile.Privacy | entity.PrivateContrib
 		}
 	})
 
@@ -64,6 +70,8 @@ func ScrapeProfile(profileTarget string) (profile entity.Profile, err error)  {
 		if levelStr := e.ChildText(".character_info span:nth-child(2) em"); levelStr != "Private" {
 			level, _ := strconv.Atoi(levelStr)
 			character.Level = int8(level)
+		} else {
+			profile.Privacy = profile.Privacy | entity.PrivateLevel
 		}
 
 		if name := e.ChildText(".character_name"); true {
@@ -103,6 +111,10 @@ func ScrapeProfile(profileTarget string) (profile entity.Profile, err error)  {
 		}
 
 		profile.Characters = append(profile.Characters, character)
+	})
+
+	c.OnHTML(`.character_spec.lock`, func(e *colly.HTMLElement) {
+		profile.Privacy = profile.Privacy | entity.PrivateSpecs
 	})
 
 	c.Visit(fmt.Sprintf("https://www.naeu.playblackdesert.com/en-US/Adventure/Profile?profileTarget=%v", profileTarget))
