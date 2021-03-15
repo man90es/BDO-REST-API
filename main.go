@@ -11,32 +11,44 @@ import (
 	"os"
 
 	"github.com/gorilla/mux"
+	"github.com/victorspringer/http-cache"
+	"github.com/victorspringer/http-cache/adapter/memory"
 
 	"gitlab.com/man90/black-desert-social-rest-api/scraper"
 )
-
-type responseCache struct {
-	time time.Time
-	data interface{}
-}
 
 type errorResponse struct {
 	Error string `json:"error"`
 }
 
-var (
-	globalCacheMap map[string]responseCache = make(map[string]responseCache)
-	lastCacheCleanUp time.Time = time.Now()
-	cacheTTL time.Duration = time.Hour * 2
-)
-
 func main() {
+	memcached, err := memory.NewAdapter(
+		memory.AdapterWithAlgorithm(memory.LRU),
+		memory.AdapterWithCapacity(1000000),
+	)
+
+	if err != nil {
+		log.Fatal(err)
+		os.Exit(1)
+	}
+
+	cacheClient, err := cache.NewClient(
+		cache.ClientWithAdapter(memcached),
+		cache.ClientWithTTL(2 * time.Hour),
+		cache.ClientWithRefreshKey("opn"),
+	)
+
+	if err != nil {
+		log.Fatal(err)
+		os.Exit(1)
+	}
+
 	router := mux.NewRouter()
 
-	router.HandleFunc("/v0/guildProfile", getGuildProfile).Methods("GET")
-	router.HandleFunc("/v0/profile", getProfile).Methods("GET")
-	router.HandleFunc("/v0/guildProfileSearch", getGuildProfileSearch).Methods("GET")
-	router.HandleFunc("/v0/profileSearch", getProfileSearch).Methods("GET")
+	router.Handle("/v0/guildProfile", 		cacheClient.Middleware(http.HandlerFunc(getGuildProfile)))		.Methods("GET")
+	router.Handle("/v0/profile", 			cacheClient.Middleware(http.HandlerFunc(getProfile)))			.Methods("GET")
+	router.Handle("/v0/guildProfileSearch", cacheClient.Middleware(http.HandlerFunc(getGuildProfileSearch))).Methods("GET")
+	router.Handle("/v0/profileSearch", 		cacheClient.Middleware(http.HandlerFunc(getProfileSearch)))		.Methods("GET")
 
 	port := os.Getenv("PORT")
 	if len(port) < 1 {
@@ -58,51 +70,6 @@ func validateRegion(r string) bool {
 	return r == "EU" || r == "NA"
 }
 
-func cleanUpCache() {
-	counter := 0
-	log.Printf("Cleaning up the cache.")
-
-	for key, element := range globalCacheMap {
-		if time.Now().Sub(element.time) > cacheTTL {
-			delete(globalCacheMap, key)
-			counter++
-		}
-	}
-
-	log.Printf("%v entries removed from the cache.", counter)
-	lastCacheCleanUp = time.Now()
-}
-
-func getCachedResponse(cacheMapKey string) (interface{}, bool) {
-	cachedReponse, ok := globalCacheMap[cacheMapKey]
-
-	if ok {
-		if time.Now().Sub(cachedReponse.time) < cacheTTL {
-			log.Printf("Serving \"%v\" from cache.\n", cacheMapKey)
-			return cachedReponse.data, true
-		} else {
-			log.Printf("\"%v\" cache has expired.", cacheMapKey)
-		}
-	} else {
-		log.Printf("\"%v\" not found in cache.", cacheMapKey)
-	}
-	
-	return nil, false
-}
-
-func setCachedResponse(cacheMapKey string, data interface{}) {
-	if time.Now().Sub(lastCacheCleanUp) > cacheTTL {
-		go cleanUpCache()
-	}
-
-	globalCacheMap[cacheMapKey] = responseCache{
-		time: time.Now(),
-		data: data,
-	}
-
-	log.Printf("Adding \"%v\" to cache.", cacheMapKey)
-}
-
 func getGuildProfile(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.Header().Set("Access-Control-Allow-Origin", "*")
@@ -114,16 +81,10 @@ func getGuildProfile(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	cacheMapKey := fmt.Sprintf("getGuildProfile+%v+%v", regionParams[0], guildNameParams[0])
-	if cachedReponseData, ok := getCachedResponse(cacheMapKey); ok {
-		json.NewEncoder(w).Encode(cachedReponseData)
+	if data, err := scraper.ScrapeGuildProfile(regionParams[0], guildNameParams[0]); err == nil {
+		json.NewEncoder(w).Encode(data)
 	} else {
-		if data, err := scraper.ScrapeGuildProfile(regionParams[0], guildNameParams[0]); err == nil {
-			setCachedResponse(cacheMapKey, data)
-			json.NewEncoder(w).Encode(data)
-		} else {
-			json.NewEncoder(w).Encode(errorResponse{ err.Error() })
-		}
+		json.NewEncoder(w).Encode(errorResponse{ err.Error() })
 	}
 }
 
@@ -137,16 +98,10 @@ func getProfile(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	cacheMapKey := fmt.Sprintf("getProfile+%v", profileTargetParams[0])
-	if cachedReponseData, ok := getCachedResponse(cacheMapKey); ok {
-		json.NewEncoder(w).Encode(cachedReponseData)
+	if data, err := scraper.ScrapeProfile(url.QueryEscape(profileTargetParams[0])); err == nil {
+		json.NewEncoder(w).Encode(data)
 	} else {
-		if data, err := scraper.ScrapeProfile(url.QueryEscape(profileTargetParams[0])); err == nil {
-			setCachedResponse(cacheMapKey, data)
-			json.NewEncoder(w).Encode(data)
-		} else {
-			json.NewEncoder(w).Encode(errorResponse{ err.Error() })
-		}
+		json.NewEncoder(w).Encode(errorResponse{ err.Error() })
 	}
 }
 
@@ -174,16 +129,10 @@ func getGuildProfileSearch(w http.ResponseWriter, r *http.Request) {
 		query = queryParams[0]
 	}
 
-	cacheMapKey := fmt.Sprintf("getGuildProfileSearch+%v+%v+%v", regionParams[0], query, int32(page))
-	if cachedReponseData, ok := getCachedResponse(cacheMapKey); ok {
-		json.NewEncoder(w).Encode(cachedReponseData)
+	if data, err := scraper.ScrapeGuildProfileSearch(regionParams[0], query, int32(page)); err == nil {
+		json.NewEncoder(w).Encode(data)
 	} else {
-		if data, err := scraper.ScrapeGuildProfileSearch(regionParams[0], query, int32(page)); err == nil {
-			setCachedResponse(cacheMapKey, data)
-			json.NewEncoder(w).Encode(data)
-		} else {
-			json.NewEncoder(w).Encode(errorResponse{ err.Error() })
-		}
+		json.NewEncoder(w).Encode(errorResponse{ err.Error() })
 	}
 }
 
@@ -211,15 +160,9 @@ func getProfileSearch(w http.ResponseWriter, r *http.Request) {
 		page, _ = strconv.Atoi(pageParams[0])
 	}
 
-	cacheMapKey := fmt.Sprintf("getProfileSearch+%v+%v+%v+%v", regionParams[0], queryParams[0], searchType, int32(page))
-	if cachedReponseData, ok := getCachedResponse(cacheMapKey); ok {
-		json.NewEncoder(w).Encode(cachedReponseData)
+	if data, err := scraper.ScrapeProfileSearch(regionParams[0], queryParams[0], searchType, int32(page)); err == nil {
+		json.NewEncoder(w).Encode(data)
 	} else {
-		if data, err := scraper.ScrapeProfileSearch(regionParams[0], queryParams[0], searchType, int32(page)); err == nil {
-			setCachedResponse(cacheMapKey, data)
-			json.NewEncoder(w).Encode(data)
-		} else {
-			json.NewEncoder(w).Encode(errorResponse{ err.Error() })
-		}
+		json.NewEncoder(w).Encode(errorResponse{ err.Error() })
 	}
 }
