@@ -3,14 +3,27 @@
 An unofficial REST API for Black Desert Online that scrapes guild and player data into convenient JSONs.
 
 ## Getting the binary
+### Prebuilt
+You can download prebuilt binaries [here](https://gitlab.com/man90/black-desert-social-rest-api/-/pipelines).
+
 ### Building from source
-Prerequisites: GNU/Linux, Go >=1.15
+Prerequisites: <abbr title="Not tested on other platforms.">GNU/Linux</abbr>, Go >=1.15
+
+Command:
 ```bash
 go build
 ```
 
-### Prebuilt
-You can download prebuild binaries [here](https://gitlab.com/man90/black-desert-social-rest-api/-/pipelines).
+By default, scraped results are cached in memory and stored for up to 2 hours, it helps to ease the pressure on BDO servers and speeds up the response time in some situations. If you don't want to cache scraped results (for example if you just want to create a dump or need extra fresh data), use this command instead:
+```bash
+go build -tags "cacheless"
+```
+
+## Environment variables
+Self-explanatory:
+```bash
+export PORT=8080
+```
 
 ## Routes
 
