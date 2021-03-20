@@ -38,6 +38,13 @@ func ScrapeGuildProfile(region, name string) (guildProfile entity.GuildProfile, 
 		}
 	})
 
+	c.OnHTML(`.line_list:not(.mob_none) li:last-child .desc`, func(e *colly.HTMLElement) {
+		text := dry(e.Text)
+		if text != "None" {
+			guildProfile.Occupying = text
+		}
+	})
+
 	c.OnHTML(`.box_list_area .adventure_list_table a`, func(e *colly.HTMLElement) {
 		member := entity.Profile{
 			FamilyName: e.Text,
