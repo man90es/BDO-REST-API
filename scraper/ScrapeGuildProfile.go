@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"time"
+	"strconv"
 
 	"github.com/gocolly/colly/v2"
 
@@ -36,6 +37,11 @@ func ScrapeGuildProfile(region, name string) (guildProfile entity.GuildProfile, 
 			ProfileTarget: e.Attr("href")[nice:],
 			Region: region,
 		}
+	})
+
+	c.OnHTML(`.line_list:not(.mob_none) li:nth-child(3) em`, func(e *colly.HTMLElement) {
+		population, _ := strconv.Atoi(e.Text)
+		guildProfile.Population = int16(population)
 	})
 
 	c.OnHTML(`.line_list:not(.mob_none) li:last-child .desc`, func(e *colly.HTMLElement) {
