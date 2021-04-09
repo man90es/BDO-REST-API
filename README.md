@@ -78,3 +78,5 @@ You can find an example of a reply [here](https://gitlab.com/man90/black-desert-
 
 ## To-do
 * Error handling
+* Provide info about which character is player's main character
+* Provide meta info through the API routes?
