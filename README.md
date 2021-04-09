@@ -2,6 +2,9 @@
 
 An unofficial REST API for Black Desert Online that scrapes guild and player data into convenient JSONs.
 
+## Projects using this API
+- [BDO Leaderboards](https://man90.gitlab.io/bdo-leader-boards)
+
 ## Getting the binary
 ### Prebuilt
 You can download prebuilt binaries [here](https://gitlab.com/man90/black-desert-social-rest-api/-/pipelines).
