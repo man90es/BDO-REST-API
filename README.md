@@ -20,9 +20,16 @@ go build -tags "cacheless"
 ```
 
 ## Environment variables
-Self-explanatory:
+Catch requests on a specific port (8001 by default):
 ```bash
-export PORT=8080
+export PORT=3000
+```
+
+Use a proxy to make requests to BDO servers (none by default):
+```bash
+export PROXY=http://123.123.123.123:8080
+# or
+export PROXY="http://123.123.123.123:8080 http://124.124.124.124:8081"
 ```
 
 ## Routes

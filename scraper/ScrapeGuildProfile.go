@@ -3,17 +3,16 @@ package scraper
 import (
 	"fmt"
 	"log"
-	"time"
 	"strconv"
+	"time"
 
 	"github.com/gocolly/colly/v2"
 
 	"gitlab.com/man90/black-desert-social-rest-api/entity"
 )
 
-func ScrapeGuildProfile(region, name string) (guildProfile entity.GuildProfile, err error)  {
-	c := colly.NewCollector()
-	c.SetRequestTimeout(time.Minute / 2)
+func ScrapeGuildProfile(region, name string) (guildProfile entity.GuildProfile, err error) {
+	c := collyFactory()
 
 	guildProfile.Region = region
 	guildProfile.Name = name
@@ -33,9 +32,9 @@ func ScrapeGuildProfile(region, name string) (guildProfile entity.GuildProfile, 
 
 	c.OnHTML(`.line_list:not(.mob_none) li:nth-child(2) .desc .text a`, func(e *colly.HTMLElement) {
 		guildProfile.GuildMaster = &entity.Profile{
-			FamilyName: e.Text,
+			FamilyName:    e.Text,
 			ProfileTarget: e.Attr("href")[nice:],
-			Region: region,
+			Region:        region,
 		}
 	})
 
@@ -53,9 +52,9 @@ func ScrapeGuildProfile(region, name string) (guildProfile entity.GuildProfile, 
 
 	c.OnHTML(`.box_list_area .adventure_list_table a`, func(e *colly.HTMLElement) {
 		member := entity.Profile{
-			FamilyName: e.Text,
+			FamilyName:    e.Text,
 			ProfileTarget: e.Attr("href")[nice:],
-			Region: region,
+			Region:        region,
 		}
 
 		guildProfile.Members = append(guildProfile.Members, member)

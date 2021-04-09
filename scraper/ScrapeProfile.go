@@ -2,20 +2,19 @@ package scraper
 
 import (
 	"fmt"
-	"time"
-	"strings"
-	"strconv"
-	"regexp"
 	"log"
+	"regexp"
+	"strconv"
+	"strings"
+	"time"
 
 	"github.com/gocolly/colly/v2"
 
 	"gitlab.com/man90/black-desert-social-rest-api/entity"
 )
 
-func ScrapeProfile(profileTarget string) (profile entity.Profile, err error)  {
-	c := colly.NewCollector()
-	c.SetRequestTimeout(time.Minute / 2)
+func ScrapeProfile(profileTarget string) (profile entity.Profile, err error) {
+	c := collyFactory()
 
 	profile.ProfileTarget = profileTarget
 
@@ -38,7 +37,7 @@ func ScrapeProfile(profileTarget string) (profile entity.Profile, err error)  {
 	c.OnHTML(`.desc.guild a`, func(e *colly.HTMLElement) {
 		if e.Attr("href") != "javscript:void(0)" {
 			profile.Guild = &entity.GuildProfile{
-				Name: e.Text,
+				Name:   e.Text,
 				Region: profile.Region,
 			}
 		}
@@ -82,7 +81,7 @@ func ScrapeProfile(profileTarget string) (profile entity.Profile, err error)  {
 			} else {
 				character.Name = name
 			}
-		} 
+		}
 
 		if specLevels := [11]string{}; true {
 			e.ForEach(".character_spec:not(.lock) .spec_level", func(ind int, el *colly.HTMLElement) {

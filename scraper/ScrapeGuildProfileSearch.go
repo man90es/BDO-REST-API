@@ -2,18 +2,17 @@ package scraper
 
 import (
 	"fmt"
-	"time"
 	"log"
 	"strconv"
+	"time"
 
 	"github.com/gocolly/colly/v2"
 
 	"gitlab.com/man90/black-desert-social-rest-api/entity"
 )
 
-func ScrapeGuildProfileSearch(region, query string, page int32) (guildProfiles []entity.GuildProfile, err error)  {
-	c := colly.NewCollector()
-	c.SetRequestTimeout(time.Minute / 2)
+func ScrapeGuildProfileSearch(region, query string, page int32) (guildProfiles []entity.GuildProfile, err error) {
+	c := collyFactory()
 
 	c.OnRequest(func(r *colly.Request) {
 		log.Println("Visiting", r.URL)
@@ -27,13 +26,13 @@ func ScrapeGuildProfileSearch(region, query string, page int32) (guildProfiles [
 		createdOn, _ := time.Parse("2006-01-02", dry(e.ChildText(".date")))
 
 		guildProfile := entity.GuildProfile{
-			Name: e.ChildText(".guild_title a"),
+			Name:   e.ChildText(".guild_title a"),
 			Region: region,
-			Kind: e.ChildText(".tag_label.guild_label"),
+			Kind:   e.ChildText(".tag_label.guild_label"),
 			GuildMaster: &entity.Profile{
-				FamilyName: e.ChildText(".box_list_area li .character_desc a"),
+				FamilyName:    e.ChildText(".box_list_area li .character_desc a"),
 				ProfileTarget: e.ChildAttr(".box_list_area li .character_desc a", "href")[nice:],
-				Region: region,
+				Region:        region,
 			},
 			CreatedOn: &createdOn,
 		}
@@ -45,7 +44,6 @@ func ScrapeGuildProfileSearch(region, query string, page int32) (guildProfiles [
 
 		guildProfiles = append(guildProfiles, guildProfile)
 	})
-
 
 	c.Visit(fmt.Sprintf("https://www.naeu.playblackdesert.com/en-US/Adventure/Guild?region=%v&page=%v&searchText=%v", region, page, query))
 
