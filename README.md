@@ -45,7 +45,7 @@ export PROXY="http://123.123.123.123:8080 http://124.124.124.124:8081"
 | guildName | Yes.     | The name of the guild.   |
 | region    | Yes.     | Supported values: EU, NA |
 
-You can find an example of a reply [here](https://gitlab.com/man90/black-desert-social-rest-api/-/blob/master/exampleDumps/guildProfile.json).
+You can find an example of a reply [here](exampleDumps/guildProfile.json).
 
 ### Player data
 `http://localhost:8001/v0/profile`
@@ -53,7 +53,7 @@ You can find an example of a reply [here](https://gitlab.com/man90/black-desert-
 |---------------|----------|-----------------------------------------------------------------------|
 | profileTarget | Yes.     | You can get this string from guild members data or from player search |
 
-You can find an example of a reply [here](https://gitlab.com/man90/black-desert-social-rest-api/-/blob/master/exampleDumps/profile.json).
+You can find an example of a reply [here](exampleDumps/profile.json).
 
 ### Guild search
 `http://localhost:8001/v0/guildProfileSearch`
@@ -63,7 +63,7 @@ You can find an example of a reply [here](https://gitlab.com/man90/black-desert-
 | query         | No.      |                                |
 | page          | No.      | Each page has up to 10 guilds. |
 
-You can find an example of a reply [here](https://gitlab.com/man90/black-desert-social-rest-api/-/blob/master/exampleDumps/guildProfileSearch.json).
+You can find an example of a reply [here](exampleDumps/guildProfileSearch.json).
 
 ### Player search
 `http://localhost:8001/v0/profileSearch`
@@ -74,7 +74,7 @@ You can find an example of a reply [here](https://gitlab.com/man90/black-desert-
 | searchType     | Yes.                               | Supported values: familyName, characterName |
 | page           | No.                                | Each page has up to 20 players.             |
 
-You can find an example of a reply [here](https://gitlab.com/man90/black-desert-social-rest-api/-/blob/master/exampleDumps/profileSearch.json).
+You can find an example of a reply [here](exampleDumps/profileSearch.json).
 
 ## Known bugs
 A vast majority of bugs comes from the original BDO website, where data is taken from. You can find a list of known bugs and workarounds [here](doc/brokenStuff.md).
