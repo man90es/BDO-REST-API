@@ -76,6 +76,9 @@ You can find an example of a reply [here](https://gitlab.com/man90/black-desert-
 
 You can find an example of a reply [here](https://gitlab.com/man90/black-desert-social-rest-api/-/blob/master/exampleDumps/profileSearch.json).
 
+## Known bugs
+A vast majority of bugs comes from the original BDO website, where data is taken from. You can find a list of known bugs and workarounds [here](blob/master/doc/brokenStuff.md).
+
 ## To-do
 * Error handling
 * Provide info about which character is player's main character
