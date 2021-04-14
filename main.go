@@ -5,6 +5,7 @@ import (
 	"os"
 	"strings"
 
+	"gitlab.com/man90/black-desert-social-rest-api/httpServer"
 	"gitlab.com/man90/black-desert-social-rest-api/scraper"
 )
 
@@ -17,7 +18,7 @@ func main() {
 	proxies := strings.Fields(os.Getenv("PROXY"))
 	scraper.PushProxies(proxies...)
 
-	srv := serverFactory(&port)
+	srv := httpServer.Server(&port)
 
 	log.Printf("Listening for requests on port %v.", port)
 	log.Fatal(srv.ListenAndServe())
