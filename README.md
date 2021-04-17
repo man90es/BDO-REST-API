@@ -35,6 +35,17 @@ export PROXY=http://123.123.123.123:8080
 export PROXY="http://123.123.123.123:8080 http://124.124.124.124:8081"
 ```
 
+## Flags
+Flags override environment variables
+```
+-cachettl int
+	Cache TTL in minutes (default 180)
+-port int
+	Port to catch requests on (default 8001)
+-proxy string
+	Open proxy address to make requests to BDO servers
+```
+
 ## Routes
 
 ### Guild data

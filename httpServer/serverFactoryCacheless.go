@@ -12,7 +12,7 @@ import (
 	"gitlab.com/man90/black-desert-social-rest-api/api"
 )
 
-func Server(port *string) (srv *http.Server) {
+func Server(port *string, flagCacheTTL *int) (srv *http.Server) {
 	router := mux.NewRouter()
 
 	router.HandleFunc("/v0/guildProfile", api.GuildProfile).Methods("GET")

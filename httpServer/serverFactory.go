@@ -16,7 +16,7 @@ import (
 	"gitlab.com/man90/black-desert-social-rest-api/api"
 )
 
-func Server(port *string) (srv *http.Server) {
+func Server(port *string, flagCacheTTL *int) (srv *http.Server) {
 	memcached, err := memory.NewAdapter(
 		memory.AdapterWithAlgorithm(memory.LRU),
 		memory.AdapterWithCapacity(1000000),
@@ -29,7 +29,7 @@ func Server(port *string) (srv *http.Server) {
 
 	cacheClient, err := cache.NewClient(
 		cache.ClientWithAdapter(memcached),
-		cache.ClientWithTTL(2*time.Hour),
+		cache.ClientWithTTL(time.Duration(*flagCacheTTL)*time.Minute),
 		cache.ClientWithRefreshKey("opn"),
 	)
 
