@@ -21,6 +21,7 @@ func Profile(w http.ResponseWriter, r *http.Request) {
 	if data, err := scraper.ScrapeProfile(url.QueryEscape(profileTargetParams[0])); err == nil {
 		json.NewEncoder(w).Encode(data)
 	} else {
-		json.NewEncoder(w).Encode(errorResponse{ err.Error() })
+		w.WriteHeader(http.StatusGatewayTimeout)
+		json.NewEncoder(w).Encode(errorResponse{err.Error()})
 	}
 }

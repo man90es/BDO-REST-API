@@ -35,6 +35,7 @@ func GuildProfileSearch(w http.ResponseWriter, r *http.Request) {
 	if data, err := scraper.ScrapeGuildProfileSearch(regionParams[0], query, int32(page)); err == nil {
 		json.NewEncoder(w).Encode(data)
 	} else {
-		json.NewEncoder(w).Encode(errorResponse{ err.Error() })
+		w.WriteHeader(http.StatusGatewayTimeout)
+		json.NewEncoder(w).Encode(errorResponse{err.Error()})
 	}
 }

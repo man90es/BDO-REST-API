@@ -17,9 +17,9 @@ func ProfileSearch(w http.ResponseWriter, r *http.Request) {
 	pageParams, ok3 := r.URL.Query()["page"]
 	queryParams, ok4 := r.URL.Query()["query"]
 
-	searchType := map[string]int8 {
+	searchType := map[string]int8{
 		"characterName": 1,
-		"familyName": 2,
+		"familyName":    2,
 	}[searchTypeParams[0]]
 
 	if !ok1 || !ok2 || !ok4 || !validateRegion(regionParams[0]) || searchType < 1 || searchType > 2 {
@@ -35,6 +35,7 @@ func ProfileSearch(w http.ResponseWriter, r *http.Request) {
 	if data, err := scraper.ScrapeProfileSearch(regionParams[0], queryParams[0], searchType, int32(page)); err == nil {
 		json.NewEncoder(w).Encode(data)
 	} else {
-		json.NewEncoder(w).Encode(errorResponse{ err.Error() })
+		w.WriteHeader(http.StatusGatewayTimeout)
+		json.NewEncoder(w).Encode(errorResponse{err.Error()})
 	}
 }
