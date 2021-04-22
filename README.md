@@ -1,9 +1,14 @@
 # Black Desert social REST API
 
-An unofficial REST API for Black Desert Online that scrapes guild and player data into convenient JSONs.
+An unofficial JSON API server for Black Desert Online that gets guild and player data via scraping the official website.
+
+## API
+See [OpenAPI documentation](https://gitlab.com/man90/black-desert-social-rest-api/-/tree/master/doc/api/openapi.json).
 
 ## Projects using this API
-- [BDO Leaderboards](https://man90.gitlab.io/bdo-leader-boards)
+- [BDO Leaderboards](https://man90.gitlab.io/bdo-leader-boards): a web-based leaderboard application for Black Desert Online guilds.
+
+
 
 ## Getting the binary
 ### Prebuilt
@@ -45,47 +50,10 @@ Flags override environment variables
 -proxy string
 	Open proxy address to make requests to BDO servers
 ```
-
-## Routes
-
-### Guild data
-`http://localhost:8001/v0/guildProfile`
-
-| GET Parameter | Required | Wtf?                     |
-|-----------|----------|--------------------------|
-| guildName | Yes.     | The name of the guild.   |
-| region    | Yes.     | Supported values: EU, NA |
-
-You can find an example of a reply [here](exampleDumps/guildProfile.json).
-
-### Player data
-`http://localhost:8001/v0/profile`
-| GET Parameter     | Required | Wtf?                                                                  |
-|---------------|----------|-----------------------------------------------------------------------|
-| profileTarget | Yes.     | You can get this string from guild members data or from player search |
-
-You can find an example of a reply [here](exampleDumps/profile.json).
-
-### Guild search
-`http://localhost:8001/v0/guildProfileSearch`
-| GET Parameter | Required | Wtf?                           |
-|---------------|----------|--------------------------------|
-| region        | Yes.     | Supported values: EU, NA       |
-| query         | No.      |                                |
-| page          | No.      | Each page has up to 10 guilds. |
-
-You can find an example of a reply [here](exampleDumps/guildProfileSearch.json).
-
-### Player search
-`http://localhost:8001/v0/profileSearch`
-| GET Parameter  | Required                           | Wtf?                                        |
-|----------------|------------------------------------|---------------------------------------------|
-| region         | Yes.                               | Supported values: EU, NA                    |
-| query          | Yes.                               |                                             |
-| searchType     | Yes.                               | Supported values: familyName, characterName |
-| page           | No.                                | Each page has up to 20 players.             |
-
-You can find an example of a reply [here](exampleDumps/profileSearch.json).
+Use them like this:
+```bash
+./black-desert-social-rest-api -proxy="http://192.168.0.0.1:8080" -cachettl=30
+```
 
 ## Known bugs
 A vast majority of bugs comes from the original BDO website, where data is taken from. You can find a list of known bugs and workarounds [here](doc/brokenStuff.md).
@@ -93,4 +61,5 @@ A vast majority of bugs comes from the original BDO website, where data is taken
 ## To-do
 * Error handling
 * Provide info about which character is player's main character
+* Parse a copy of provided data to make evading official website bugs easier
 * Provide meta info through the API routes?

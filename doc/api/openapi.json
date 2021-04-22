@@ -1,0 +1,481 @@
+{
+	"openapi": "3.0.2",
+	"info": {
+		"title": "BDO REST API",
+		"version": "v0"
+	},
+	"servers": [
+		{
+			"url": "http://localhost:8001"
+		},
+		{
+			"url": "https://boiling-mountain-53521.herokuapp.com"
+		}
+	],
+	"components": {
+		"responses": {
+			"504": {
+				"description": "BDO servers are currently under maintenance and request is not cached.",
+				"content": {
+					"application/json": {
+						"schema": {
+							"type": "object",
+							"properties": {
+								"error": {
+									"type": "string",
+									"example": "BDO servers are currently under maintenance. More info: www.naeu.playblackdesert.com"
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	},
+	"paths": {
+		"/v0/guildProfile?guildName={guildName}&region={region}": {
+			"get": {
+				"description": "Retrieve guild profile.",
+				"summary": "Retrieve guild profile.",
+				"operationId": "getGuildProfile",
+				"parameters": [
+					{
+						"name": "guildName",
+						"in": "query",
+						"description": "Desired guild's name.",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"name": "region",
+						"in": "query",
+						"description": "Desired guild's region. Supported values: «EU» and «NA».",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Successful operation.",
+						"content": {
+							"application/json": {
+								"schema": {
+									"title": "GuildProfile",
+									"type": "object",
+									"properties": {
+										"name": {
+											"type": "string",
+											"example": "TumblrGirls"
+										},
+										"region": {
+											"type": "string",
+											"example": "EU"
+										},
+										"createdOn": {
+											"type": "string",
+											"example": "2020-02-23T00:00:00Z"
+										},
+										"guildMaster": {
+											"type": "object",
+											"properties": {
+												"familyName": {
+													"type": "string",
+													"example": "Apple"
+												},
+												"profileTarget": {
+													"type": "string",
+													"example": "tbXSK...SY%3d"
+												},
+												"region": {
+													"type": "string",
+													"example": "EU"
+												}
+											}
+										},
+										"members": {
+											"type": "array",
+											"items": {
+												"type": "object",
+												"properties": {
+													"familyName": {
+														"type": "string",
+														"example": "Apple"
+													},
+													"profileTarget": {
+														"type": "string",
+														"example": "tbXSK...SY%3d"
+													},
+													"region": {
+														"type": "string",
+														"example": "EU"
+													}
+												}
+											}
+										},
+										"population": {
+											"type": "number",
+											"example": 1
+										},
+										"occupying": {
+											"type": "string",
+											"example": "Mediah Territory"
+										}
+									}
+								}
+							}
+						}
+					},
+					"504": {
+						"$ref": "#/components/responses/504"
+					}
+				}
+			}
+		},
+		"/v0/profile?profileTarget={profileTarget}": {
+			"get": {
+				"description": "Retrieve player profile.",
+				"summary": "Retrieve player profile.",
+				"operationId": "getProfile",
+				"parameters": [
+					{
+						"name": "profileTarget",
+						"in": "query",
+						"description": "Desired player's profileTarget. You can get this string from guild members data or from player search.",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Successful operation.",
+						"content": {
+							"application/json": {
+								"schema": {
+									"title": "Profile",
+									"type": "object",
+									"properties": {
+										"familyName": {
+											"type": "string",
+											"example": "Apple"
+										},
+										"profileTarget": {
+											"type": "string",
+											"example": "tbXSK...SY%3d"
+										},
+										"region": {
+											"type": "string",
+											"example": "EU"
+										},
+										"guild": {
+											"properties": {
+												"name": {
+													"type": "string",
+													"example": "TumblrGirls"
+												},
+												"region": {
+													"type": "string",
+													"example": "EU"
+												}
+											}
+										},
+										"contributionPoints": {
+											"type": "number",
+											"example": 100
+										},
+										"createdOn": {
+											"type": "string",
+											"example": "2016-09-24T00:00:00Z"
+										},
+										"characters": {
+											"type": "array",
+											"items": {
+												"type": "object",
+												"properties": {
+													"name": {
+														"type": "string",
+														"example": "Blue"
+													},
+													"class": {
+														"type": "string",
+														"example": "Ninja"
+													},
+													"level": {
+														"type": "number",
+														"example": 56
+													},
+													"specLevels": {
+														"properties": {
+															"gathering": {
+																"type": "string",
+																"example": "Beginner 6"
+															},
+															"fishing": {
+																"type": "string",
+																"example": "Master 18"
+															},
+															"hunting": {
+																"type": "string",
+																"example": "Beginner 1"
+															},
+															"cooking": {
+																"type": "string",
+																"example": "Beginner 4"
+															},
+															"alchemy": {
+																"type": "string",
+																"example": "Beginner 1"
+															},
+															"processing": {
+																"type": "string",
+																"example": "Beginner 9"
+															},
+															"training": {
+																"type": "string",
+																"example": "Apprentice 1"
+															},
+															"trading": {
+																"type": "string",
+																"example": "Apprentice 3"
+															},
+															"farming": {
+																"type": "string",
+																"example": "Beginner 1"
+															},
+															"sailing": {
+																"type": "string",
+																"example": "Beginner 1"
+															},
+															"barter": {
+																"type": "string",
+																"example": "Beginner 1"
+															}
+														}
+													}
+												}
+											}
+										}
+									}
+								}
+							}
+						}
+					},
+					"504": {
+						"$ref": "#/components/responses/504"
+					}
+				}
+			}
+		},
+		"/v0/guildProfileSearch?region={region}&query={query}&page={page}": {
+			"get": {
+				"description": "Search for guild.",
+				"summary": "Search for guild.",
+				"operationId": "getGuildProfileSearch",
+				"parameters": [
+					{
+						"name": "region",
+						"in": "query",
+						"description": "Desired guild's region. Supported values: «EU» and «NA».",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"name": "query",
+						"in": "query",
+						"description": "Desired guild's name.",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"name": "page",
+						"in": "query",
+						"description": "Desired page of results. Each page has up to 10 guilds.",
+						"required": false,
+						"schema": {
+							"type": "string",
+							"default": 0
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Successful operation.",
+						"content": {
+							"application/json": {
+								"schema": {
+									"title": "GuildProfileSearchResult",
+									"type": "array",
+									"items": {
+										"type": "object",
+										"properties": {
+											"name": {
+												"type": "string",
+												"example": "TumblrGirls"
+											},
+											"region": {
+												"type": "string",
+												"example": "EU"
+											},
+											"createdOn": {
+												"type": "string",
+												"example": "2020-02-23T00:00:00Z"
+											},
+											"guildMaster": {
+												"type": "object",
+												"properties": {
+													"familyName": {
+														"type": "string",
+														"example": "Apple"
+													},
+													"profileTarget": {
+														"type": "string",
+														"example": "tbXSK...SY%3d"
+													},
+													"region": {
+														"type": "string",
+														"example": "EU"
+													}
+												}
+											},
+											"kind": {
+												"type": "string",
+												"example": "Guild"
+											},
+											"population": {
+												"type": "number",
+												"example": 1
+											}
+										}
+									}
+								}
+							}
+						}
+					},
+					"504": {
+						"$ref": "#/components/responses/504"
+					}
+				}
+			}
+		},
+		"/v0/profileSearch?region={region}&query={query}&searchType={searchType}&page={page}": {
+			"get": {
+				"description": "Search for player.",
+				"summary": "Search for player.",
+				"operationId": "getProfileSearch",
+				"parameters": [
+					{
+						"name": "region",
+						"in": "query",
+						"description": "Desired player's region. Supported values: «EU» and «NA».",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"name": "query",
+						"in": "query",
+						"description": "Desired player's family name or character name.",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"name": "searchType",
+						"in": "query",
+						"description": "Type of search. Supported values: «familyName» and «characterName».",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"name": "page",
+						"in": "query",
+						"description": "Desired page of results. Each page has up to 20 players.",
+						"required": false,
+						"schema": {
+							"type": "string",
+							"default": 0
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Successful operation.",
+						"content": {
+							"application/json": {
+								"schema": {
+									"title": "Profile",
+									"type": "array",
+									"items": {
+										"type": "object",
+										"properties": {
+											"familyName": {
+												"type": "string",
+												"example": "Apple"
+											},
+											"profileTarget": {
+												"type": "string",
+												"example": "tbXSK...SY%3d"
+											},
+											"region": {
+												"type": "string",
+												"example": "EU"
+											},
+											"guild": {
+												"properties": {
+													"name": {
+														"type": "string",
+														"example": "TumblrGirls"
+													},
+													"region": {
+														"type": "string",
+														"example": "EU"
+													}
+												}
+											},
+											"characters": {
+												"type": "array",
+												"items": {
+													"type": "object",
+													"properties": {
+														"name": {
+															"type": "string",
+															"example": "Blue"
+														},
+														"class": {
+															"type": "string",
+															"example": "Ninja"
+														},
+														"level": {
+															"type": "number",
+															"example": 56
+														}
+													}
+												}
+											}
+										}
+									}
+								}
+							}
+						}
+					},
+					"504": {
+						"$ref": "#/components/responses/504"
+					}
+				}
+			}
+		}
+	}
+}
