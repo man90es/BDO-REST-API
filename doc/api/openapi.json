@@ -51,10 +51,11 @@
 					{
 						"name": "region",
 						"in": "query",
-						"description": "Desired guild's region. Supported values: «EU» and «NA».",
+						"description": "Desired guild's region.",
 						"required": true,
 						"schema": {
-							"type": "string"
+							"type": "string",
+							"enum": ["EU", "NA"]
 						}
 					}
 				],
@@ -73,7 +74,7 @@
 										},
 										"region": {
 											"type": "string",
-											"example": "EU"
+											"enum": ["EU", "NA"]
 										},
 										"createdOn": {
 											"type": "string",
@@ -92,7 +93,7 @@
 												},
 												"region": {
 													"type": "string",
-													"example": "EU"
+													"enum": ["EU", "NA"]
 												}
 											}
 										},
@@ -111,7 +112,7 @@
 													},
 													"region": {
 														"type": "string",
-														"example": "EU"
+														"enum": ["EU", "NA"]
 													}
 												}
 											}
@@ -170,7 +171,7 @@
 										},
 										"region": {
 											"type": "string",
-											"example": "EU"
+											"enum": ["EU", "NA"]
 										},
 										"guild": {
 											"properties": {
@@ -180,7 +181,7 @@
 												},
 												"region": {
 													"type": "string",
-													"example": "EU"
+													"enum": ["EU", "NA"]
 												}
 											}
 										},
@@ -280,10 +281,11 @@
 					{
 						"name": "region",
 						"in": "query",
-						"description": "Desired guild's region. Supported values: «EU» and «NA».",
+						"description": "Desired guild's region.",
 						"required": true,
 						"schema": {
-							"type": "string"
+							"type": "string",
+							"enum": ["EU", "NA"]
 						}
 					},
 					{
@@ -323,7 +325,7 @@
 											},
 											"region": {
 												"type": "string",
-												"example": "EU"
+												"enum": ["EU", "NA"]
 											},
 											"createdOn": {
 												"type": "string",
@@ -342,7 +344,7 @@
 													},
 													"region": {
 														"type": "string",
-														"example": "EU"
+														"enum": ["EU", "NA"]
 													}
 												}
 											},
@@ -375,10 +377,11 @@
 					{
 						"name": "region",
 						"in": "query",
-						"description": "Desired player's region. Supported values: «EU» and «NA».",
+						"description": "Desired player's region.",
 						"required": true,
 						"schema": {
-							"type": "string"
+							"type": "string",
+							"enum": ["EU", "NA"]
 						}
 					},
 					{
@@ -393,10 +396,11 @@
 					{
 						"name": "searchType",
 						"in": "query",
-						"description": "Type of search. Supported values: «familyName» and «characterName».",
+						"description": "Type of search.",
 						"required": true,
 						"schema": {
-							"type": "string"
+							"type": "string",
+							"enum": ["familyName", "characterName"]
 						}
 					},
 					{
@@ -431,7 +435,7 @@
 											},
 											"region": {
 												"type": "string",
-												"example": "EU"
+												"enum": ["EU", "NA"]
 											},
 											"guild": {
 												"properties": {
@@ -441,7 +445,7 @@
 													},
 													"region": {
 														"type": "string",
-														"example": "EU"
+														"enum": ["EU", "NA"]
 													}
 												}
 											},
