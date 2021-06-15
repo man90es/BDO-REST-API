@@ -27,12 +27,12 @@ func ScrapeGuildProfileSearch(region, query string, page int32) (guildProfiles [
 
 		guildProfile := entity.GuildProfile{
 			Name:   e.ChildText(".guild_title a"),
-			Region: region,
+			Region: e.ChildText(".region_info"),
 			Kind:   e.ChildText(".tag_label.guild_label"),
 			GuildMaster: &entity.Profile{
 				FamilyName:    e.ChildText(".box_list_area li .character_desc a"),
 				ProfileTarget: e.ChildAttr(".box_list_area li .character_desc a", "href")[nice:],
-				Region:        region,
+				Region:        e.ChildText(".region_info"),
 			},
 			CreatedOn: &createdOn,
 		}

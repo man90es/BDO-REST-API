@@ -23,7 +23,7 @@ func ScrapeProfileSearch(region, query string, searchType int8, page int32) (pro
 
 	c.OnHTML(`.box_list_area li:not(.no_result)`, func(e *colly.HTMLElement) {
 		profile := entity.Profile{
-			Region:        region,
+			Region:        e.ChildText(".region_info"),
 			FamilyName:    e.ChildText(".title a"),
 			ProfileTarget: e.ChildAttr(".title a", "href")[nice:],
 			Characters:    make([]entity.Character, 1),
@@ -32,7 +32,7 @@ func ScrapeProfileSearch(region, query string, searchType int8, page int32) (pro
 		if e.ChildAttr(".state a", "href") != "javscript:void(0)" {
 			profile.Guild = &entity.GuildProfile{
 				Name:   e.ChildText(".state a"),
-				Region: region,
+				Region: e.ChildText(".region_info"),
 			}
 		}
 

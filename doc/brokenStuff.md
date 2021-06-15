@@ -3,23 +3,20 @@ BDO website, where all the data is taken from, has a number of bugs, which are r
 
 ## List of known bugs
 This is a list of bugs that I am aware of:
-1. Opening some guild profiles returns profiles of different guilds. (Example: VoS guild on EU)
-1. Opening some guild profiles returns a 404 page. (Example: Valiant guild on EU)
-1. Sometimes members who left the guild are still displayed as members.
-1. Data is not updated immediately after it is updated in game.
+1. When profile of one of a number of guilds is requested, another guild's profile is returned. (e.g. requesting the profile of VoS guild on EU returns the profile of Ocrana guild on EU).
+1. Opening some guild profiles returns a 404 page despite the fact that that guild exists. (e.g. Valiant guild on EU)
+2. Sometimes members who left the guild are still displayed as members for some time.
+3. Data is not updated immediately after it is updated in game.
 
 ## Workarounds and tips
 List numbers match list numbers in the previous section:
-1. Use the guild search to find out who the real guild master is. Is his name the same as the one in the guild profile? If yes, you most probably got the right profile.
+1. Check the name of the guild in the response. Is it the same as the one you requested?
 1. You can get some information like creation date, guild master's name and population by searching for guild instead of requesting its profile. Not much, but better than nothing.
-1. I believe maintenances remove "ghost members" from guilds. If you don't feel like waiting, request profiles of those players and check if they are:
-	1. Still in the guild
-	1. Members of another guild or not in a guild
-	1. Have their guild set as private, so you can't check.
-1. The lag is around a few hours, and you can only wait. This API may introduce additional lag (≤2 hours) in some cases, so if you need the most fresh data possible, consider disabling cache (I assume you understand the consequences).
+2. I believe maintenances remove "ghost members" from guilds. If you don't feel like waiting, request profiles of those players. Guild membership status in player profiles is more reliable, unless it's set to private.
+3. The lag is around a few hours, and you can only wait. This API may introduce additional lag (≤2 hours) in some cases, so if you need the most fresh data possible, consider disabling cache as it's described in the main README (I assume that you understand the consequences).
 
 ## Contribute to this list
-If you found a bug on the original BDO website that affects this API and is not listed in this file, you can contribute by:
-1. Making a pull request on [GitLab](https://gitlab.com/man90/black-desert-social-rest-api) or [GitHub](https://github.com/octoman90/BDO-REST-API)
-2. Sending an email to an address found [here on GitLab](https://gitlab.com/man90) or [here on GitHub](https://github.com/octoman90)
-3. Messaging deadMNGO#8312 on Discord.
+If you found a bug on the original BDO website that affects this API and is not listed in this file, you can contribute by either:
+- making a pull request or creating an issue [on GitHub](https://github.com/octoman90/BDO-REST-API)
+- or sending an email to an address found [in my GitHub profile](https://github.com/octoman90)
+- or messaging deadMNGO#8312 on Discord.

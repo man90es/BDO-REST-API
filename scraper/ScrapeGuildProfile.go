@@ -14,15 +14,20 @@ import (
 func ScrapeGuildProfile(region, name string) (guildProfile entity.GuildProfile, err error) {
 	c := collyFactory()
 
-	guildProfile.Region = region
-	guildProfile.Name = name
-
 	c.OnRequest(func(r *colly.Request) {
 		log.Println("Visiting", r.URL)
 	})
 
 	c.OnHTML(`.closetime_message`, func(e *colly.HTMLElement) {
 		err = fmt.Errorf(closetimeMessage)
+	})
+
+	c.OnHTML(`.region_info`, func(e *colly.HTMLElement) {
+		guildProfile.Region = e.Text
+	})
+
+	c.OnHTML(`.guild_name p`, func(e *colly.HTMLElement) {
+		guildProfile.Name = e.Text
 	})
 
 	c.OnHTML(`.line_list.mob_none .desc`, func(e *colly.HTMLElement) {
