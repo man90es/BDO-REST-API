@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"net/url"
 
-	"gitlab.com/man90/black-desert-social-rest-api/scraper"
+	"black-desert-social-rest-api/scraper"
 )
 
 func Profile(w http.ResponseWriter, r *http.Request) {

@@ -7,8 +7,8 @@ import (
 	"os"
 	"strings"
 
-	"gitlab.com/man90/black-desert-social-rest-api/httpServer"
-	"gitlab.com/man90/black-desert-social-rest-api/scraper"
+	"black-desert-social-rest-api/httpServer"
+	"black-desert-social-rest-api/scraper"
 )
 
 func main() {

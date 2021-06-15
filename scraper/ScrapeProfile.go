@@ -10,7 +10,7 @@ import (
 
 	"github.com/gocolly/colly/v2"
 
-	"gitlab.com/man90/black-desert-social-rest-api/entity"
+	"black-desert-social-rest-api/entity"
 )
 
 func ScrapeProfile(profileTarget string) (profile entity.Profile, err error) {

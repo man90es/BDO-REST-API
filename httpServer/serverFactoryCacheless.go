@@ -9,7 +9,7 @@ import (
 
 	"github.com/gorilla/mux"
 
-	"gitlab.com/man90/black-desert-social-rest-api/api"
+	"black-desert-social-rest-api/api"
 )
 
 func Server(port *string, flagCacheTTL *int) (srv *http.Server) {

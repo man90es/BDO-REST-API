@@ -8,7 +8,7 @@ import (
 
 	"github.com/gocolly/colly/v2"
 
-	"gitlab.com/man90/black-desert-social-rest-api/entity"
+	"black-desert-social-rest-api/entity"
 )
 
 func ScrapeGuildProfile(region, name string) (guildProfile entity.GuildProfile, err error) {

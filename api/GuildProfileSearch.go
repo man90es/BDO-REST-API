@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"strconv"
 
-	"gitlab.com/man90/black-desert-social-rest-api/scraper"
+	"black-desert-social-rest-api/scraper"
 )
 
 func GuildProfileSearch(w http.ResponseWriter, r *http.Request) {

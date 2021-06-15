@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"gitlab.com/man90/black-desert-social-rest-api/scraper"
+	"black-desert-social-rest-api/scraper"
 )
 
 func GuildProfile(w http.ResponseWriter, r *http.Request) {
