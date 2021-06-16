@@ -66,6 +66,10 @@ func ScrapeProfile(profileTarget string) (profile entity.Profile, err error) {
 			Class: e.ChildText(".character_info .character_symbol em:last-child"),
 		}
 
+		e.ForEach(`.selected_label`, func(ind int, el *colly.HTMLElement) {
+			character.Main = true
+		})
+
 		if levelStr := e.ChildText(".character_info span:nth-child(2) em"); levelStr != "Private" {
 			level, _ := strconv.Atoi(levelStr)
 			character.Level = int8(level)

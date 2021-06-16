@@ -206,6 +206,10 @@
 														"type": "string",
 														"example": "Ninja"
 													},
+													"main": {
+														"type": "boolean",
+														"example": true
+													},
 													"level": {
 														"type": "number",
 														"example": 56
