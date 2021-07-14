@@ -1,4 +1,4 @@
-module black-desert-social-rest-api
+module bdo-rest-api
 
 // +heroku goVersion go1.15
 go 1.15

@@ -12,7 +12,7 @@ const (
 type Profile struct {
 	FamilyName         string        `json:"familyName"`
 	ProfileTarget      string        `json:"profileTarget"`
-	Region             string        `json:"region"`
+	Region             string        `json:"region,omitempty"`
 	Guild              *GuildProfile `json:"guild,omitempty"`
 	ContributionPoints int16         `json:"contributionPoints,omitempty"`
 	CreatedOn          *time.Time    `json:"createdOn,omitempty"`

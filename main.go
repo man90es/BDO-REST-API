@@ -7,8 +7,8 @@ import (
 	"os"
 	"strings"
 
-	"black-desert-social-rest-api/httpServer"
-	"black-desert-social-rest-api/scraper"
+	"bdo-rest-api/httpServer"
+	"bdo-rest-api/scraper"
 )
 
 func main() {

@@ -1,1 +1,1 @@
-web: bin/black-desert-social-rest-api
+web: bin/bdo-rest-api

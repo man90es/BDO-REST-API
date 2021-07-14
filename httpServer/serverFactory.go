@@ -13,13 +13,13 @@ import (
 	cache "github.com/victorspringer/http-cache"
 	"github.com/victorspringer/http-cache/adapter/memory"
 
-	"black-desert-social-rest-api/api"
+	"bdo-rest-api/api"
 )
 
 func Server(port *string, flagCacheTTL *int) (srv *http.Server) {
 	memcached, err := memory.NewAdapter(
 		memory.AdapterWithAlgorithm(memory.LRU),
-		memory.AdapterWithCapacity(1000000),
+		memory.AdapterWithCapacity(1e6),
 	)
 
 	if err != nil {
@@ -40,10 +40,10 @@ func Server(port *string, flagCacheTTL *int) (srv *http.Server) {
 
 	router := mux.NewRouter()
 
-	router.Handle("/v0/guildProfile", cacheClient.Middleware(http.HandlerFunc(api.GuildProfile))).Methods("GET")
-	router.Handle("/v0/profile", cacheClient.Middleware(http.HandlerFunc(api.Profile))).Methods("GET")
-	router.Handle("/v0/guildProfileSearch", cacheClient.Middleware(http.HandlerFunc(api.GuildProfileSearch))).Methods("GET")
-	router.Handle("/v0/profileSearch", cacheClient.Middleware(http.HandlerFunc(api.ProfileSearch))).Methods("GET")
+	router.Handle("/v1/adventurer/search", cacheClient.Middleware(http.HandlerFunc(api.ProfileSearch))).Methods("GET")
+	router.Handle("/v1/guild/search", cacheClient.Middleware(http.HandlerFunc(api.GuildProfileSearch))).Methods("GET")
+	router.Handle("/v1/adventurer", cacheClient.Middleware(http.HandlerFunc(api.Profile))).Methods("GET")
+	router.Handle("/v1/guild", cacheClient.Middleware(http.HandlerFunc(api.GuildProfile))).Methods("GET")
 
 	srv = &http.Server{
 		Handler:      router,

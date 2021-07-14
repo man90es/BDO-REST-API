@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"strconv"
 
-	"black-desert-social-rest-api/scraper"
+	"bdo-rest-api/scraper"
 )
 
 func ProfileSearch(w http.ResponseWriter, r *http.Request) {

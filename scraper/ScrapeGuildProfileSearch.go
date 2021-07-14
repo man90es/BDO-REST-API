@@ -8,7 +8,7 @@ import (
 
 	"github.com/gocolly/colly/v2"
 
-	"black-desert-social-rest-api/entity"
+	"bdo-rest-api/entity"
 )
 
 func ScrapeGuildProfileSearch(region, query string, page int32) (guildProfiles []entity.GuildProfile, err error) {
@@ -29,16 +29,15 @@ func ScrapeGuildProfileSearch(region, query string, page int32) (guildProfiles [
 			Name:   e.ChildText(".guild_title a"),
 			Region: e.ChildText(".region_info"),
 			Kind:   e.ChildText(".tag_label.guild_label"),
-			GuildMaster: &entity.Profile{
-				FamilyName:    e.ChildText(".box_list_area li .character_desc a"),
-				ProfileTarget: e.ChildAttr(".box_list_area li .character_desc a", "href")[nice:],
-				Region:        e.ChildText(".region_info"),
+			Master: &entity.Profile{
+				FamilyName:    e.ChildText(".guild_info a"),
+				ProfileTarget: extractProfileTarget(e.ChildAttr(".guild_info a", "href")),
 			},
 			CreatedOn: &createdOn,
 		}
 
-		if membersStr := e.ChildText(".guild_member"); true {
-			population, _ := strconv.Atoi(membersStr[9:])
+		if membersStr := e.ChildText(".member"); true {
+			population, _ := strconv.Atoi(membersStr)
 			guildProfile.Population = int16(population)
 		}
 

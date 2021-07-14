@@ -7,7 +7,7 @@ import (
 
 	"github.com/gocolly/colly/v2"
 
-	"black-desert-social-rest-api/entity"
+	"bdo-rest-api/entity"
 )
 
 func ScrapeProfileSearch(region, query string, searchType int8, page int32) (profiles []entity.Profile, err error) {
@@ -25,14 +25,13 @@ func ScrapeProfileSearch(region, query string, searchType int8, page int32) (pro
 		profile := entity.Profile{
 			Region:        e.ChildText(".region_info"),
 			FamilyName:    e.ChildText(".title a"),
-			ProfileTarget: e.ChildAttr(".title a", "href")[nice:],
+			ProfileTarget: extractProfileTarget(e.ChildAttr(".title a", "href")),
 			Characters:    make([]entity.Character, 1),
 		}
 
 		if e.ChildAttr(".state a", "href") != "javscript:void(0)" {
 			profile.Guild = &entity.GuildProfile{
-				Name:   e.ChildText(".state a"),
-				Region: e.ChildText(".region_info"),
+				Name: e.ChildText(".state a"),
 			}
 		}
 

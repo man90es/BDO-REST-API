@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"black-desert-social-rest-api/scraper"
+	"bdo-rest-api/scraper"
 )
 
 func GuildProfile(w http.ResponseWriter, r *http.Request) {

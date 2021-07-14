@@ -10,7 +10,7 @@ import (
 
 	"github.com/gocolly/colly/v2"
 
-	"black-desert-social-rest-api/entity"
+	"bdo-rest-api/entity"
 )
 
 func ScrapeProfile(profileTarget string) (profile entity.Profile, err error) {
@@ -37,8 +37,7 @@ func ScrapeProfile(profileTarget string) (profile entity.Profile, err error) {
 	c.OnHTML(`.desc.guild a`, func(e *colly.HTMLElement) {
 		if e.Attr("href") != "javscript:void(0)" {
 			profile.Guild = &entity.GuildProfile{
-				Name:   e.Text,
-				Region: profile.Region,
+				Name: e.Text,
 			}
 		}
 	})
@@ -98,17 +97,17 @@ func ScrapeProfile(profileTarget string) (profile entity.Profile, err error) {
 
 			if len(specLevels[0]) > 0 {
 				character.SpecLevels = &entity.Specs{
-					specLevels[0],
-					specLevels[1],
-					specLevels[2],
-					specLevels[3],
-					specLevels[4],
-					specLevels[5],
-					specLevels[6],
-					specLevels[7],
-					specLevels[8],
-					specLevels[9],
-					specLevels[10],
+					Gathering:  specLevels[0],
+					Fishing:    specLevels[1],
+					Hunting:    specLevels[2],
+					Cooking:    specLevels[3],
+					Alchemy:    specLevels[4],
+					Processing: specLevels[5],
+					Training:   specLevels[6],
+					Trading:    specLevels[7],
+					Farming:    specLevels[8],
+					Sailing:    specLevels[9],
+					Barter:     specLevels[10],
 				}
 			}
 		}

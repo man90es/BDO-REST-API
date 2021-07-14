@@ -8,7 +8,7 @@ import (
 
 	"github.com/gocolly/colly/v2"
 
-	"black-desert-social-rest-api/entity"
+	"bdo-rest-api/entity"
 )
 
 func ScrapeGuildProfile(region, name string) (guildProfile entity.GuildProfile, err error) {
@@ -36,10 +36,9 @@ func ScrapeGuildProfile(region, name string) (guildProfile entity.GuildProfile, 
 	})
 
 	c.OnHTML(`.line_list:not(.mob_none) li:nth-child(2) .desc .text a`, func(e *colly.HTMLElement) {
-		guildProfile.GuildMaster = &entity.Profile{
+		guildProfile.Master = &entity.Profile{
 			FamilyName:    e.Text,
-			ProfileTarget: e.Attr("href")[nice:],
-			Region:        region,
+			ProfileTarget: extractProfileTarget(e.Attr("href")),
 		}
 	})
 
@@ -58,8 +57,7 @@ func ScrapeGuildProfile(region, name string) (guildProfile entity.GuildProfile, 
 	c.OnHTML(`.box_list_area .adventure_list_table a`, func(e *colly.HTMLElement) {
 		member := entity.Profile{
 			FamilyName:    e.Text,
-			ProfileTarget: e.Attr("href")[nice:],
-			Region:        region,
+			ProfileTarget: extractProfileTarget(e.Attr("href")),
 		}
 
 		guildProfile.Members = append(guildProfile.Members, member)

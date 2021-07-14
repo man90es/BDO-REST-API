@@ -8,7 +8,6 @@ import (
 	"github.com/gocolly/colly/v2/proxy"
 )
 
-const nice = 69
 const closetimeMessage = "BDO servers are currently under maintenance. More info: www.naeu.playblackdesert.com"
 
 var proxies = make([]string, 0)
@@ -21,6 +20,10 @@ func PushProxies(args ...string) {
 
 func dry(s string) string {
 	return strings.Join(strings.Fields(s), " ")
+}
+
+func extractProfileTarget(link string) string {
+	return link[69:] // Nice
 }
 
 func collyFactory() (c *colly.Collector) {

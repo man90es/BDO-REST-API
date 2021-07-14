@@ -9,16 +9,16 @@ import (
 
 	"github.com/gorilla/mux"
 
-	"black-desert-social-rest-api/api"
+	"bdo-rest-api/api"
 )
 
 func Server(port *string, flagCacheTTL *int) (srv *http.Server) {
 	router := mux.NewRouter()
 
-	router.HandleFunc("/v0/guildProfile", api.GuildProfile).Methods("GET")
-	router.HandleFunc("/v0/profile", api.Profile).Methods("GET")
-	router.HandleFunc("/v0/guildProfileSearch", api.GuildProfileSearch).Methods("GET")
-	router.HandleFunc("/v0/profileSearch", api.ProfileSearch).Methods("GET")
+	router.HandleFunc("/v1/adventurer/search", api.ProfileSearch).Methods("GET")
+	router.HandleFunc("/v1/guild/search", api.GuildProfileSearch).Methods("GET")
+	router.HandleFunc("/v1/adventurer", api.Profile).Methods("GET")
+	router.HandleFunc("/v1/guild", api.GuildProfile).Methods("GET")
 
 	srv = &http.Server{
 		Handler:      router,

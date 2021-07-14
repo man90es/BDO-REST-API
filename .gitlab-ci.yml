@@ -1,8 +1,8 @@
-build-black-desert-social-rest-api:
+build-bdo-rest-api:
   image: golang:1.15
   stage: build
   script:
-    - go build -o ${CI_PROJECT_DIR}/dist/black-desert-social-rest-api
+    - go build -o ${CI_PROJECT_DIR}/dist/bdo-rest-api
   artifacts:
     paths:
       - dist

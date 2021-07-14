@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"net/url"
 
-	"black-desert-social-rest-api/scraper"
+	"bdo-rest-api/scraper"
 )
 
 func Profile(w http.ResponseWriter, r *http.Request) {
