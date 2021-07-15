@@ -9,11 +9,6 @@ import (
 	"github.com/gocolly/colly/v2/proxy"
 )
 
-type scrapedError interface {
-	Error() string
-	HTTPCode() int
-}
-
 var proxies = make([]string, 0)
 var proxySwitcher colly.ProxyFunc
 

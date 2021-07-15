@@ -18,10 +18,9 @@ func Profile(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if data, err := scraper.ScrapeProfile(url.QueryEscape(profileTargetParams[0])); err == nil {
+	if data, status := scraper.ScrapeProfile(url.QueryEscape(profileTargetParams[0])); status == http.StatusOK {
 		json.NewEncoder(w).Encode(data)
 	} else {
-		w.WriteHeader(err.HTTPCode())
-		json.NewEncoder(w).Encode(err.Error())
+		w.WriteHeader(status)
 	}
 }

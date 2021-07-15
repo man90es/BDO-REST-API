@@ -2,6 +2,7 @@ package scraper
 
 import (
 	"fmt"
+	"net/http"
 	"strconv"
 
 	"github.com/gocolly/colly/v2"
@@ -9,11 +10,11 @@ import (
 	"bdo-rest-api/entity"
 )
 
-func ScrapeProfileSearch(region, query string, searchType int8, page int32) (profiles []entity.Profile, err scrapedError) {
+func ScrapeProfileSearch(region, query string, searchType int8, page int32) (profiles []entity.Profile, status int) {
 	c := collyFactory()
 
 	c.OnHTML(`.closetime_message`, func(e *colly.HTMLElement) {
-		err = &entity.MaintenanceError{}
+		status = http.StatusServiceUnavailable
 	})
 
 	c.OnHTML(`.box_list_area li:not(.no_result)`, func(e *colly.HTMLElement) {
@@ -43,7 +44,9 @@ func ScrapeProfileSearch(region, query string, searchType int8, page int32) (pro
 	c.Visit(fmt.Sprintf("https://www.naeu.playblackdesert.com/en-US/Adventure?region=%v&searchType=%v&searchKeyword=%v&Page=%v", region, searchType, query, page))
 
 	if len(profiles) < 1 {
-		err = &entity.NotFoundError{}
+		status = http.StatusNotFound
+	} else {
+		status = http.StatusOK
 	}
 
 	return

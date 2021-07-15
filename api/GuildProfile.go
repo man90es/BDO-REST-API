@@ -18,10 +18,9 @@ func GuildProfile(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if data, err := scraper.ScrapeGuildProfile(regionParams[0], guildNameParams[0]); err == nil {
+	if data, status := scraper.ScrapeGuildProfile(regionParams[0], guildNameParams[0]); status == http.StatusOK {
 		json.NewEncoder(w).Encode(data)
 	} else {
-		w.WriteHeader(err.HTTPCode())
-		json.NewEncoder(w).Encode(err.Error())
+		w.WriteHeader(status)
 	}
 }

@@ -32,10 +32,9 @@ func ProfileSearch(w http.ResponseWriter, r *http.Request) {
 		page, _ = strconv.Atoi(pageParams[0])
 	}
 
-	if data, err := scraper.ScrapeProfileSearch(regionParams[0], queryParams[0], searchType, int32(page)); err == nil {
+	if data, status := scraper.ScrapeProfileSearch(regionParams[0], queryParams[0], searchType, int32(page)); status == http.StatusOK {
 		json.NewEncoder(w).Encode(data)
 	} else {
-		w.WriteHeader(err.HTTPCode())
-		json.NewEncoder(w).Encode(err.Error())
+		w.WriteHeader(status)
 	}
 }

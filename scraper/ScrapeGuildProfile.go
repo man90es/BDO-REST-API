@@ -2,6 +2,7 @@ package scraper
 
 import (
 	"fmt"
+	"net/http"
 	"strconv"
 	"time"
 
@@ -10,13 +11,13 @@ import (
 	"bdo-rest-api/entity"
 )
 
-func ScrapeGuildProfile(region, name string) (guildProfile entity.GuildProfile, err scrapedError) {
+func ScrapeGuildProfile(region, name string) (guildProfile entity.GuildProfile, status int) {
 	c := collyFactory()
 
-	err = &entity.NotFoundError{}
+	status = http.StatusNotFound
 
 	c.OnHTML(`.closetime_message`, func(e *colly.HTMLElement) {
-		err = &entity.MaintenanceError{}
+		status = http.StatusServiceUnavailable
 	})
 
 	c.OnHTML(`.region_info`, func(e *colly.HTMLElement) {
@@ -25,7 +26,7 @@ func ScrapeGuildProfile(region, name string) (guildProfile entity.GuildProfile, 
 
 	c.OnHTML(`.guild_name p`, func(e *colly.HTMLElement) {
 		guildProfile.Name = e.Text
-		err = nil
+		status = http.StatusOK
 	})
 
 	c.OnHTML(`.line_list.mob_none .desc`, func(e *colly.HTMLElement) {

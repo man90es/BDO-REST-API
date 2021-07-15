@@ -2,6 +2,7 @@ package scraper
 
 import (
 	"fmt"
+	"net/http"
 	"regexp"
 	"strconv"
 	"strings"
@@ -12,19 +13,19 @@ import (
 	"bdo-rest-api/entity"
 )
 
-func ScrapeProfile(profileTarget string) (profile entity.Profile, err scrapedError) {
+func ScrapeProfile(profileTarget string) (profile entity.Profile, status int) {
 	c := collyFactory()
 
 	profile.ProfileTarget = profileTarget
-	err = &entity.NotFoundError{}
+	status = http.StatusNotFound
 
 	c.OnHTML(`.closetime_message`, func(e *colly.HTMLElement) {
-		err = &entity.MaintenanceError{}
+		status = http.StatusServiceUnavailable
 	})
 
 	c.OnHTML(`.nick`, func(e *colly.HTMLElement) {
 		profile.FamilyName = e.Text
-		err = nil
+		status = http.StatusOK
 	})
 
 	c.OnHTML(`.region_info`, func(e *colly.HTMLElement) {

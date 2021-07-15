@@ -2,6 +2,7 @@ package scraper
 
 import (
 	"fmt"
+	"net/http"
 	"strconv"
 	"time"
 
@@ -10,11 +11,11 @@ import (
 	"bdo-rest-api/entity"
 )
 
-func ScrapeGuildProfileSearch(region, query string, page int32) (guildProfiles []entity.GuildProfile, err scrapedError) {
+func ScrapeGuildProfileSearch(region, query string, page int32) (guildProfiles []entity.GuildProfile, status int) {
 	c := collyFactory()
 
 	c.OnHTML(`.closetime_message`, func(e *colly.HTMLElement) {
-		err = &entity.MaintenanceError{}
+		status = http.StatusServiceUnavailable
 	})
 
 	c.OnHTML(`.box_list_area li:not(.no_result)`, func(e *colly.HTMLElement) {
@@ -42,7 +43,9 @@ func ScrapeGuildProfileSearch(region, query string, page int32) (guildProfiles [
 	c.Visit(fmt.Sprintf("https://www.naeu.playblackdesert.com/en-US/Adventure/Guild?region=%v&page=%v&searchText=%v", region, page, query))
 
 	if len(guildProfiles) < 1 {
-		err = &entity.NotFoundError{}
+		status = http.StatusNotFound
+	} else {
+		status = http.StatusOK
 	}
 
 	return
