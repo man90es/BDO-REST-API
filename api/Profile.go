@@ -9,8 +9,7 @@ import (
 )
 
 func Profile(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-	w.Header().Set("Access-Control-Allow-Origin", "*")
+	setHeaders(w)
 
 	profileTargetParams, ok := r.URL.Query()["profileTarget"]
 

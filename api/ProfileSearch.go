@@ -9,8 +9,7 @@ import (
 )
 
 func ProfileSearch(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-	w.Header().Set("Access-Control-Allow-Origin", "*")
+	setHeaders(w)
 
 	regionParams, ok1 := r.URL.Query()["region"]
 	searchTypeParams, ok2 := r.URL.Query()["searchType"]
