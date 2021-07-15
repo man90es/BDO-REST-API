@@ -7,5 +7,5 @@ func (e *MaintenanceError) Error() string {
 }
 
 func (e *MaintenanceError) HTTPCode() int {
-	return 504
+	return 503
 }
