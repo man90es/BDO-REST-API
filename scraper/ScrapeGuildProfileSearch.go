@@ -10,11 +10,11 @@ import (
 	"bdo-rest-api/entity"
 )
 
-func ScrapeGuildProfileSearch(region, query string, page int32) (guildProfiles []entity.GuildProfile, err error) {
+func ScrapeGuildProfileSearch(region, query string, page int32) (guildProfiles []entity.GuildProfile, err scrapedError) {
 	c := collyFactory()
 
 	c.OnHTML(`.closetime_message`, func(e *colly.HTMLElement) {
-		err = fmt.Errorf(closetimeMessage)
+		err = &entity.MaintenanceError{}
 	})
 
 	c.OnHTML(`.box_list_area li:not(.no_result)`, func(e *colly.HTMLElement) {
@@ -40,6 +40,10 @@ func ScrapeGuildProfileSearch(region, query string, page int32) (guildProfiles [
 	})
 
 	c.Visit(fmt.Sprintf("https://www.naeu.playblackdesert.com/en-US/Adventure/Guild?region=%v&page=%v&searchText=%v", region, page, query))
+
+	if len(guildProfiles) < 1 {
+		err = &entity.NotFoundError{}
+	}
 
 	return
 }

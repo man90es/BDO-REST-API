@@ -9,7 +9,10 @@ import (
 	"github.com/gocolly/colly/v2/proxy"
 )
 
-const closetimeMessage = "BDO servers are currently under maintenance. More info: www.naeu.playblackdesert.com"
+type scrapedError interface {
+	Error() string
+	HTTPCode() int
+}
 
 var proxies = make([]string, 0)
 var proxySwitcher colly.ProxyFunc

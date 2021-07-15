@@ -12,17 +12,19 @@ import (
 	"bdo-rest-api/entity"
 )
 
-func ScrapeProfile(profileTarget string) (profile entity.Profile, err error) {
+func ScrapeProfile(profileTarget string) (profile entity.Profile, err scrapedError) {
 	c := collyFactory()
 
 	profile.ProfileTarget = profileTarget
+	err = &entity.NotFoundError{}
 
 	c.OnHTML(`.closetime_message`, func(e *colly.HTMLElement) {
-		err = fmt.Errorf(closetimeMessage)
+		err = &entity.MaintenanceError{}
 	})
 
 	c.OnHTML(`.nick`, func(e *colly.HTMLElement) {
 		profile.FamilyName = e.Text
+		err = nil
 	})
 
 	c.OnHTML(`.region_info`, func(e *colly.HTMLElement) {

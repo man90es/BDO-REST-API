@@ -10,11 +10,13 @@ import (
 	"bdo-rest-api/entity"
 )
 
-func ScrapeGuildProfile(region, name string) (guildProfile entity.GuildProfile, err error) {
+func ScrapeGuildProfile(region, name string) (guildProfile entity.GuildProfile, err scrapedError) {
 	c := collyFactory()
 
+	err = &entity.NotFoundError{}
+
 	c.OnHTML(`.closetime_message`, func(e *colly.HTMLElement) {
-		err = fmt.Errorf(closetimeMessage)
+		err = &entity.MaintenanceError{}
 	})
 
 	c.OnHTML(`.region_info`, func(e *colly.HTMLElement) {
@@ -23,6 +25,7 @@ func ScrapeGuildProfile(region, name string) (guildProfile entity.GuildProfile, 
 
 	c.OnHTML(`.guild_name p`, func(e *colly.HTMLElement) {
 		guildProfile.Name = e.Text
+		err = nil
 	})
 
 	c.OnHTML(`.line_list.mob_none .desc`, func(e *colly.HTMLElement) {

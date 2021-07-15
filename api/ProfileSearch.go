@@ -22,6 +22,7 @@ func ProfileSearch(w http.ResponseWriter, r *http.Request) {
 	}[searchTypeParams[0]]
 
 	if !ok1 || !ok2 || !ok4 || !validateRegion(regionParams[0]) || searchType < 1 || searchType > 2 {
+		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
@@ -34,7 +35,7 @@ func ProfileSearch(w http.ResponseWriter, r *http.Request) {
 	if data, err := scraper.ScrapeProfileSearch(regionParams[0], queryParams[0], searchType, int32(page)); err == nil {
 		json.NewEncoder(w).Encode(data)
 	} else {
-		w.WriteHeader(http.StatusGatewayTimeout)
-		json.NewEncoder(w).Encode(errorResponse{err.Error()})
+		w.WriteHeader(err.HTTPCode())
+		json.NewEncoder(w).Encode(err.Error())
 	}
 }
