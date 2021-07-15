@@ -2,7 +2,6 @@ package scraper
 
 import (
 	"fmt"
-	"log"
 	"regexp"
 	"strconv"
 	"strings"
@@ -17,10 +16,6 @@ func ScrapeProfile(profileTarget string) (profile entity.Profile, err error) {
 	c := collyFactory()
 
 	profile.ProfileTarget = profileTarget
-
-	c.OnRequest(func(r *colly.Request) {
-		log.Println("Visiting", r.URL)
-	})
 
 	c.OnHTML(`.closetime_message`, func(e *colly.HTMLElement) {
 		err = fmt.Errorf(closetimeMessage)

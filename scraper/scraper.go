@@ -1,6 +1,7 @@
 package scraper
 
 import (
+	"log"
 	"strings"
 	"time"
 
@@ -33,6 +34,10 @@ func collyFactory() (c *colly.Collector) {
 	if len(proxies) > 0 {
 		c.SetProxyFunc(proxySwitcher)
 	}
+
+	c.OnRequest(func(r *colly.Request) {
+		log.Println("Visiting", r.URL)
+	})
 
 	return
 }

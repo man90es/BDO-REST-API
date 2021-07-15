@@ -2,7 +2,6 @@ package scraper
 
 import (
 	"fmt"
-	"log"
 	"strconv"
 	"time"
 
@@ -13,10 +12,6 @@ import (
 
 func ScrapeGuildProfile(region, name string) (guildProfile entity.GuildProfile, err error) {
 	c := collyFactory()
-
-	c.OnRequest(func(r *colly.Request) {
-		log.Println("Visiting", r.URL)
-	})
 
 	c.OnHTML(`.closetime_message`, func(e *colly.HTMLElement) {
 		err = fmt.Errorf(closetimeMessage)

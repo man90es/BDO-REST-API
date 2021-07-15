@@ -2,7 +2,6 @@ package scraper
 
 import (
 	"fmt"
-	"log"
 	"strconv"
 
 	"github.com/gocolly/colly/v2"
@@ -12,10 +11,6 @@ import (
 
 func ScrapeProfileSearch(region, query string, searchType int8, page int32) (profiles []entity.Profile, err error) {
 	c := collyFactory()
-
-	c.OnRequest(func(r *colly.Request) {
-		log.Println("Visiting", r.URL)
-	})
 
 	c.OnHTML(`.closetime_message`, func(e *colly.HTMLElement) {
 		err = fmt.Errorf(closetimeMessage)
