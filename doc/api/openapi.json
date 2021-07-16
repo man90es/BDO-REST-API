@@ -2,145 +2,78 @@
 	"openapi": "3.0.2",
 	"info": {
 		"title": "BDO REST API",
-		"version": "v0"
+		"version": "v1"
 	},
 	"servers": [
 		{
-			"url": "http://localhost:8001"
-		},
-		{
-			"url": "https://boiling-mountain-53521.herokuapp.com"
+			"url": "http://localhost:8001/v1"
 		}
 	],
 	"components": {
-		"responses": {
-			"504": {
-				"description": "BDO servers are currently under maintenance and request is not cached.",
-				"content": {
-					"application/json": {
-						"schema": {
-							"type": "object",
-							"properties": {
-								"error": {
-									"type": "string",
-									"example": "BDO servers are currently under maintenance. More info: www.naeu.playblackdesert.com"
-								}
-							}
-						}
-					}
+		"schemas": {
+			"familyName": {
+				"type": "string",
+				"example": "Apple"
+			},
+			"profileTarget": {
+				"type": "string",
+				"example": "XXX"
+			},
+			"region": {
+				"type": "string",
+				"enum": ["EU", "NA"]
+			},
+			"guildName": {
+				"type": "string",
+				"example": "TumblrGirls"
+			},
+			"createdOn": {
+				"type": "string",
+				"example": "2020-02-23T00:00:00Z"
+			}
+		},
+		"parameters": {
+			"region": {
+				"name": "region",
+				"in": "query",
+				"required": true,
+				"schema": {
+					"$ref": "#/components/schemas/region"
 				}
+			},
+			"query": {
+				"name": "query",
+				"in": "query",
+				"required": true,
+				"schema": {
+					"type": "string"
+				}
+			},
+			"page": {
+				"name": "page",
+				"in": "query",
+				"required": false,
+				"schema": {
+					"type": "number",
+					"default": 1
+				}
+			}
+		},
+		"responses": {
+			"404": {
+				"description": "Not Found."
+			},
+			"503": {
+				"description": "BDO servers are currently under maintenance and requested data is not cached."
 			}
 		}
 	},
 	"paths": {
-		"/v0/guildProfile?guildName={guildName}&region={region}": {
-			"get": {
-				"description": "Retrieve guild profile.",
-				"summary": "Retrieve guild profile.",
-				"operationId": "getGuildProfile",
-				"parameters": [
-					{
-						"name": "guildName",
-						"in": "query",
-						"description": "Desired guild's name.",
-						"required": true,
-						"schema": {
-							"type": "string"
-						}
-					},
-					{
-						"name": "region",
-						"in": "query",
-						"description": "Desired guild's region.",
-						"required": true,
-						"schema": {
-							"type": "string",
-							"enum": ["EU", "NA"]
-						}
-					}
-				],
-				"responses": {
-					"200": {
-						"description": "Successful operation.",
-						"content": {
-							"application/json": {
-								"schema": {
-									"title": "GuildProfile",
-									"type": "object",
-									"properties": {
-										"name": {
-											"type": "string",
-											"example": "TumblrGirls"
-										},
-										"region": {
-											"type": "string",
-											"enum": ["EU", "NA"]
-										},
-										"createdOn": {
-											"type": "string",
-											"example": "2020-02-23T00:00:00Z"
-										},
-										"guildMaster": {
-											"type": "object",
-											"properties": {
-												"familyName": {
-													"type": "string",
-													"example": "Apple"
-												},
-												"profileTarget": {
-													"type": "string",
-													"example": "tbXSK...SY%3d"
-												},
-												"region": {
-													"type": "string",
-													"enum": ["EU", "NA"]
-												}
-											}
-										},
-										"members": {
-											"type": "array",
-											"items": {
-												"type": "object",
-												"properties": {
-													"familyName": {
-														"type": "string",
-														"example": "Apple"
-													},
-													"profileTarget": {
-														"type": "string",
-														"example": "tbXSK...SY%3d"
-													},
-													"region": {
-														"type": "string",
-														"enum": ["EU", "NA"]
-													}
-												}
-											}
-										},
-										"population": {
-											"type": "number",
-											"example": 1
-										},
-										"occupying": {
-											"type": "string",
-											"example": "Mediah Territory"
-										}
-									}
-								}
-							}
-						}
-					},
-					"504": {
-						"$ref": "#/components/responses/504"
-					}
-				}
-			}
-		},
-		"/v0/profile?profileTarget={profileTarget}": {
+		"/adventurer?profileTarget={profileTarget}": {
 			"get": {
 				"description": "Retrieve player profile.",
 				"summary": "Retrieve player profile.",
-				"operationId": "getProfile",
+				"operationId": "getAdventurer",
 				"parameters": [
 					{
 						"name": "profileTarget",
@@ -154,7 +87,7 @@
 				],
 				"responses": {
 					"200": {
-						"description": "Successful operation.",
+						"description": "OK.",
 						"content": {
 							"application/json": {
 								"schema": {
@@ -162,26 +95,18 @@
 									"type": "object",
 									"properties": {
 										"familyName": {
-											"type": "string",
-											"example": "Apple"
+											"$ref": "#/components/schemas/familyName"
 										},
 										"profileTarget": {
-											"type": "string",
-											"example": "tbXSK...SY%3d"
+											"$ref": "#/components/schemas/profileTarget"
 										},
 										"region": {
-											"type": "string",
-											"enum": ["EU", "NA"]
+											"$ref": "#/components/schemas/region"
 										},
 										"guild": {
 											"properties": {
 												"name": {
-													"type": "string",
-													"example": "TumblrGirls"
-												},
-												"region": {
-													"type": "string",
-													"enum": ["EU", "NA"]
+													"$ref": "#/components/schemas/guildName"
 												}
 											}
 										},
@@ -190,8 +115,7 @@
 											"example": 100
 										},
 										"createdOn": {
-											"type": "string",
-											"example": "2016-09-24T00:00:00Z"
+											"$ref": "#/components/schemas/createdOn"
 										},
 										"characters": {
 											"type": "array",
@@ -270,132 +194,26 @@
 							}
 						}
 					},
-					"504": {
-						"$ref": "#/components/responses/504"
+					"404": {
+						"$ref": "#/components/responses/404"
+					},
+					"503": {
+						"$ref": "#/components/responses/503"
 					}
 				}
 			}
 		},
-		"/v0/guildProfileSearch?region={region}&query={query}&page={page}": {
-			"get": {
-				"description": "Search for guild.",
-				"summary": "Search for guild.",
-				"operationId": "getGuildProfileSearch",
-				"parameters": [
-					{
-						"name": "region",
-						"in": "query",
-						"description": "Desired guild's region.",
-						"required": true,
-						"schema": {
-							"type": "string",
-							"enum": ["EU", "NA"]
-						}
-					},
-					{
-						"name": "query",
-						"in": "query",
-						"description": "Desired guild's name.",
-						"required": true,
-						"schema": {
-							"type": "string"
-						}
-					},
-					{
-						"name": "page",
-						"in": "query",
-						"description": "Desired page of results. Each page has up to 10 guilds.",
-						"required": false,
-						"schema": {
-							"type": "string",
-							"default": 1
-						}
-					}
-				],
-				"responses": {
-					"200": {
-						"description": "Successful operation.",
-						"content": {
-							"application/json": {
-								"schema": {
-									"title": "GuildProfileSearchResult",
-									"type": "array",
-									"items": {
-										"type": "object",
-										"properties": {
-											"name": {
-												"type": "string",
-												"example": "TumblrGirls"
-											},
-											"region": {
-												"type": "string",
-												"enum": ["EU", "NA"]
-											},
-											"createdOn": {
-												"type": "string",
-												"example": "2020-02-23T00:00:00Z"
-											},
-											"guildMaster": {
-												"type": "object",
-												"properties": {
-													"familyName": {
-														"type": "string",
-														"example": "Apple"
-													},
-													"profileTarget": {
-														"type": "string",
-														"example": "tbXSK...SY%3d"
-													},
-													"region": {
-														"type": "string",
-														"enum": ["EU", "NA"]
-													}
-												}
-											},
-											"kind": {
-												"type": "string",
-												"example": "Guild"
-											},
-											"population": {
-												"type": "number",
-												"example": 1
-											}
-										}
-									}
-								}
-							}
-						}
-					},
-					"504": {
-						"$ref": "#/components/responses/504"
-					}
-				}
-			}
-		},
-		"/v0/profileSearch?region={region}&query={query}&searchType={searchType}&page={page}": {
+		"/adventurer/search?region={region}&query={query}&searchType={searchType}&page={page}": {
 			"get": {
 				"description": "Search for player.",
 				"summary": "Search for player.",
-				"operationId": "getProfileSearch",
+				"operationId": "getAdventurerSearch",
 				"parameters": [
 					{
-						"name": "region",
-						"in": "query",
-						"description": "Desired player's region.",
-						"required": true,
-						"schema": {
-							"type": "string",
-							"enum": ["EU", "NA"]
-						}
+						"$ref": "#/components/parameters/region"
 					},
 					{
-						"name": "query",
-						"in": "query",
-						"description": "Desired player's family name or character name.",
-						"required": true,
-						"schema": {
-							"type": "string"
-						}
+						"$ref": "#/components/parameters/query"
 					},
 					{
 						"name": "searchType",
@@ -408,19 +226,12 @@
 						}
 					},
 					{
-						"name": "page",
-						"in": "query",
-						"description": "Desired page of results. Each page has up to 20 players.",
-						"required": false,
-						"schema": {
-							"type": "string",
-							"default": 1
-						}
+						"$ref": "#/components/parameters/page"
 					}
 				],
 				"responses": {
 					"200": {
-						"description": "Successful operation.",
+						"description": "OK.",
 						"content": {
 							"application/json": {
 								"schema": {
@@ -430,26 +241,18 @@
 										"type": "object",
 										"properties": {
 											"familyName": {
-												"type": "string",
-												"example": "Apple"
+												"$ref": "#/components/schemas/familyName"
 											},
 											"profileTarget": {
-												"type": "string",
-												"example": "tbXSK...SY%3d"
+												"$ref": "#/components/schemas/profileTarget"
 											},
 											"region": {
-												"type": "string",
-												"enum": ["EU", "NA"]
+												"$ref": "#/components/schemas/region"
 											},
 											"guild": {
 												"properties": {
 													"name": {
-														"type": "string",
-														"example": "TumblrGirls"
-													},
-													"region": {
-														"type": "string",
-														"enum": ["EU", "NA"]
+														"$ref": "#/components/schemas/guildName"
 													}
 												}
 											},
@@ -479,8 +282,165 @@
 							}
 						}
 					},
-					"504": {
-						"$ref": "#/components/responses/504"
+					"404": {
+						"$ref": "#/components/responses/404"
+					},
+					"503": {
+						"$ref": "#/components/responses/503"
+					}
+				}
+			}
+		},
+		"/guild?guildName={guildName}&region={region}": {
+			"get": {
+				"description": "Retrieve guild profile.",
+				"summary": "Retrieve guild profile.",
+				"operationId": "getGuild",
+				"parameters": [
+					{
+						"name": "guildName",
+						"in": "query",
+						"description": "Desired guild's name.",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"$ref": "#/components/parameters/region"
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "OK.",
+						"content": {
+							"application/json": {
+								"schema": {
+									"title": "Guild",
+									"type": "object",
+									"properties": {
+										"name": {
+											"$ref": "#/components/schemas/guildName"
+										},
+										"region": {
+											"$ref": "#/components/schemas/region"
+										},
+										"createdOn": {
+											"$ref": "#/components/schemas/createdOn"
+										},
+										"master": {
+											"type": "object",
+											"properties": {
+												"familyName": {
+													"$ref": "#/components/schemas/familyName"
+												},
+												"profileTarget": {
+													"$ref": "#/components/schemas/profileTarget"
+												}
+											}
+										},
+										"members": {
+											"type": "array",
+											"items": {
+												"type": "object",
+												"properties": {
+													"familyName": {
+														"$ref": "#/components/schemas/familyName"
+													},
+													"profileTarget": {
+														"$ref": "#/components/schemas/profileTarget"
+													}
+												}
+											}
+										},
+										"population": {
+											"type": "number",
+											"example": 1
+										},
+										"occupying": {
+											"type": "string",
+											"example": "Mediah Territory"
+										}
+									}
+								}
+							}
+						}
+					},
+					"404": {
+						"$ref": "#/components/responses/404"
+					},
+					"503": {
+						"$ref": "#/components/responses/503"
+					}
+				}
+			}
+		},
+		"/guild/search?region={region}&query={query}&page={page}": {
+			"get": {
+				"description": "Search for guild.",
+				"summary": "Search for guild.",
+				"operationId": "getGuildSearch",
+				"parameters": [
+					{
+						"$ref": "#/components/parameters/region"
+					},
+					{
+						"$ref": "#/components/parameters/query"
+					},
+					{
+						"$ref": "#/components/parameters/page"
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "OK.",
+						"content": {
+							"application/json": {
+								"schema": {
+									"title": "GuildSearchResult",
+									"type": "array",
+									"items": {
+										"type": "object",
+										"properties": {
+											"name": {
+												"$ref": "#/components/schemas/guildName"
+											},
+											"region": {
+												"$ref": "#/components/schemas/region"
+											},
+											"createdOn": {
+												"$ref": "#/components/schemas/createdOn"
+											},
+											"master": {
+												"type": "object",
+												"properties": {
+													"familyName": {
+														"$ref": "#/components/schemas/familyName"
+													},
+													"profileTarget": {
+														"$ref": "#/components/schemas/profileTarget"
+													}
+												}
+											},
+											"kind": {
+												"type": "string",
+												"example": "Guild"
+											},
+											"population": {
+												"type": "number",
+												"example": 1
+											}
+										}
+									}
+								}
+							}
+						}
+					},
+					"404": {
+						"$ref": "#/components/responses/404"
+					},
+					"503": {
+						"$ref": "#/components/responses/503"
 					}
 				}
 			}
