@@ -1,31 +1,16 @@
 # Black Desert social REST API
-
-An unofficial JSON API server for Black Desert Online that gets guild and player data via scraping the official website.
-
-## API
-See [OpenAPI documentation](https://gitlab.com/man90/black-desert-social-rest-api/-/tree/master/doc/api/openapi.json).
+An unofficial REST API server for Black Desert Online community data.
 
 ## Projects using this API
-- [BDO Leaderboards](https://man90.gitlab.io/bdo-leader-boards): a web-based leaderboard application for Black Desert Online guilds.
+- [BDO Leaderboards](https://bdo.hemlo.cc/leaderboards/): a web-based leaderboard application for BDO guilds.
 
-
+## API routes
+The current version of API is v1. **v0 is no longer supported** and is not fully functional due to changes in the official BDO website.
+- The migration guide can be found [here](doc/migrationGuilde.md).
+- The v1 OpenAPI documentation can be found [here](https://gitlab.com/man90/black-desert-social-rest-api/-/tree/master/doc/api/openapi.json).
 
 ## Getting the binary
-### Prebuilt
-You can download prebuilt binaries [here](https://gitlab.com/man90/black-desert-social-rest-api/-/pipelines).
-
-### Building from source
-Prerequisites: <abbr title="Not tested on other platforms.">GNU/Linux</abbr>, Go >=1.15
-
-Command:
-```bash
-go build
-```
-
-By default, scraped results are cached in memory and stored for up to 2 hours, it helps to ease the pressure on BDO servers and speeds up the response time in some situations. If you don't want to cache scraped results (for example if you just want to create a dump or need extra fresh data), use this command instead:
-```bash
-go build -tags "cacheless"
-```
+You can either download prebuilt binaries from [here](https://gitlab.com/man90/black-desert-social-rest-api/-/pipelines) or build them yourself following [this guide](doc/buildingFromSource.md).
 
 ## Environment variables
 Catch requests on a specific port (8001 by default):
@@ -52,7 +37,7 @@ Flags override environment variables
 ```
 Use them like this:
 ```bash
-./black-desert-social-rest-api -proxy="http://192.168.0.0.1:8080" -cachettl=30
+./bdo-rest-api -proxy="http://192.168.0.0.1:8080" -cachettl=30
 ```
 
 ## Known bugs
