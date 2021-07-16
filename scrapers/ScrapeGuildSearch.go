@@ -1,4 +1,4 @@
-package scraper
+package scrapers
 
 import (
 	"fmt"
@@ -8,10 +8,10 @@ import (
 
 	"github.com/gocolly/colly/v2"
 
-	"bdo-rest-api/entity"
+	"bdo-rest-api/models"
 )
 
-func ScrapeGuildProfileSearch(region, query string, page int32) (guildProfiles []entity.GuildProfile, status int) {
+func ScrapeGuildSearch(region, query string, page int32) (guildProfiles []models.GuildProfile, status int) {
 	c := collyFactory()
 
 	c.OnHTML(`.closetime_message`, func(e *colly.HTMLElement) {
@@ -21,11 +21,11 @@ func ScrapeGuildProfileSearch(region, query string, page int32) (guildProfiles [
 	c.OnHTML(`.box_list_area li:not(.no_result)`, func(e *colly.HTMLElement) {
 		createdOn, _ := time.Parse("2006-01-02", dry(e.ChildText(".date")))
 
-		guildProfile := entity.GuildProfile{
+		guildProfile := models.GuildProfile{
 			Name:   e.ChildText(".guild_title a"),
 			Region: e.ChildText(".region_info"),
 			Kind:   e.ChildText(".tag_label.guild_label"),
-			Master: &entity.Profile{
+			Master: &models.Profile{
 				FamilyName:    e.ChildText(".guild_info a"),
 				ProfileTarget: extractProfileTarget(e.ChildAttr(".guild_info a", "href")),
 			},

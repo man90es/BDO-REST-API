@@ -1,14 +1,14 @@
-package api
+package handlers
 
 import (
 	"encoding/json"
 	"net/http"
 	"strconv"
 
-	"bdo-rest-api/scraper"
+	"bdo-rest-api/scrapers"
 )
 
-func GuildProfileSearch(w http.ResponseWriter, r *http.Request) {
+func GetGuildSearch(w http.ResponseWriter, r *http.Request) {
 	setHeaders(w)
 
 	regionParams, ok1 := r.URL.Query()["region"]
@@ -32,7 +32,7 @@ func GuildProfileSearch(w http.ResponseWriter, r *http.Request) {
 		query = queryParams[0]
 	}
 
-	if data, status := scraper.ScrapeGuildProfileSearch(regionParams[0], query, int32(page)); status == http.StatusOK {
+	if data, status := scrapers.ScrapeGuildSearch(regionParams[0], query, int32(page)); status == http.StatusOK {
 		json.NewEncoder(w).Encode(data)
 	} else {
 		w.WriteHeader(status)

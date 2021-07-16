@@ -9,11 +9,11 @@ import (
 	"os"
 	"time"
 
+	"bdo-rest-api/handlers"
+
 	"github.com/gorilla/mux"
 	cache "github.com/victorspringer/http-cache"
 	"github.com/victorspringer/http-cache/adapter/memory"
-
-	"bdo-rest-api/api"
 )
 
 func Server(port *string, flagCacheTTL *int) (srv *http.Server) {
@@ -40,10 +40,10 @@ func Server(port *string, flagCacheTTL *int) (srv *http.Server) {
 
 	router := mux.NewRouter()
 
-	router.Handle("/v1/adventurer/search", cacheClient.Middleware(http.HandlerFunc(api.ProfileSearch))).Methods("GET")
-	router.Handle("/v1/guild/search", cacheClient.Middleware(http.HandlerFunc(api.GuildProfileSearch))).Methods("GET")
-	router.Handle("/v1/adventurer", cacheClient.Middleware(http.HandlerFunc(api.Profile))).Methods("GET")
-	router.Handle("/v1/guild", cacheClient.Middleware(http.HandlerFunc(api.GuildProfile))).Methods("GET")
+	router.Handle("/v1/adventurer/search", cacheClient.Middleware(http.HandlerFunc(handlers.GetAdventurerSearch))).Methods("GET")
+	router.Handle("/v1/guild/search", cacheClient.Middleware(http.HandlerFunc(handlers.GetGuildSearch))).Methods("GET")
+	router.Handle("/v1/adventurer", cacheClient.Middleware(http.HandlerFunc(handlers.GetAdventurer))).Methods("GET")
+	router.Handle("/v1/guild", cacheClient.Middleware(http.HandlerFunc(handlers.GetGuild))).Methods("GET")
 
 	srv = &http.Server{
 		Handler:      router,

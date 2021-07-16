@@ -1,14 +1,14 @@
-package api
+package handlers
 
 import (
 	"encoding/json"
 	"net/http"
 	"strconv"
 
-	"bdo-rest-api/scraper"
+	"bdo-rest-api/scrapers"
 )
 
-func ProfileSearch(w http.ResponseWriter, r *http.Request) {
+func GetAdventurerSearch(w http.ResponseWriter, r *http.Request) {
 	setHeaders(w)
 
 	regionParams, ok1 := r.URL.Query()["region"]
@@ -32,7 +32,7 @@ func ProfileSearch(w http.ResponseWriter, r *http.Request) {
 		page, _ = strconv.Atoi(pageParams[0])
 	}
 
-	if data, status := scraper.ScrapeProfileSearch(regionParams[0], queryParams[0], searchType, int32(page)); status == http.StatusOK {
+	if data, status := scrapers.ScrapeAdventurerSearch(regionParams[0], queryParams[0], searchType, int32(page)); status == http.StatusOK {
 		json.NewEncoder(w).Encode(data)
 	} else {
 		w.WriteHeader(status)

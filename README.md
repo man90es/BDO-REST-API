@@ -57,9 +57,3 @@ Use them like this:
 
 ## Known bugs
 A vast majority of bugs comes from the original BDO website, where data is taken from. You can find a list of known bugs and workarounds [here](doc/brokenStuff.md).
-
-## To-do
-* Error handling
-* Provide info about which character is player's main character
-* Parse a copy of provided data to make evading official website bugs easier
-* Provide meta info through the API routes?

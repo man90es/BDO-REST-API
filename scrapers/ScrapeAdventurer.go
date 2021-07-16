@@ -1,4 +1,4 @@
-package scraper
+package scrapers
 
 import (
 	"fmt"
@@ -10,10 +10,10 @@ import (
 
 	"github.com/gocolly/colly/v2"
 
-	"bdo-rest-api/entity"
+	"bdo-rest-api/models"
 )
 
-func ScrapeProfile(profileTarget string) (profile entity.Profile, status int) {
+func ScrapeAdventurer(profileTarget string) (profile models.Profile, status int) {
 	c := collyFactory()
 
 	profile.ProfileTarget = profileTarget
@@ -34,14 +34,14 @@ func ScrapeProfile(profileTarget string) (profile entity.Profile, status int) {
 
 	c.OnHTML(`.desc.guild a`, func(e *colly.HTMLElement) {
 		if e.Attr("href") != "javscript:void(0)" {
-			profile.Guild = &entity.GuildProfile{
+			profile.Guild = &models.GuildProfile{
 				Name: e.Text,
 			}
 		}
 	})
 
 	c.OnHTML(`.desc.guild span`, func(e *colly.HTMLElement) {
-		profile.Privacy = profile.Privacy | entity.PrivateGuild
+		profile.Privacy = profile.Privacy | models.PrivateGuild
 	})
 
 	c.OnHTML(`.line_list .desc:not(.guild)`, func(e *colly.HTMLElement) {
@@ -54,12 +54,12 @@ func ScrapeProfile(profileTarget string) (profile entity.Profile, status int) {
 			contributionPoints, _ := strconv.Atoi(e.Text)
 			profile.ContributionPoints = int16(contributionPoints)
 		} else {
-			profile.Privacy = profile.Privacy | entity.PrivateContrib
+			profile.Privacy = profile.Privacy | models.PrivateContrib
 		}
 	})
 
 	c.OnHTML(`.character_desc_area`, func(e *colly.HTMLElement) {
-		character := entity.Character{
+		character := models.Character{
 			Class: e.ChildText(".character_info .character_symbol em:last-child"),
 		}
 
@@ -71,7 +71,7 @@ func ScrapeProfile(profileTarget string) (profile entity.Profile, status int) {
 			level, _ := strconv.Atoi(levelStr)
 			character.Level = int8(level)
 		} else {
-			profile.Privacy = profile.Privacy | entity.PrivateLevel
+			profile.Privacy = profile.Privacy | models.PrivateLevel
 		}
 
 		if name := e.ChildText(".character_name"); true {
@@ -94,7 +94,7 @@ func ScrapeProfile(profileTarget string) (profile entity.Profile, status int) {
 			})
 
 			if len(specLevels[0]) > 0 {
-				character.SpecLevels = &entity.Specs{
+				character.SpecLevels = &models.Specs{
 					Gathering:  specLevels[0],
 					Fishing:    specLevels[1],
 					Hunting:    specLevels[2],
@@ -114,7 +114,7 @@ func ScrapeProfile(profileTarget string) (profile entity.Profile, status int) {
 	})
 
 	c.OnHTML(`.character_spec.lock`, func(e *colly.HTMLElement) {
-		profile.Privacy = profile.Privacy | entity.PrivateSpecs
+		profile.Privacy = profile.Privacy | models.PrivateSpecs
 	})
 
 	c.Visit(fmt.Sprintf("https://www.naeu.playblackdesert.com/en-US/Adventure/Profile?profileTarget=%v", profileTarget))

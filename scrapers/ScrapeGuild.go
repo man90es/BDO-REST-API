@@ -1,4 +1,4 @@
-package scraper
+package scrapers
 
 import (
 	"fmt"
@@ -8,10 +8,10 @@ import (
 
 	"github.com/gocolly/colly/v2"
 
-	"bdo-rest-api/entity"
+	"bdo-rest-api/models"
 )
 
-func ScrapeGuildProfile(region, name string) (guildProfile entity.GuildProfile, status int) {
+func ScrapeGuild(region, name string) (guildProfile models.GuildProfile, status int) {
 	c := collyFactory()
 
 	status = http.StatusNotFound
@@ -35,7 +35,7 @@ func ScrapeGuildProfile(region, name string) (guildProfile entity.GuildProfile, 
 	})
 
 	c.OnHTML(`.line_list:not(.mob_none) li:nth-child(2) .desc .text a`, func(e *colly.HTMLElement) {
-		guildProfile.Master = &entity.Profile{
+		guildProfile.Master = &models.Profile{
 			FamilyName:    e.Text,
 			ProfileTarget: extractProfileTarget(e.Attr("href")),
 		}
@@ -54,7 +54,7 @@ func ScrapeGuildProfile(region, name string) (guildProfile entity.GuildProfile, 
 	})
 
 	c.OnHTML(`.box_list_area .adventure_list_table a`, func(e *colly.HTMLElement) {
-		member := entity.Profile{
+		member := models.Profile{
 			FamilyName:    e.Text,
 			ProfileTarget: extractProfileTarget(e.Attr("href")),
 		}

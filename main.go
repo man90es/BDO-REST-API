@@ -8,7 +8,7 @@ import (
 	"strings"
 
 	"bdo-rest-api/httpServer"
-	"bdo-rest-api/scraper"
+	"bdo-rest-api/scrapers"
 )
 
 func main() {
@@ -30,7 +30,7 @@ func main() {
 	} else {
 		proxies = strings.Fields(os.Getenv("PROXY"))
 	}
-	scraper.PushProxies(proxies...)
+	scrapers.PushProxies(proxies...)
 
 	fmt.Printf("Used configuration:\n\tProxies:\t%v\n\tPort:\t\t%v\n\tCache TTL:\t%v minutes\n\n", proxies, port, *flagCacheTTL)
 
