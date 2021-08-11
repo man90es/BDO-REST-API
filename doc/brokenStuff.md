@@ -19,4 +19,4 @@ List numbers match list numbers in the previous section:
 If you found a bug on the original BDO website that affects this API and is not listed in this file, you can contribute by either:
 - making a pull request or creating an issue [on GitHub](https://github.com/octoman90/BDO-REST-API)
 - or sending an email to an address found [in my GitHub profile](https://github.com/octoman90)
-- or messaging deadMNGO#8312 on Discord.
+- or messaging mvngo#8312 on Discord.
