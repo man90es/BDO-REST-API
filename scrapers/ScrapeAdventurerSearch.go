@@ -12,9 +12,10 @@ import (
 
 func ScrapeAdventurerSearch(region, query string, searchType int8, page int32) (profiles []models.Profile, status int) {
 	c := collyFactory()
+	closetime := false
 
 	c.OnHTML(`.closetime_message`, func(e *colly.HTMLElement) {
-		status = http.StatusServiceUnavailable
+		closetime = true
 	})
 
 	c.OnHTML(`.box_list_area li:not(.no_result)`, func(e *colly.HTMLElement) {
@@ -43,7 +44,9 @@ func ScrapeAdventurerSearch(region, query string, searchType int8, page int32) (
 
 	c.Visit(fmt.Sprintf("https://www.naeu.playblackdesert.com/en-US/Adventure?region=%v&searchType=%v&searchKeyword=%v&Page=%v", region, searchType, query, page))
 
-	if len(profiles) < 1 {
+	if closetime {
+		status = http.StatusServiceUnavailable
+	} else if len(profiles) < 1 {
 		status = http.StatusNotFound
 	} else {
 		status = http.StatusOK

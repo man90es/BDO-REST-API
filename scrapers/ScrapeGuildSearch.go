@@ -13,9 +13,10 @@ import (
 
 func ScrapeGuildSearch(region, query string, page int32) (guildProfiles []models.GuildProfile, status int) {
 	c := collyFactory()
+	closetime := false
 
 	c.OnHTML(`.closetime_message`, func(e *colly.HTMLElement) {
-		status = http.StatusServiceUnavailable
+		closetime = true
 	})
 
 	c.OnHTML(`.box_list_area li:not(.no_result)`, func(e *colly.HTMLElement) {
@@ -42,7 +43,9 @@ func ScrapeGuildSearch(region, query string, page int32) (guildProfiles []models
 
 	c.Visit(fmt.Sprintf("https://www.naeu.playblackdesert.com/en-US/Adventure/Guild?region=%v&page=%v&searchText=%v", region, page, query))
 
-	if len(guildProfiles) < 1 {
+	if closetime {
+		status = http.StatusServiceUnavailable
+	} else if len(guildProfiles) < 1 {
 		status = http.StatusNotFound
 	} else {
 		status = http.StatusOK
