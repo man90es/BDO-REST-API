@@ -2,6 +2,7 @@ package scrapers
 
 import (
 	"log"
+	"net/url"
 	"strings"
 	"time"
 
@@ -21,8 +22,13 @@ func dry(s string) string {
 	return strings.Join(strings.Fields(s), " ")
 }
 
+func reEscape(s string) string {
+	decodedValue, _ := url.QueryUnescape(s)
+	return url.QueryEscape(decodedValue)
+}
+
 func extractProfileTarget(link string) string {
-	return link[69:] // Nice
+	return reEscape(link[69:]) // Nice
 }
 
 func collyFactory() (c *colly.Collector) {
