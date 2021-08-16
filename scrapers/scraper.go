@@ -22,13 +22,10 @@ func dry(s string) string {
 	return strings.Join(strings.Fields(s), " ")
 }
 
-func reEscape(s string) string {
-	decodedValue, _ := url.QueryUnescape(s)
-	return url.QueryEscape(decodedValue)
-}
-
 func extractProfileTarget(link string) string {
-	return reEscape(link[69:]) // Nice
+	u, _ := url.Parse(link)
+	m, _ := url.ParseQuery(u.RawQuery)
+	return url.QueryEscape(m["profileTarget"][0])
 }
 
 func collyFactory() (c *colly.Collector) {
