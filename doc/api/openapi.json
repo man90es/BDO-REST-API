@@ -17,11 +17,11 @@
 			"region": {
 				"name": "region",
 				"in": "query",
-				"description": "Only Eropean and North American servers are supported.",
-				"required": true,
+				"description": "Only Eropean and North American servers are supported. If you don't provide this parameter, it's assumed that you want to search on the European server.",
 				"schema": {
 					"type": "string",
-					"enum": ["EU", "NA"]
+					"enum": ["EU", "NA"],
+					"default": "EU"
 				}
 			},
 			"query": {
@@ -37,7 +37,6 @@
 				"name": "page",
 				"in": "query",
 				"description": "If the results have more than one page, you can navigate through those pages using this parameter. The indexing starts with 1.",
-				"required": false,
 				"schema": {
 					"type": "number",
 					"default": 1
@@ -206,19 +205,19 @@
 				"operationId": "getAdventurerSearch",
 				"parameters": [
 					{
-						"$ref": "#/components/parameters/region"
+						"$ref": "#/components/parameters/query"
 					},
 					{
-						"$ref": "#/components/parameters/query"
+						"$ref": "#/components/parameters/region"
 					},
 					{
 						"name": "searchType",
 						"in": "query",
-						"description": "Switch between filtering by family name and character name.",
-						"required": true,
+						"description": "Switch between filtering by family name and character name. If you don't provide this parameter, it's assumed that you want to filter by family name.",
 						"schema": {
 							"type": "string",
-							"enum": ["familyName", "characterName"]
+							"enum": ["familyName", "characterName"],
+							"default": "familyName"
 						}
 					},
 					{
@@ -395,10 +394,10 @@
 				"operationId": "getGuildSearch",
 				"parameters": [
 					{
-						"$ref": "#/components/parameters/region"
+						"$ref": "#/components/parameters/query"
 					},
 					{
-						"$ref": "#/components/parameters/query"
+						"$ref": "#/components/parameters/region"
 					},
 					{
 						"$ref": "#/components/parameters/page"

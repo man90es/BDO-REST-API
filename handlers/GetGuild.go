@@ -10,15 +10,24 @@ import (
 func GetGuild(w http.ResponseWriter, r *http.Request) {
 	setHeaders(w)
 
-	regionParams, ok1 := r.URL.Query()["region"]
-	guildNameParams, ok2 := r.URL.Query()["guildName"]
+	regionParams, regionProvided := r.URL.Query()["region"]
+	nameParams, nameProvided := r.URL.Query()["guildName"]
 
-	if !ok1 || !validateRegion(regionParams[0]) || !ok2 {
+	// Return status 400 if a required parameter is omitted
+	if !nameProvided {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
-	if data, status := scrapers.ScrapeGuild(regionParams[0], guildNameParams[0]); status == http.StatusOK {
+	// Set defaults for optional parameters
+	region := defaultRegion
+
+	if regionProvided && validateRegion(regionParams[0]) {
+		region = regionParams[0]
+	}
+
+	// Run the scraper
+	if data, status := scrapers.ScrapeGuild(region, nameParams[0]); status == http.StatusOK {
 		json.NewEncoder(w).Encode(data)
 	} else {
 		w.WriteHeader(status)

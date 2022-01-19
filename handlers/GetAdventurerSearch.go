@@ -11,28 +11,39 @@ import (
 func GetAdventurerSearch(w http.ResponseWriter, r *http.Request) {
 	setHeaders(w)
 
-	regionParams, ok1 := r.URL.Query()["region"]
-	searchTypeParams, ok2 := r.URL.Query()["searchType"]
-	pageParams, ok3 := r.URL.Query()["page"]
-	queryParams, ok4 := r.URL.Query()["query"]
+	regionParams, regionProvided := r.URL.Query()["region"]
+	searchTypeParams, searchTypeProvided := r.URL.Query()["searchType"]
+	pageParams, pageProvided := r.URL.Query()["page"]
+	queryParams, queryProvided := r.URL.Query()["query"]
 
-	searchType := map[string]int8{
-		"characterName": 1,
-		"familyName":    2,
-	}[searchTypeParams[0]]
-
-	if !ok1 || !ok2 || !ok4 || !validateRegion(regionParams[0]) || searchType < 1 || searchType > 2 {
+	// Return status 400 if a required parameter is omitted
+	if !queryProvided {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
-	page := 1
+	// Set defaults for optional parameters
+	region := defaultRegion
+	searchType := int8(2)
+	page := defaultPage
 
-	if ok3 {
+	if regionProvided && validateRegion(regionParams[0]) {
+		region = regionParams[0]
+	}
+
+	if searchTypeProvided && validateSearchType(searchTypeParams[0]) {
+		searchType = map[string]int8{
+			"characterName": 1,
+			"familyName":    2,
+		}[searchTypeParams[0]]
+	}
+
+	if pageProvided && validatePage(pageParams[0]) {
 		page, _ = strconv.Atoi(pageParams[0])
 	}
 
-	if data, status := scrapers.ScrapeAdventurerSearch(regionParams[0], queryParams[0], searchType, int32(page)); status == http.StatusOK {
+	// Run the scraper
+	if data, status := scrapers.ScrapeAdventurerSearch(region, queryParams[0], searchType, int32(page)); status == http.StatusOK {
 		json.NewEncoder(w).Encode(data)
 	} else {
 		w.WriteHeader(status)
