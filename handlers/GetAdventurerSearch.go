@@ -24,7 +24,7 @@ func GetAdventurerSearch(w http.ResponseWriter, r *http.Request) {
 
 	// Set defaults for optional parameters
 	region := defaultRegion
-	searchType := int8(2)
+	searchType := uint8(2)
 	page := defaultPage
 
 	if regionProvided && validateRegion(regionParams[0]) {
@@ -32,7 +32,7 @@ func GetAdventurerSearch(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if searchTypeProvided && validateSearchType(searchTypeParams[0]) {
-		searchType = map[string]int8{
+		searchType = map[string]uint8{
 			"characterName": 1,
 			"familyName":    2,
 		}[searchTypeParams[0]]
@@ -43,7 +43,7 @@ func GetAdventurerSearch(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Run the scraper
-	if data, status := scrapers.ScrapeAdventurerSearch(region, queryParams[0], searchType, int32(page)); status == http.StatusOK {
+	if data, status := scrapers.ScrapeAdventurerSearch(region, queryParams[0], searchType, uint16(page)); status == http.StatusOK {
 		json.NewEncoder(w).Encode(data)
 	} else {
 		w.WriteHeader(status)

@@ -34,7 +34,7 @@ func GetGuildSearch(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Run the scraper
-	if data, status := scrapers.ScrapeGuildSearch(region, queryParams[0], int32(page)); status == http.StatusOK {
+	if data, status := scrapers.ScrapeGuildSearch(region, queryParams[0], uint16(page)); status == http.StatusOK {
 		json.NewEncoder(w).Encode(data)
 	} else {
 		w.WriteHeader(status)

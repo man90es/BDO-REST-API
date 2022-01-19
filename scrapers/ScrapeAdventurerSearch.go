@@ -10,7 +10,7 @@ import (
 	"bdo-rest-api/models"
 )
 
-func ScrapeAdventurerSearch(region, query string, searchType int8, page int32) (profiles []models.Profile, status int) {
+func ScrapeAdventurerSearch(region, query string, searchType uint8, page uint16) (profiles []models.Profile, status int) {
 	c := collyFactory()
 	closetime := false
 
@@ -36,7 +36,7 @@ func ScrapeAdventurerSearch(region, query string, searchType int8, page int32) (
 		profile.Characters[0].Class = e.ChildText(".name")
 
 		if level, err := strconv.Atoi(e.ChildText(".level")[3:]); err == nil {
-			profile.Characters[0].Level = int8(level)
+			profile.Characters[0].Level = uint8(level)
 		}
 
 		profiles = append(profiles, profile)

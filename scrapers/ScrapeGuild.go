@@ -43,7 +43,7 @@ func ScrapeGuild(region, name string) (guildProfile models.GuildProfile, status 
 
 	c.OnHTML(`.line_list:not(.mob_none) li:nth-child(3) em`, func(e *colly.HTMLElement) {
 		population, _ := strconv.Atoi(e.Text)
-		guildProfile.Population = int16(population)
+		guildProfile.Population = uint8(population)
 	})
 
 	c.OnHTML(`.line_list:not(.mob_none) li:last-child .desc`, func(e *colly.HTMLElement) {

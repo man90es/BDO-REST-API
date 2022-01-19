@@ -14,7 +14,7 @@ type Profile struct {
 	ProfileTarget      string        `json:"profileTarget"`
 	Region             string        `json:"region,omitempty"`
 	Guild              *GuildProfile `json:"guild,omitempty"`
-	ContributionPoints int16         `json:"contributionPoints,omitempty"`
+	ContributionPoints uint16        `json:"contributionPoints,omitempty"`
 	CreatedOn          *time.Time    `json:"createdOn,omitempty"`
 	Characters         []Character   `json:"characters,omitempty"`
 	Privacy            int8          `json:"privacy,omitempty"`

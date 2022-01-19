@@ -52,7 +52,7 @@ func ScrapeAdventurer(profileTarget string) (profile models.Profile, status int)
 	c.OnHTML(`.character_desc_area .character_info span:nth-child(3) em`, func(e *colly.HTMLElement) {
 		if e.Text != "Private" {
 			contributionPoints, _ := strconv.Atoi(e.Text)
-			profile.ContributionPoints = int16(contributionPoints)
+			profile.ContributionPoints = uint16(contributionPoints)
 		} else {
 			profile.Privacy = profile.Privacy | models.PrivateContrib
 		}
@@ -69,7 +69,7 @@ func ScrapeAdventurer(profileTarget string) (profile models.Profile, status int)
 
 		if levelStr := e.ChildText(".character_info span:nth-child(2) em"); levelStr != "Private" {
 			level, _ := strconv.Atoi(levelStr)
-			character.Level = int8(level)
+			character.Level = uint8(level)
 		} else {
 			profile.Privacy = profile.Privacy | models.PrivateLevel
 		}

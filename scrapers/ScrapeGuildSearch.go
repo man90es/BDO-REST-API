@@ -11,7 +11,7 @@ import (
 	"bdo-rest-api/models"
 )
 
-func ScrapeGuildSearch(region, query string, page int32) (guildProfiles []models.GuildProfile, status int) {
+func ScrapeGuildSearch(region, query string, page uint16) (guildProfiles []models.GuildProfile, status int) {
 	c := collyFactory()
 	closetime := false
 
@@ -35,7 +35,7 @@ func ScrapeGuildSearch(region, query string, page int32) (guildProfiles []models
 
 		if membersStr := e.ChildText(".member"); true {
 			population, _ := strconv.Atoi(membersStr)
-			guildProfile.Population = int16(population)
+			guildProfile.Population = uint8(population)
 		}
 
 		guildProfiles = append(guildProfiles, guildProfile)
