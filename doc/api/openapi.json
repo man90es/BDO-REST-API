@@ -6,44 +6,28 @@
 	},
 	"servers": [
 		{
+			"url": "https://bdo.hemlo.cc/communityapi/v1"
+		},
+		{
 			"url": "http://localhost:8001/v1"
 		}
 	],
 	"components": {
-		"schemas": {
-			"familyName": {
-				"type": "string",
-				"example": "Apple"
-			},
-			"profileTarget": {
-				"type": "string",
-				"example": "XXX"
-			},
-			"region": {
-				"type": "string",
-				"enum": ["EU", "NA"]
-			},
-			"guildName": {
-				"type": "string",
-				"example": "TumblrGirls"
-			},
-			"createdOn": {
-				"type": "string",
-				"example": "2020-02-23T00:00:00Z"
-			}
-		},
 		"parameters": {
 			"region": {
 				"name": "region",
 				"in": "query",
+				"description": "Only Eropean and North American servers are supported.",
 				"required": true,
 				"schema": {
-					"$ref": "#/components/schemas/region"
+					"type": "string",
+					"enum": ["EU", "NA"]
 				}
 			},
 			"query": {
 				"name": "query",
 				"in": "query",
+				"description": "Your search query.",
 				"required": true,
 				"schema": {
 					"type": "string"
@@ -52,6 +36,7 @@
 			"page": {
 				"name": "page",
 				"in": "query",
+				"description": "If the results have more than one page, you can navigate through those pages using this parameter. The indexing starts with 1.",
 				"required": false,
 				"schema": {
 					"type": "number",
@@ -60,25 +45,28 @@
 			}
 		},
 		"responses": {
+			"400": {
+				"description": "Bad Request: you have to provide all GET parameters that are marked as required."
+			},
 			"404": {
-				"description": "Not Found."
+				"description": "Not Found: try requesting something else."
 			},
 			"503": {
-				"description": "BDO servers are currently under maintenance and requested data is not cached."
+				"description": "Service Unavailable: [https://naeu.playblackdesert.com](naeu.playblackdesert.com) is currently under maintenance and the data requested is not cached."
 			}
 		}
 	},
 	"paths": {
-		"/adventurer?profileTarget={profileTarget}": {
+		"/adventurer": {
 			"get": {
-				"description": "Retrieve player profile.",
-				"summary": "Retrieve player profile.",
+				"summary": "Retrieve player's profile.",
+				"description": "Retrieve the full profile of a single player by his or her profileTarget.",
 				"operationId": "getAdventurer",
 				"parameters": [
 					{
 						"name": "profileTarget",
 						"in": "query",
-						"description": "Desired player's profileTarget. You can get this string from guild members data or from player search.",
+						"description": "Player's profileTarget. You can get this string from the guild members' list or from the search.",
 						"required": true,
 						"schema": {
 							"type": "string"
@@ -95,18 +83,22 @@
 									"type": "object",
 									"properties": {
 										"familyName": {
-											"$ref": "#/components/schemas/familyName"
+											"type": "string",
+											"example": "Apple"
 										},
 										"profileTarget": {
-											"$ref": "#/components/schemas/profileTarget"
+											"type": "string",
+											"example": "XXX"
 										},
 										"region": {
-											"$ref": "#/components/schemas/region"
+											"type": "string",
+											"enum": ["EU", "NA"]
 										},
 										"guild": {
 											"properties": {
 												"name": {
-													"$ref": "#/components/schemas/guildName"
+													"type": "string",
+													"example": "TumblrGirls"
 												}
 											}
 										},
@@ -115,7 +107,8 @@
 											"example": 100
 										},
 										"createdOn": {
-											"$ref": "#/components/schemas/createdOn"
+											"type": "string",
+											"example": "2020-02-23T00:00:00Z"
 										},
 										"characters": {
 											"type": "array",
@@ -194,6 +187,9 @@
 							}
 						}
 					},
+					"400": {
+						"$ref": "#/components/responses/400"
+					},
 					"404": {
 						"$ref": "#/components/responses/404"
 					},
@@ -203,10 +199,10 @@
 				}
 			}
 		},
-		"/adventurer/search?region={region}&query={query}&searchType={searchType}&page={page}": {
+		"/adventurer/search": {
 			"get": {
-				"description": "Search for player.",
-				"summary": "Search for player.",
+				"summary": "Search for a player.",
+				"description": "Search for a player by a combination of his or her region and family/character name.",
 				"operationId": "getAdventurerSearch",
 				"parameters": [
 					{
@@ -218,7 +214,7 @@
 					{
 						"name": "searchType",
 						"in": "query",
-						"description": "Type of search.",
+						"description": "Switch between filtering by family name and character name.",
 						"required": true,
 						"schema": {
 							"type": "string",
@@ -241,18 +237,22 @@
 										"type": "object",
 										"properties": {
 											"familyName": {
-												"$ref": "#/components/schemas/familyName"
+												"type": "string",
+												"example": "Apple"
 											},
 											"profileTarget": {
-												"$ref": "#/components/schemas/profileTarget"
+												"type": "string",
+												"example": "XXX"
 											},
 											"region": {
-												"$ref": "#/components/schemas/region"
+												"type": "string",
+												"enum": ["EU", "NA"]
 											},
 											"guild": {
 												"properties": {
 													"name": {
-														"$ref": "#/components/schemas/guildName"
+														"type": "string",
+														"example": "TumblrGirls"
 													}
 												}
 											},
@@ -282,6 +282,9 @@
 							}
 						}
 					},
+					"400": {
+						"$ref": "#/components/responses/400"
+					},
 					"404": {
 						"$ref": "#/components/responses/404"
 					},
@@ -291,16 +294,16 @@
 				}
 			}
 		},
-		"/guild?guildName={guildName}&region={region}": {
+		"/guild": {
 			"get": {
-				"description": "Retrieve guild profile.",
 				"summary": "Retrieve guild profile.",
+				"description": "Retrieve the profile of a guild by its name.",
 				"operationId": "getGuild",
 				"parameters": [
 					{
 						"name": "guildName",
 						"in": "query",
-						"description": "Desired guild's name.",
+						"description": "Guild's name.",
 						"required": true,
 						"schema": {
 							"type": "string"
@@ -320,22 +323,27 @@
 									"type": "object",
 									"properties": {
 										"name": {
-											"$ref": "#/components/schemas/guildName"
+											"type": "string",
+											"example": "TumblrGirls"
 										},
 										"region": {
-											"$ref": "#/components/schemas/region"
+											"type": "string",
+											"enum": ["EU", "NA"]
 										},
 										"createdOn": {
-											"$ref": "#/components/schemas/createdOn"
+											"type": "string",
+											"example": "2020-02-23T00:00:00Z"
 										},
 										"master": {
 											"type": "object",
 											"properties": {
 												"familyName": {
-													"$ref": "#/components/schemas/familyName"
+													"type": "string",
+													"example": "Apple"
 												},
 												"profileTarget": {
-													"$ref": "#/components/schemas/profileTarget"
+													"type": "string",
+													"example": "XXX"
 												}
 											}
 										},
@@ -345,10 +353,12 @@
 												"type": "object",
 												"properties": {
 													"familyName": {
-														"$ref": "#/components/schemas/familyName"
+														"type": "string",
+														"example": "Apple"
 													},
 													"profileTarget": {
-														"$ref": "#/components/schemas/profileTarget"
+														"type": "string",
+														"example": "XXX"
 													}
 												}
 											}
@@ -366,6 +376,9 @@
 							}
 						}
 					},
+					"400": {
+						"$ref": "#/components/responses/400"
+					},
 					"404": {
 						"$ref": "#/components/responses/404"
 					},
@@ -375,10 +388,10 @@
 				}
 			}
 		},
-		"/guild/search?region={region}&query={query}&page={page}": {
+		"/guild/search": {
 			"get": {
-				"description": "Search for guild.",
-				"summary": "Search for guild.",
+				"summary": "Search for a guild.",
+				"description": "Search for a guild by combination of its region and name.",
 				"operationId": "getGuildSearch",
 				"parameters": [
 					{
@@ -403,28 +416,33 @@
 										"type": "object",
 										"properties": {
 											"name": {
-												"$ref": "#/components/schemas/guildName"
+												"type": "string",
+												"example": "TumblrGirls"
 											},
 											"region": {
-												"$ref": "#/components/schemas/region"
+												"type": "string",
+												"enum": ["EU", "NA"]
 											},
 											"createdOn": {
-												"$ref": "#/components/schemas/createdOn"
+												"type": "string",
+												"example": "2020-02-23T00:00:00Z"
 											},
 											"master": {
 												"type": "object",
 												"properties": {
 													"familyName": {
-														"$ref": "#/components/schemas/familyName"
+														"type": "string",
+														"example": "Apple"
 													},
 													"profileTarget": {
-														"$ref": "#/components/schemas/profileTarget"
+														"type": "string",
+														"example": "XXX"
 													}
 												}
 											},
 											"kind": {
 												"type": "string",
-												"example": "Guild"
+												"enum": ["Guild", "Clan"]
 											},
 											"population": {
 												"type": "number",
@@ -435,6 +453,9 @@
 								}
 							}
 						}
+					},
+					"400": {
+						"$ref": "#/components/responses/400"
 					},
 					"404": {
 						"$ref": "#/components/responses/404"
