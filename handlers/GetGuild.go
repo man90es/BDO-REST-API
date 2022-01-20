@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"bdo-rest-api/scrapers"
+	"bdo-rest-api/validators"
 )
 
 func GetGuild(w http.ResponseWriter, r *http.Request) {
@@ -13,8 +14,8 @@ func GetGuild(w http.ResponseWriter, r *http.Request) {
 	regionParams, regionProvided := r.URL.Query()["region"]
 	nameParams, nameProvided := r.URL.Query()["guildName"]
 
-	// Return status 400 if a required parameter is omitted
-	if !nameProvided {
+	// Return status 400 if a required parameter is invalid
+	if !nameProvided || !validators.ValidateGuildName(&nameParams[0]) {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
@@ -22,7 +23,7 @@ func GetGuild(w http.ResponseWriter, r *http.Request) {
 	// Set defaults for optional parameters
 	region := defaultRegion
 
-	if regionProvided && validateRegion(regionParams[0]) {
+	if regionProvided && validators.ValidateRegion(&regionParams[0]) {
 		region = regionParams[0]
 	}
 

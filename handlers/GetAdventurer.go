@@ -6,6 +6,7 @@ import (
 	"net/url"
 
 	"bdo-rest-api/scrapers"
+	"bdo-rest-api/validators"
 )
 
 func GetAdventurer(w http.ResponseWriter, r *http.Request) {
@@ -13,8 +14,8 @@ func GetAdventurer(w http.ResponseWriter, r *http.Request) {
 
 	profileTargetParams, profileTargetProvided := r.URL.Query()["profileTarget"]
 
-	// Return status 400 if a required parameter is omitted
-	if !profileTargetProvided {
+	// Return status 400 if a required parameter is invalid
+	if !profileTargetProvided || !validators.ValidateProfileTarget(&profileTargetParams[0]) {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}

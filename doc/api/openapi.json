@@ -17,35 +17,17 @@
 			"region": {
 				"name": "region",
 				"in": "query",
-				"description": "Only Eropean and North American servers are supported. If you don't provide this parameter, it's assumed that you want to search on the European server.",
+				"description": "Only Eropean and North American servers are supported. If you omit this parameter, it's assumed that you want to search on the European server.",
 				"schema": {
 					"type": "string",
 					"enum": ["EU", "NA"],
-					"default": "EU"
-				}
-			},
-			"query": {
-				"name": "query",
-				"in": "query",
-				"description": "Your search query.",
-				"required": true,
-				"schema": {
-					"type": "string"
-				}
-			},
-			"page": {
-				"name": "page",
-				"in": "query",
-				"description": "If the results have more than one page, you can navigate through those pages using this parameter. The indexing starts with 1.",
-				"schema": {
-					"type": "number",
-					"default": 1
+					"example": "EU"
 				}
 			}
 		},
 		"responses": {
 			"400": {
-				"description": "Bad Request: you have to provide all GET parameters that are marked as required."
+				"description": "Bad Request: a required parameter is either missing or in a wrong format."
 			},
 			"404": {
 				"description": "Not Found: try requesting something else."
@@ -65,7 +47,7 @@
 					{
 						"name": "profileTarget",
 						"in": "query",
-						"description": "Player's profileTarget. You can get this string from the guild members' list or from the search.",
+						"description": "Player's profileTarget. It should be at least 150 characters long. You can get it from the guild members' list or from the search.",
 						"required": true,
 						"schema": {
 							"type": "string"
@@ -205,7 +187,13 @@
 				"operationId": "getAdventurerSearch",
 				"parameters": [
 					{
-						"$ref": "#/components/parameters/query"
+						"name": "query",
+						"in": "query",
+						"description": "Only exact matches work for this search. The length of this parameter should be between 3 and 16 characters, and you can only use symbols A-Z, a-z, 0-9, _.",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
 					},
 					{
 						"$ref": "#/components/parameters/region"
@@ -213,15 +201,21 @@
 					{
 						"name": "searchType",
 						"in": "query",
-						"description": "Switch between filtering by family name and character name. If you don't provide this parameter, it's assumed that you want to filter by family name.",
+						"description": "Switch between filtering by family name and character name. If you omit this parameter, it's assumed that you want to filter by family name.",
 						"schema": {
 							"type": "string",
 							"enum": ["familyName", "characterName"],
-							"default": "familyName"
+							"example": "familyName"
 						}
 					},
 					{
-						"$ref": "#/components/parameters/page"
+						"name": "page",
+						"in": "query",
+						"description": "This parameter is understood by the API, but you should either omit it or set to 1. Because of how player search works, there is never more than one page.",
+						"schema": {
+							"type": "number",
+							"default": 1
+						}
 					}
 				],
 				"responses": {
@@ -302,7 +296,7 @@
 					{
 						"name": "guildName",
 						"in": "query",
-						"description": "Guild's name.",
+						"description": "Guild's name. It should be at least 2 characters long and can only contain A-Z, a-z, 0-9, _ characters.",
 						"required": true,
 						"schema": {
 							"type": "string"
@@ -394,13 +388,25 @@
 				"operationId": "getGuildSearch",
 				"parameters": [
 					{
-						"$ref": "#/components/parameters/query"
+						"name": "query",
+						"in": "query",
+						"description": "The query string should be at least 2 characters long and can only contain A-Z, a-z, 0-9, _ characters.",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
 					},
 					{
 						"$ref": "#/components/parameters/region"
 					},
 					{
-						"$ref": "#/components/parameters/page"
+						"name": "page",
+						"in": "query",
+						"description": "If the results have more than one page, you can navigate through those pages using this parameter. The indexing starts with 1.",
+						"schema": {
+							"type": "number",
+							"default": 1
+						}
 					}
 				],
 				"responses": {

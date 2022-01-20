@@ -6,6 +6,7 @@ import (
 	"strconv"
 
 	"bdo-rest-api/scrapers"
+	"bdo-rest-api/validators"
 )
 
 func GetAdventurerSearch(w http.ResponseWriter, r *http.Request) {
@@ -16,8 +17,8 @@ func GetAdventurerSearch(w http.ResponseWriter, r *http.Request) {
 	pageParams, pageProvided := r.URL.Query()["page"]
 	queryParams, queryProvided := r.URL.Query()["query"]
 
-	// Return status 400 if a required parameter is omitted
-	if !queryProvided {
+	// Return status 400 if a required parameter is invalid
+	if !queryProvided || !validators.ValidateAdventurerName(&queryParams[0]) {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
@@ -27,18 +28,18 @@ func GetAdventurerSearch(w http.ResponseWriter, r *http.Request) {
 	searchType := uint8(2)
 	page := defaultPage
 
-	if regionProvided && validateRegion(regionParams[0]) {
+	if regionProvided && validators.ValidateRegion(&regionParams[0]) {
 		region = regionParams[0]
 	}
 
-	if searchTypeProvided && validateSearchType(searchTypeParams[0]) {
+	if searchTypeProvided && validators.ValidateSearchType(&searchTypeParams[0]) {
 		searchType = map[string]uint8{
 			"characterName": 1,
 			"familyName":    2,
 		}[searchTypeParams[0]]
 	}
 
-	if pageProvided && validatePage(pageParams[0]) {
+	if pageProvided && validators.ValidatePage(&pageParams[0]) {
 		page, _ = strconv.Atoi(pageParams[0])
 	}
 
