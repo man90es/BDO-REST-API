@@ -56,7 +56,7 @@
 				],
 				"responses": {
 					"200": {
-						"description": "OK.",
+						"description": "Watch out for the \"privacy\" attribute that is added to the response when the player whose profile is requested turned on at least one of the privacy options BDO website has. It is a single number that you can decode using bitmasks. `0b0001` for private character levels, `0b0010` for private guild, `0b0100` for private contribution points and `0b1000` for private lifeskill levels. If the attribute is equal to `0b1111` then everything is set to private.",
 						"content": {
 							"application/json": {
 								"schema": {
