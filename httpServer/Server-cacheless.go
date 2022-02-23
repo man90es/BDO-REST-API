@@ -1,4 +1,4 @@
-// +build cacheless
+//go:build cacheless
 
 package httpServer
 
