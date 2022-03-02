@@ -3,6 +3,9 @@ module bdo-rest-api
 // +heroku goVersion go1.17
 go 1.17
 
+// A fork without hardcoded port filter
+replace github.com/victorspringer/http-cache => github.com/octoman90/http-cache v0.0.0-20220223074738-0686ed29f408
+
 require (
 	github.com/gocolly/colly/v2 v2.1.0
 	github.com/gorilla/mux v1.8.0
