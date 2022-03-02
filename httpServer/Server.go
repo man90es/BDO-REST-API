@@ -31,6 +31,7 @@ func Server(port *string, flagCacheTTL *int) (srv *http.Server) {
 		cache.ClientWithAdapter(memcached),
 		cache.ClientWithTTL(time.Duration(*flagCacheTTL)*time.Minute),
 		cache.ClientWithRefreshKey("opn"),
+		cache.ClientWithStatusCodeFilter(func(code int) bool { return code != 400 }),
 	)
 
 	if err != nil {
