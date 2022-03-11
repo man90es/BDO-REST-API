@@ -1,5 +1,5 @@
 build-bdo-rest-api:
-  image: golang:1.15
+  image: golang:1.17
   stage: build
   script:
     - go build -o ${CI_PROJECT_DIR}/dist/bdo-rest-api

@@ -1,4 +1,4 @@
-FROM golang:1.16.5-alpine AS build
+FROM golang:1.17-alpine AS build
 RUN apk add --no-cache git
 WORKDIR /src/bdo-rest-api
 COPY go.mod .
