@@ -14,7 +14,7 @@ func ScrapeAdventurerSearch(region, query string, searchType uint8, page uint16)
 	c := collyFactory()
 	closetime := false
 
-	c.OnHTML(`.closetime_message`, func(e *colly.HTMLElement) {
+	c.OnHTML(closetimeSelector, func(e *colly.HTMLElement) {
 		closetime = true
 	})
 

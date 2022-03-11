@@ -19,7 +19,7 @@ func ScrapeAdventurer(profileTarget string) (profile models.Profile, status int)
 	profile.ProfileTarget = profileTarget
 	status = http.StatusNotFound
 
-	c.OnHTML(`.closetime_message`, func(e *colly.HTMLElement) {
+	c.OnHTML(closetimeSelector, func(e *colly.HTMLElement) {
 		status = http.StatusServiceUnavailable
 	})
 

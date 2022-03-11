@@ -16,7 +16,7 @@ func ScrapeGuild(region, name string) (guildProfile models.GuildProfile, status 
 
 	status = http.StatusNotFound
 
-	c.OnHTML(`.closetime_message`, func(e *colly.HTMLElement) {
+	c.OnHTML(closetimeSelector, func(e *colly.HTMLElement) {
 		status = http.StatusServiceUnavailable
 	})
 

@@ -15,7 +15,7 @@ func ScrapeGuildSearch(region, query string, page uint16) (guildProfiles []model
 	c := collyFactory()
 	closetime := false
 
-	c.OnHTML(`.closetime_message`, func(e *colly.HTMLElement) {
+	c.OnHTML(closetimeSelector, func(e *colly.HTMLElement) {
 		closetime = true
 	})
 

@@ -10,6 +10,8 @@ import (
 	"github.com/gocolly/colly/v2/proxy"
 )
 
+const closetimeSelector = ".closetime_wrap"
+
 var proxies = make([]string, 0)
 var proxySwitcher colly.ProxyFunc
 
