@@ -9,6 +9,7 @@ import (
 	"github.com/gocolly/colly/v2"
 
 	"bdo-rest-api/models"
+	"bdo-rest-api/translators"
 )
 
 func ScrapeGuildSearch(region, query string, page uint16) (guildProfiles []models.GuildProfile, status int) {
@@ -24,13 +25,21 @@ func ScrapeGuildSearch(region, query string, page uint16) (guildProfiles []model
 
 		guildProfile := models.GuildProfile{
 			Name:   e.ChildText(".guild_title a"),
-			Region: e.ChildText(".region_info"),
+			Region: region,
 			Kind:   e.ChildText(".tag_label.guild_label"),
 			Master: &models.Profile{
 				FamilyName:    e.ChildText(".guild_info a"),
 				ProfileTarget: extractProfileTarget(e.ChildAttr(".guild_info a", "href")),
 			},
 			CreatedOn: &createdOn,
+		}
+
+		if region != "SA" {
+			guildProfile.Region = e.ChildText(".region_info")
+		}
+
+		if region == "SA" {
+			translators.TranslateGuildKind(&guildProfile.Kind)
 		}
 
 		if membersStr := e.ChildText(".member"); true {
@@ -41,7 +50,7 @@ func ScrapeGuildSearch(region, query string, page uint16) (guildProfiles []model
 		guildProfiles = append(guildProfiles, guildProfile)
 	})
 
-	c.Visit(fmt.Sprintf("https://www.naeu.playblackdesert.com/en-US/Adventure/Guild?region=%v&page=%v&searchText=%v", region, page, query))
+	c.Visit(fmt.Sprintf("%v/Adventure/Guild?region=%v&page=%v&searchText=%v", getSiteRoot(region), region, page, query))
 
 	if closetime {
 		status = http.StatusServiceUnavailable

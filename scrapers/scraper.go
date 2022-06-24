@@ -30,6 +30,14 @@ func extractProfileTarget(link string) string {
 	return url.QueryEscape(m["profileTarget"][0])
 }
 
+func getSiteRoot(region string) string {
+	if "SA" == region {
+		return "https://www.sa.playblackdesert.com/pt-BR"
+	}
+
+	return "https://www.naeu.playblackdesert.com/en-US"
+}
+
 func collyFactory() (c *colly.Collector) {
 	c = colly.NewCollector()
 	c.SetRequestTimeout(time.Minute / 2)

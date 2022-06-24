@@ -8,9 +8,10 @@ import (
 	"github.com/gocolly/colly/v2"
 
 	"bdo-rest-api/models"
+	"bdo-rest-api/translators"
 )
 
-func ScrapeAdventurerSearch(region, query string, searchType uint8, page uint16) (profiles []models.Profile, status int) {
+func ScrapeAdventurerSearch(region string, query string, searchType uint8, page uint16) (profiles []models.Profile, status int) {
 	c := collyFactory()
 	closetime := false
 
@@ -20,20 +21,29 @@ func ScrapeAdventurerSearch(region, query string, searchType uint8, page uint16)
 
 	c.OnHTML(`.box_list_area li:not(.no_result)`, func(e *colly.HTMLElement) {
 		profile := models.Profile{
-			Region:        e.ChildText(".region_info"),
+			Region:        region,
 			FamilyName:    e.ChildText(".title a"),
 			ProfileTarget: extractProfileTarget(e.ChildAttr(".title a", "href")),
 			Characters:    make([]models.Character, 1),
 		}
 
-		if e.ChildAttr(".state a", "href") != "javscript:void(0)" {
+		if region != "SA" {
+			profile.Region = e.ChildText(".region_info")
+		}
+
+		if len(e.ChildAttr(".state a", "href")) > 0 {
 			profile.Guild = &models.GuildProfile{
 				Name: e.ChildText(".state a"),
 			}
 		}
 
-		profile.Characters[0].Name = e.ChildText(".text")
 		profile.Characters[0].Class = e.ChildText(".name")
+		profile.Characters[0].Main = true
+		profile.Characters[0].Name = e.ChildText(".text")
+
+		if region == "SA" {
+			translators.TranslateClassName(&profile.Characters[0].Class)
+		}
 
 		if level, err := strconv.Atoi(e.ChildText(".level")[3:]); err == nil {
 			profile.Characters[0].Level = uint8(level)
@@ -42,7 +52,7 @@ func ScrapeAdventurerSearch(region, query string, searchType uint8, page uint16)
 		profiles = append(profiles, profile)
 	})
 
-	c.Visit(fmt.Sprintf("https://www.naeu.playblackdesert.com/en-US/Adventure?region=%v&searchType=%v&searchKeyword=%v&Page=%v", region, searchType, query, page))
+	c.Visit(fmt.Sprintf("%v/Adventure?region=%v&searchType=%v&searchKeyword=%v&Page=%v", getSiteRoot(region), region, searchType, query, page))
 
 	if closetime {
 		status = http.StatusServiceUnavailable

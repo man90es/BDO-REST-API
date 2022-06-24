@@ -48,7 +48,7 @@ func ScrapeGuild(region, name string) (guildProfile models.GuildProfile, status 
 
 	c.OnHTML(`.line_list:not(.mob_none) li:last-child .desc`, func(e *colly.HTMLElement) {
 		text := dry(e.Text)
-		if text != "None" {
+		if text != "None" && text != "N/A" {
 			guildProfile.Occupying = text
 		}
 	})
@@ -62,7 +62,7 @@ func ScrapeGuild(region, name string) (guildProfile models.GuildProfile, status 
 		guildProfile.Members = append(guildProfile.Members, member)
 	})
 
-	c.Visit(fmt.Sprintf("https://www.naeu.playblackdesert.com/en-US/Adventure/Guild/GuildProfile?guildName=%v&region=%v", name, region))
+	c.Visit(fmt.Sprintf("%v/Adventure/Guild/GuildProfile?guildName=%v&region=%v", getSiteRoot(region), name, region))
 
 	return
 }

@@ -17,10 +17,10 @@
 			"region": {
 				"name": "region",
 				"in": "query",
-				"description": "Only Eropean and North American servers are supported. If you omit this parameter, it's assumed that you want to search on the European server.",
+				"description": "Only Eropean, North American and South American servers are supported. If you omit this parameter, it's assumed that you want to search on the European server.",
 				"schema": {
 					"type": "string",
-					"enum": ["EU", "NA"],
+					"enum": ["EU", "NA", "SA"],
 					"example": "EU"
 				}
 			}
@@ -51,6 +51,16 @@
 						"required": true,
 						"schema": {
 							"type": "string"
+						}
+					},
+					{
+						"name": "region",
+						"in": "query",
+						"description": "Only Eropean, North American and South American servers are supported. You may omit this parameter for the European and North American servers.",
+						"schema": {
+							"type": "string",
+							"enum": ["EU", "NA", "SA"],
+							"example": "EU"
 						}
 					}
 				],
@@ -261,6 +271,10 @@
 														"class": {
 															"type": "string",
 															"example": "Ninja"
+														},
+														"main": {
+															"type": "boolean",
+															"example": true
 														},
 														"level": {
 															"type": "number",

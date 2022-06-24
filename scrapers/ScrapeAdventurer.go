@@ -11,12 +11,14 @@ import (
 	"github.com/gocolly/colly/v2"
 
 	"bdo-rest-api/models"
+	"bdo-rest-api/translators"
 )
 
-func ScrapeAdventurer(profileTarget string) (profile models.Profile, status int) {
+func ScrapeAdventurer(region string, profileTarget string) (profile models.Profile, status int) {
 	c := collyFactory()
 
 	profile.ProfileTarget = profileTarget
+	profile.Region = region
 	status = http.StatusNotFound
 
 	c.OnHTML(closetimeSelector, func(e *colly.HTMLElement) {
@@ -63,6 +65,10 @@ func ScrapeAdventurer(profileTarget string) (profile models.Profile, status int)
 			Class: e.ChildText(".character_info .character_symbol em:last-child"),
 		}
 
+		if region == "SA" {
+			translators.TranslateClassName(&character.Class)
+		}
+
 		e.ForEach(`.selected_label`, func(ind int, el *colly.HTMLElement) {
 			character.Main = true
 		})
@@ -88,9 +94,13 @@ func ScrapeAdventurer(profileTarget string) (profile models.Profile, status int)
 			e.ForEach(".character_spec:not(.lock) .spec_level", func(ind int, el *colly.HTMLElement) {
 				// "Beginner1" → "Beginner 1"
 				i := regexp.MustCompile(`[0-9]`).FindStringIndex(el.Text)[0]
-				level := el.Text[:i] + " " + el.Text[i:]
+				wordLevel := el.Text[:i]
 
-				specLevels[ind] = level
+				if region == "SA" {
+					translators.TranslateSpecLevel(&wordLevel)
+				}
+
+				specLevels[ind] = wordLevel + " " + el.Text[i:]
 			})
 
 			if len(specLevels[0]) > 0 {
@@ -117,7 +127,7 @@ func ScrapeAdventurer(profileTarget string) (profile models.Profile, status int)
 		profile.Privacy = profile.Privacy | models.PrivateSpecs
 	})
 
-	c.Visit(fmt.Sprintf("https://www.naeu.playblackdesert.com/en-US/Adventure/Profile?profileTarget=%v", profileTarget))
+	c.Visit(fmt.Sprintf("%v/Adventure/Profile?profileTarget=%v", getSiteRoot(region), profileTarget))
 
 	return
 }
