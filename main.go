@@ -34,7 +34,7 @@ func main() {
 
 	fmt.Printf("Used configuration:\n\tProxies:\t%v\n\tPort:\t\t%v\n\tCache TTL:\t%v minutes\n\n", proxies, port, *flagCacheTTL)
 
-	srv := httpServer.Server(&port, flagCacheTTL)
+	srv := httpServer.BuildServer(&port, flagCacheTTL)
 
 	log.Println("Listening for requests")
 	log.Fatal(srv.ListenAndServe())

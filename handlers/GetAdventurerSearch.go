@@ -10,8 +10,6 @@ import (
 )
 
 func GetAdventurerSearch(w http.ResponseWriter, r *http.Request) {
-	setHeaders(w)
-
 	regionParams, regionProvided := r.URL.Query()["region"]
 	searchTypeParams, searchTypeProvided := r.URL.Query()["searchType"]
 	pageParams, pageProvided := r.URL.Query()["page"]

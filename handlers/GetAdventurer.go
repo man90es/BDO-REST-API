@@ -10,8 +10,6 @@ import (
 )
 
 func GetAdventurer(w http.ResponseWriter, r *http.Request) {
-	setHeaders(w)
-
 	profileTargetParams, profileTargetProvided := r.URL.Query()["profileTarget"]
 	regionParams, regionProvided := r.URL.Query()["region"]
 

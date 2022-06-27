@@ -10,8 +10,6 @@ import (
 )
 
 func GetGuildSearch(w http.ResponseWriter, r *http.Request) {
-	setHeaders(w)
-
 	regionParams, regionProvided := r.URL.Query()["region"]
 	pageParams, pageProvided := r.URL.Query()["page"]
 	queryParams, queryProvided := r.URL.Query()["query"]

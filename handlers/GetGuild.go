@@ -9,8 +9,6 @@ import (
 )
 
 func GetGuild(w http.ResponseWriter, r *http.Request) {
-	setHeaders(w)
-
 	regionParams, regionProvided := r.URL.Query()["region"]
 	nameParams, nameProvided := r.URL.Query()["guildName"]
 
