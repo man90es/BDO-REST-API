@@ -14,6 +14,7 @@ import (
 func ScrapeGuild(region, name string) (guildProfile models.GuildProfile, status int) {
 	c := collyFactory()
 
+	guildProfile.Region = region
 	status = http.StatusNotFound
 
 	c.OnHTML(closetimeSelector, func(e *colly.HTMLElement) {
