@@ -4,7 +4,7 @@ module bdo-rest-api
 go 1.17
 
 // A fork without hardcoded port filter
-replace github.com/victorspringer/http-cache => github.com/octoman90/http-cache v0.0.0-20220302203037-ad4c8661b025
+replace github.com/victorspringer/http-cache => github.com/octoman90/http-cache v0.0.0-20220627112407-5a1d73af7fc5
 
 require (
 	github.com/gocolly/colly/v2 v2.1.0
