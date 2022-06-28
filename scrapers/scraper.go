@@ -27,7 +27,7 @@ func dry(s string) string {
 func extractProfileTarget(link string) string {
 	u, _ := url.Parse(link)
 	m, _ := url.ParseQuery(u.RawQuery)
-	return url.QueryEscape(m["profileTarget"][0])
+	return m["profileTarget"][0]
 }
 
 func getSiteRoot(region string) string {

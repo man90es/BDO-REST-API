@@ -3,7 +3,6 @@ package handlers
 import (
 	"encoding/json"
 	"net/http"
-	"net/url"
 
 	"bdo-rest-api/scrapers"
 	"bdo-rest-api/validators"
@@ -27,7 +26,7 @@ func GetAdventurer(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Run the scraper
-	if data, status := scrapers.ScrapeAdventurer(region, url.QueryEscape(profileTargetParams[0])); status == http.StatusOK {
+	if data, status := scrapers.ScrapeAdventurer(region, profileTargetParams[0]); status == http.StatusOK {
 		json.NewEncoder(w).Encode(data)
 	} else {
 		w.WriteHeader(status)

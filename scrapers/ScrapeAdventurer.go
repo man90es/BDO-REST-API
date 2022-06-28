@@ -3,6 +3,7 @@ package scrapers
 import (
 	"fmt"
 	"net/http"
+	"net/url"
 	"regexp"
 	"strconv"
 	"strings"
@@ -127,7 +128,7 @@ func ScrapeAdventurer(region string, profileTarget string) (profile models.Profi
 		profile.Privacy = profile.Privacy | models.PrivateSpecs
 	})
 
-	c.Visit(fmt.Sprintf("%v/Adventure/Profile?profileTarget=%v", getSiteRoot(region), profileTarget))
+	c.Visit(fmt.Sprintf("%v/Adventure/Profile?profileTarget=%v", getSiteRoot(region), url.QueryEscape(profileTarget)))
 
 	return
 }
