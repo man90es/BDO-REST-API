@@ -38,8 +38,13 @@ func ScrapeAdventurerSearch(region string, query string, searchType uint8, page 
 		}
 
 		profile.Characters[0].Class = e.ChildText(".name")
-		profile.Characters[0].Main = true
 		profile.Characters[0].Name = e.ChildText(".text")
+
+		// Site displays the main character when searching by family name
+		// And the searched character when searching by character name
+		if 2 == searchType {
+			profile.Characters[0].Main = true
+		}
 
 		if region == "SA" {
 			translators.TranslateClassName(&profile.Characters[0].Class)
