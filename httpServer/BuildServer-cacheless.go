@@ -15,6 +15,8 @@ import (
 	"github.com/gorilla/mux"
 )
 
+const CacheSupport = false
+
 func registerHandlers(handlerMap map[string]func(http.ResponseWriter, *http.Request)) (*mux.Router, error) {
 	router := mux.NewRouter()
 

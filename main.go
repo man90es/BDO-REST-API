@@ -32,7 +32,11 @@ func main() {
 	}
 	scrapers.PushProxies(proxies...)
 
-	fmt.Printf("Used configuration:\n\tProxies:\t%v\n\tPort:\t\t%v\n\tCache TTL:\t%v minutes\n\n", proxies, port, *flagCacheTTL)
+	if httpServer.CacheSupport {
+		fmt.Printf("Used configuration:\n\tProxies:\t%v\n\tPort:\t\t%v\n\tCache TTL:\t%v minutes\n\n", proxies, port, *flagCacheTTL)
+	} else {
+		fmt.Printf("Used configuration:\n\tProxies:\t%v\n\tPort:\t\t%v\n\tCache TTL:\tUnsupported in build\n\n", proxies, port)
+	}
 
 	srv := httpServer.BuildServer(&port, flagCacheTTL)
 

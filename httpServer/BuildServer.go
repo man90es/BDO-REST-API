@@ -17,6 +17,8 @@ import (
 	"github.com/victorspringer/http-cache/adapter/memory"
 )
 
+const CacheSupport = true
+
 func registerHandlers(handlerMap map[string]func(http.ResponseWriter, *http.Request), ttl time.Duration) (*mux.Router, error) {
 	memcached, err := memory.NewAdapter(
 		memory.AdapterWithAlgorithm(memory.LRU),
