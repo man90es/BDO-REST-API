@@ -27,7 +27,7 @@ func ScrapeAdventurerSearch(region string, query string, searchType uint8, page 
 			Characters:    make([]models.Character, 1),
 		}
 
-		if region != "SA" {
+		if region != "SA" && region != "KR" {
 			profile.Region = e.ChildText(".region_info")
 		}
 

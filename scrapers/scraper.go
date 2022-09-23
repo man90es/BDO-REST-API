@@ -35,6 +35,10 @@ func getSiteRoot(region string) string {
 		return "https://www.sa.playblackdesert.com/pt-BR"
 	}
 
+	if "KR" == region {
+		return "https://www.kr.playblackdesert.com/ko-KR"
+	}
+
 	return "https://www.naeu.playblackdesert.com/en-US"
 }
 

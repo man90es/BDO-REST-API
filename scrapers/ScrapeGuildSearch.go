@@ -34,7 +34,7 @@ func ScrapeGuildSearch(region, query string, page uint16) (guildProfiles []model
 			CreatedOn: &createdOn,
 		}
 
-		if region != "SA" {
+		if region != "SA" && region != "KR" {
 			guildProfile.Region = e.ChildText(".region_info")
 		}
 

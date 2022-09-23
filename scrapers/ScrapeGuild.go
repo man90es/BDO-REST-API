@@ -49,7 +49,7 @@ func ScrapeGuild(region, name string) (guildProfile models.GuildProfile, status 
 
 	c.OnHTML(`.line_list:not(.mob_none) li:last-child .desc`, func(e *colly.HTMLElement) {
 		text := dry(e.Text)
-		if text != "None" && text != "N/A" {
+		if text != "None" && text != "N/A" && text != "없음" {
 			guildProfile.Occupying = text
 		}
 	})
