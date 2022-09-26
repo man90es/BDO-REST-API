@@ -66,7 +66,7 @@ func ScrapeAdventurer(region string, profileTarget string) (profile models.Profi
 			Class: e.ChildText(".character_info .character_symbol em:last-child"),
 		}
 
-		if region == "SA" {
+		if region != "EU" && region != "NA" {
 			translators.TranslateClassName(&character.Class)
 		}
 
@@ -97,7 +97,7 @@ func ScrapeAdventurer(region string, profileTarget string) (profile models.Profi
 				i := regexp.MustCompile(`[0-9]`).FindStringIndex(el.Text)[0]
 				wordLevel := el.Text[:i]
 
-				if region == "SA" {
+				if region != "EU" && region != "NA" {
 					translators.TranslateSpecLevel(&wordLevel)
 				}
 

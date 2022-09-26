@@ -38,7 +38,7 @@ func ScrapeGuildSearch(region, query string, page uint16) (guildProfiles []model
 			guildProfile.Region = e.ChildText(".region_info")
 		}
 
-		if region == "SA" {
+		if region != "EU" && region != "NA" {
 			translators.TranslateGuildKind(&guildProfile.Kind)
 		}
 

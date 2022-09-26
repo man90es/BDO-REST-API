@@ -46,7 +46,7 @@ func ScrapeAdventurerSearch(region string, query string, searchType uint8, page 
 			profile.Characters[0].Main = true
 		}
 
-		if region == "SA" {
+		if region != "EU" && region != "NA" {
 			translators.TranslateClassName(&profile.Characters[0].Class)
 		}
 

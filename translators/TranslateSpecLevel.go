@@ -9,6 +9,9 @@ var specLevelTranslationMap = map[string]string{
 	"Novato":       "Beginner",
 	"Proficiente":  "Skilled",
 	"Profissional": "Professional",
+	"견습":           "Apprentice",
+	"숙련":           "Skilled",
+	"초급":           "Beginner",
 }
 
 func TranslateSpecLevel(specLevel *string) {
