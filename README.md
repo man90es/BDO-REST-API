@@ -6,10 +6,10 @@ A collector for Black Desert Online player in-game data that provides an unoffic
 
 ## How to start using it
 There are two ways to use this API in your apps:
-* https://bdo-rest-api.herokuapp.com/v1 is an instance that I host. Be aware that if the API changes in the master branch on GitHub, this instance will reflect it immediately and your app may break. The API documentation can be viewed [here](https://gitlab.com/man90/black-desert-social-rest-api/-/tree/master/doc/api/openapi.json).
-* Host it yourself. Renting a VPS may cost some money, but the process is trivial. This approach will give you more stability and freedom. There are four easy steps to it:
-	1. Build the server from the source code following [this guide](doc/buildingFromSource.md) or download a prebuilt Linux binary from [here](https://gitlab.com/man90/black-desert-social-rest-api/-/pipelines).
-	2. Set the environment variables if you want. The list is in a section below.
+* https://bdo-community-api.onrender.com/v1 is the "official" instance. Using it doesn't require anything from you, but it may become unresponsive or its address and routes may change without notice. The API documentation can be viewed [here](https://gitlab.com/man90/black-desert-social-rest-api/-/tree/master/doc/api/openapi.json).
+* If you want to have more control over the API, host the collector yourself. The repository is preconfigured to be deployable on Heroku, can be easily deployed with Docker or built manually for a VPS/VDS. To do this, follow these steps:
+	1. Build the server from the source code following [this guide](doc/buildingFromSource.md).
+	2. (Optional) Set the environment variables. The list of available variables is in the section below.
 	3. Run the binary. Possible flags are described in a section below.
 	4. Use the API as described in the [documentation](https://gitlab.com/man90/black-desert-social-rest-api/-/tree/master/doc/api/openapi.json).
 
@@ -19,7 +19,7 @@ Catch requests on a specific port (8001 by default):
 export PORT=3000
 ```
 
-Use a proxy to make requests to BDO servers (none by default):
+Use a proxy to make requests to BDO servers (direct by default):
 ```bash
 export PROXY=http://123.123.123.123:8080
 # or
@@ -43,9 +43,6 @@ Use them like this:
 
 ## Known bugs
 There is a number of bugs that the official BDO website has. This collector does not do anything about them for the sake of simplicity, so your apps may need to use the [workarounds](doc/brokenStuff.md).
-
-## API migration
-There used to be a v0 version that is no longer supported, so if you use it, use the  [migration guide](doc/migrationGuilde.md).
 
 ## Contributing
 Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
