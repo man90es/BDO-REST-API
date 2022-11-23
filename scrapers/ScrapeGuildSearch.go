@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
-	"time"
 
 	"github.com/gocolly/colly/v2"
 
@@ -21,7 +20,7 @@ func ScrapeGuildSearch(region, query string, page uint16) (guildProfiles []model
 	})
 
 	c.OnHTML(`.box_list_area li:not(.no_result)`, func(e *colly.HTMLElement) {
-		createdOn, _ := time.Parse("2006-01-02", dry(e.ChildText(".date")))
+		createdOn := parseDate(e.ChildText(".date"))
 
 		guildProfile := models.GuildProfile{
 			Name:   e.ChildText(".guild_title a"),

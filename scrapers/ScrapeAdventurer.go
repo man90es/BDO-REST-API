@@ -7,7 +7,6 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
-	"time"
 
 	"github.com/gocolly/colly/v2"
 
@@ -48,7 +47,7 @@ func ScrapeAdventurer(region string, profileTarget string) (profile models.Profi
 	})
 
 	c.OnHTML(`.line_list .desc:not(.guild)`, func(e *colly.HTMLElement) {
-		createdOn, _ := time.Parse("2006-01-02", dry(e.Text))
+		createdOn := parseDate(e.Text)
 		profile.CreatedOn = &createdOn
 	})
 

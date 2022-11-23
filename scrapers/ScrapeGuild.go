@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
-	"time"
 
 	"github.com/gocolly/colly/v2"
 
@@ -31,7 +30,7 @@ func ScrapeGuild(region, name string) (guildProfile models.GuildProfile, status 
 	})
 
 	c.OnHTML(`.line_list.mob_none .desc`, func(e *colly.HTMLElement) {
-		createdOn, _ := time.Parse("2006-01-02", dry(e.Text))
+		createdOn := parseDate(e.Text)
 		guildProfile.CreatedOn = &createdOn
 	})
 
