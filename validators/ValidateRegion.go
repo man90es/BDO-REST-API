@@ -1,5 +1,7 @@
 package validators
 
 func ValidateRegion(r *string) bool {
-	return *r == "EU" || *r == "NA" || *r == "SA" || *r == "KR"
+	// TODO: Readd KR region once the translations are ready
+	// return *r == "EU" || *r == "NA" || *r == "SA" || *r == "KR"
+	return *r == "EU" || *r == "NA" || *r == "SA"
 }
