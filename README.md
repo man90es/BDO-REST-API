@@ -1,13 +1,16 @@
 # BDO-REST-API
-A collector for Black Desert Online player in-game data that provides an unofficial REST API. It currently supports European, North American and South American servers. (Korean server support will be added in the future).
+[![license](https://img.shields.io/github/license/octoman90/BDO-REST-API)](https://github.com/octoman90/BDO-REST-API/blob/master/LICENSE)
+
+A scraper for Black Desert Online player in-game data with a REST API. It currently supports European, North American, and South American servers (Korean server support is in progress).
 
 ## Projects using this API
-- [BDO Leaderboards](https://bdo.hemlo.cc/leaderboards/) ([GitHub](https://github.com/octoman90/BDO-Leaderboards)): web-based leaderboards for Black Desert Online.
+- [BDO Leaderboards](https://bdo.hemlo.cc/leaderboards) ([Source](https://github.com/octoman90/BDO-Leaderboards)): web-based leaderboards for Black Desert Online.
+- [Ikusa](https://ikusa.site) ([Source](https://github.com/sch-28/ikusa_api)): a powerful tool that allows you to analyze your game logs and gain valuable insights into your combat performance.
 
 ## How to start using it
 There are two ways to use this API in your apps:
-* https://bdo-community-api.onrender.com/v1 is the "official" instance. Using it doesn't require anything from you, but it may become unresponsive or its address and routes may change without notice. The API documentation can be viewed [here](https://gitlab.com/man90/black-desert-social-rest-api/-/tree/master/doc/api/openapi.json).
-* If you want to have more control over the API, host the collector yourself. The repository is preconfigured to be deployable on Heroku, can be easily deployed with Docker or built manually for a VPS/VDS. To do this, follow these steps:
+* https://bdo.hemlo.cc/communityapi/v1 is the "official" instance hosted by me. Using it is easy but it may be slow or even become unresponsive. The API documentation can be viewed [here](https://gitlab.com/man90/black-desert-social-rest-api/-/tree/master/doc/api/openapi.json).
+* If you want to have more control over the API, host the scraper yourself. The repository is preconfigured to be deployable on Heroku, can be easily deployed with Docker or built manually for a VPS/VDS. To do this, follow these steps:
 	1. Build the server from the source code following [this guide](doc/buildingFromSource.md).
 	2. (Optional) Set the environment variables. The list of available variables is in the section below.
 	3. Run the binary. Possible flags are described in a section below.
@@ -47,5 +50,5 @@ There is a number of bugs that the official BDO website has. This collector does
 ## Contributing
 Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
 
-## License
-[MIT](LICENSE)
+## By the way
+This is a fan-created project that is not affiliated with or endorsed by Pearl Abyss.
