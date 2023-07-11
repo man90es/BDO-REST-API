@@ -1,13 +1,16 @@
-FROM golang:1.17-alpine AS build
+FROM golang:1.21rc2-alpine3.18 AS build
 RUN apk add --no-cache git
 WORKDIR /src/bdo-rest-api
 COPY go.mod .
 COPY go.sum .
 RUN go mod download
 COPY . .
-RUN go build -o ./bin/bdo-rest-api .
+RUN go build -o /bdo-rest-api .
 
 FROM alpine:3.14 AS bin
-COPY --from=build /src/bdo-rest-api/bin/bdo-rest-api /app/bdo-rest-api
+RUN addgroup --system --gid 1001 go
+RUN adduser --system --uid 1001 go
+COPY --from=build --chown=go:go /bdo-rest-api .
+USER go
 EXPOSE 8001
-CMD ["/app/bdo-rest-api"]
+CMD ["/bdo-rest-api"]

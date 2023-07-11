@@ -1,0 +1,9 @@
+.dockerignore
+.git
+.gitignore
+.gitlab-ci.yml
+/doc
+Dockerfile
+LICENSE
+Procfile
+README.md
