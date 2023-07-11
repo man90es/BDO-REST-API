@@ -12,11 +12,15 @@ import (
 )
 
 func main() {
-	flagProxy := flag.String("proxy", "", "Open proxy address to make requests to BDO servers")
-	flagPort := flag.Int("port", 8001, "Port to catch requests on")
+	// Parse flags
+	flagCacheCap := flag.Int("cachecap", 1e4, "Cache capacity")
 	flagCacheTTL := flag.Int("cachettl", 180, "Cache TTL in minutes")
+	flagPort := flag.Int("port", 8001, "Port to catch requests on")
+	flagProxy := flag.String("proxy", "", "Open proxy address to make requests to BDO servers")
+	flagVerbose := flag.Bool("verbose", false, "Print out additional logs into stdout")
 	flag.Parse()
 
+	// Read port from flags and env
 	var port string
 	if *flagPort == 8001 && len(os.Getenv("PORT")) > 0 {
 		port = os.Getenv("PORT")
@@ -24,6 +28,7 @@ func main() {
 		port = fmt.Sprintf("%v", *flagPort)
 	}
 
+	// Read proxies from flags
 	var proxies []string
 	if len(*flagProxy) > 0 {
 		proxies = strings.Fields(*flagProxy)
@@ -32,13 +37,26 @@ func main() {
 	}
 	scrapers.PushProxies(proxies...)
 
+	// Set scraper verbosity level according to flag
+	scrapers.SetVerbose(*flagVerbose)
+
+	// Print out start info
+	configPrintOut := "Configuration:\n" +
+		fmt.Sprintf("\tPort:\t\t%v\n", port) +
+		fmt.Sprintf("\tProxies:\t%v\n", proxies) +
+		fmt.Sprintf("\tVerbosity:\t%v\n", *flagVerbose)
+
 	if httpServer.CacheSupport {
-		fmt.Printf("Used configuration:\n\tProxies:\t%v\n\tPort:\t\t%v\n\tCache TTL:\t%v minutes\n\n", proxies, port, *flagCacheTTL)
+		configPrintOut += fmt.Sprintf("\tCache TTL:\t%v minutes\n", *flagCacheTTL) +
+			fmt.Sprintf("\tCache capacity:\t%v\n\n", *flagCacheCap)
 	} else {
-		fmt.Printf("Used configuration:\n\tProxies:\t%v\n\tPort:\t\t%v\n\tCache TTL:\tUnsupported in build\n\n", proxies, port)
+		configPrintOut += "\tCache:\tUnsupported in this build\n\n"
 	}
 
-	srv := httpServer.BuildServer(&port, flagCacheTTL)
+	fmt.Printf(configPrintOut)
+
+	// Build server
+	srv := httpServer.BuildServer(&port, flagCacheTTL, flagCacheCap)
 
 	log.Println("Listening for requests")
 	log.Fatal(srv.ListenAndServe())

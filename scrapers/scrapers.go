@@ -20,6 +20,12 @@ func PushProxies(args ...string) {
 	proxySwitcher, _ = proxy.RoundRobinProxySwitcher(proxies...)
 }
 
+var verbose = false
+
+func SetVerbose(v bool) {
+	verbose = v
+}
+
 func dry(s string) string {
 	return strings.Join(strings.Fields(s), " ")
 }
@@ -74,6 +80,10 @@ func collyFactory() (c *colly.Collector) {
 	}
 
 	c.OnRequest(func(r *colly.Request) {
+		if !verbose {
+			return
+		}
+
 		log.Println("Visiting", r.URL)
 	})
 

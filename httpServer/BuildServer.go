@@ -19,10 +19,10 @@ import (
 
 const CacheSupport = true
 
-func registerHandlers(handlerMap map[string]func(http.ResponseWriter, *http.Request), ttl time.Duration) (*mux.Router, error) {
+func registerHandlers(handlerMap map[string]func(http.ResponseWriter, *http.Request), ttl time.Duration, cap int) (*mux.Router, error) {
 	memcached, err := memory.NewAdapter(
 		memory.AdapterWithAlgorithm(memory.LRU),
-		memory.AdapterWithCapacity(1e6),
+		memory.AdapterWithCapacity(cap),
 	)
 
 	if err != nil {
@@ -56,13 +56,13 @@ func registerHandlers(handlerMap map[string]func(http.ResponseWriter, *http.Requ
 	return router, nil
 }
 
-func BuildServer(port *string, flagCacheTTL *int) (srv *http.Server) {
+func BuildServer(port *string, flagCacheTTL *int, flagCacheCap *int) (srv *http.Server) {
 	router, err := registerHandlers(map[string]func(http.ResponseWriter, *http.Request){
 		"/v1/adventurer/search": handlers.GetAdventurerSearch,
 		"/v1/guild/search":      handlers.GetGuildSearch,
 		"/v1/adventurer":        handlers.GetAdventurer,
 		"/v1/guild":             handlers.GetGuild,
-	}, time.Duration(*flagCacheTTL)*time.Minute)
+	}, time.Duration(*flagCacheTTL)*time.Minute, *flagCacheCap)
 
 	if err != nil {
 		log.Fatal(err)

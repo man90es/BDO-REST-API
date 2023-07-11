@@ -31,7 +31,7 @@ func registerHandlers(handlerMap map[string]func(http.ResponseWriter, *http.Requ
 	return router, nil
 }
 
-func BuildServer(port *string, flagCacheTTL *int) (srv *http.Server) {
+func BuildServer(port *string, flagCacheTTL *int, flagCacheCap *int) (srv *http.Server) {
 	router, err := registerHandlers(map[string]func(http.ResponseWriter, *http.Request){
 		"/v1/adventurer/search": handlers.GetAdventurerSearch,
 		"/v1/guild/search":      handlers.GetGuildSearch,
