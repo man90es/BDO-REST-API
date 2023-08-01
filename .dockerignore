@@ -2,6 +2,7 @@
 .git
 .gitignore
 .gitlab-ci.yml
+*_test.go
 /doc
 Dockerfile
 LICENSE
