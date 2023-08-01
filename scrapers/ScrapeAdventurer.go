@@ -12,6 +12,7 @@ import (
 
 	"bdo-rest-api/models"
 	"bdo-rest-api/translators"
+	"bdo-rest-api/utils"
 )
 
 func ScrapeAdventurer(region string, profileTarget string) (profile models.Profile, status int) {
@@ -47,7 +48,7 @@ func ScrapeAdventurer(region string, profileTarget string) (profile models.Profi
 	})
 
 	c.OnHTML(`.line_list .desc:not(.guild)`, func(e *colly.HTMLElement) {
-		createdOn := parseDate(e.Text)
+		createdOn := utils.ParseDate(e.Text)
 		profile.CreatedOn = &createdOn
 	})
 

@@ -9,6 +9,7 @@ import (
 
 	"bdo-rest-api/models"
 	"bdo-rest-api/translators"
+	"bdo-rest-api/utils"
 )
 
 func ScrapeGuildSearch(region, query string, page uint16) (guildProfiles []models.GuildProfile, status int) {
@@ -20,7 +21,7 @@ func ScrapeGuildSearch(region, query string, page uint16) (guildProfiles []model
 	})
 
 	c.OnHTML(`.box_list_area li:not(.no_result)`, func(e *colly.HTMLElement) {
-		createdOn := parseDate(e.ChildText(".date"))
+		createdOn := utils.ParseDate(e.ChildText(".date"))
 
 		guildProfile := models.GuildProfile{
 			Name:   e.ChildText(".guild_title a"),

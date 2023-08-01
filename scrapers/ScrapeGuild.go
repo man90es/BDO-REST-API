@@ -8,6 +8,7 @@ import (
 	"github.com/gocolly/colly/v2"
 
 	"bdo-rest-api/models"
+	"bdo-rest-api/utils"
 )
 
 func ScrapeGuild(region, name string) (guildProfile models.GuildProfile, status int) {
@@ -30,7 +31,7 @@ func ScrapeGuild(region, name string) (guildProfile models.GuildProfile, status 
 	})
 
 	c.OnHTML(`.line_list.mob_none .desc`, func(e *colly.HTMLElement) {
-		createdOn := parseDate(e.Text)
+		createdOn := utils.ParseDate(e.Text)
 		guildProfile.CreatedOn = &createdOn
 	})
 
@@ -47,7 +48,7 @@ func ScrapeGuild(region, name string) (guildProfile models.GuildProfile, status 
 	})
 
 	c.OnHTML(`.line_list:not(.mob_none) li:last-child .desc`, func(e *colly.HTMLElement) {
-		text := dry(e.Text)
+		text := utils.RemoveExtraSpaces(e.Text)
 		if text != "None" && text != "N/A" && text != "없음" {
 			guildProfile.Occupying = text
 		}

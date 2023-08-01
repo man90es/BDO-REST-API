@@ -3,7 +3,6 @@ package scrapers
 import (
 	"log"
 	"net/url"
-	"strings"
 	"time"
 
 	"github.com/gocolly/colly/v2"
@@ -26,37 +25,10 @@ func SetVerbose(v bool) {
 	verbose = v
 }
 
-func dry(s string) string {
-	return strings.Join(strings.Fields(s), " ")
-}
-
 func extractProfileTarget(link string) string {
 	u, _ := url.Parse(link)
 	m, _ := url.ParseQuery(u.RawQuery)
 	return m["profileTarget"][0]
-}
-
-func parseDate(text string) time.Time {
-	var format string
-	if strings.Contains(text, ".") {
-		// Used on KR server for account creation date
-		format = "2006.01.02"
-	} else if strings.Contains(text, "/") {
-		// Used on SA server for account creation date
-		format = "02/01/2006"
-	} else if strings.Contains(text, "-") {
-		// Used on all servers for guild creation date
-		format = "2006-01-02"
-	} else {
-		// Used on NAEU server for account creation date
-		format = "Jan 2, 2006"
-	}
-
-	if parsed, err := time.Parse(format, dry(text)); nil == err {
-		return parsed
-	}
-
-	return time.Time{}
 }
 
 func getSiteRoot(region string) string {
