@@ -6,10 +6,10 @@
 	},
 	"servers": [
 		{
-			"url": "https://bdo.hemlo.cc/communityapi/v1"
+			"url": "https://bdo.hemlo.cc/communityapi"
 		},
 		{
-			"url": "http://localhost:8001/v1"
+			"url": "http://localhost:8001"
 		}
 	],
 	"components": {
@@ -21,7 +21,7 @@
 				"schema": {
 					"type": "string",
 					"enum": ["EU", "NA", "SA"],
-					"example": "EU"
+					"default": "EU"
 				}
 			}
 		},
@@ -33,15 +33,15 @@
 				"description": "Not Found: try requesting something else."
 			},
 			"503": {
-				"description": "Service Unavailable: [https://naeu.playblackdesert.com](naeu.playblackdesert.com) is currently under maintenance and the data requested is not cached."
+				"description": "Service Unavailable: [https://naeu.playblackdesert.com](naeu.playblackdesert.com) is currently under maintenance and requested data is not cached."
 			}
 		}
 	},
 	"paths": {
-		"/adventurer": {
+		"/v1/adventurer": {
 			"get": {
 				"summary": "Retrieve player's profile.",
-				"description": "Retrieve the full profile of a single player by his or her profileTarget.",
+				"description": "Retrieve the full profile of a single player by his or her profileTarget. Watch out for the \"privacy\" attribute that is added to the response when the player whose profile is requested turned on at least one of the privacy options BDO website has. It is a single number that you can decode using bitmasks. `0b0001` for private character levels, `0b0010` for private guild, `0b0100` for private contribution points and `0b1000` for private lifeskill levels. If the attribute is equal to `0b1111` then everything is set to private.",
 				"operationId": "getAdventurer",
 				"parameters": [
 					{
@@ -60,13 +60,13 @@
 						"schema": {
 							"type": "string",
 							"enum": ["EU", "NA", "SA"],
-							"example": "EU"
+							"default": "EU"
 						}
 					}
 				],
 				"responses": {
 					"200": {
-						"description": "Watch out for the \"privacy\" attribute that is added to the response when the player whose profile is requested turned on at least one of the privacy options BDO website has. It is a single number that you can decode using bitmasks. `0b0001` for private character levels, `0b0010` for private guild, `0b0100` for private contribution points and `0b1000` for private lifeskill levels. If the attribute is equal to `0b1111` then everything is set to private.",
+						"description": "OK.",
 						"content": {
 							"application/json": {
 								"schema": {
@@ -190,7 +190,7 @@
 				}
 			}
 		},
-		"/adventurer/search": {
+		"/v1/adventurer/search": {
 			"get": {
 				"summary": "Search for a player.",
 				"description": "Search for a player by a combination of his or her region and family/character name.",
@@ -249,7 +249,7 @@
 											},
 											"region": {
 												"type": "string",
-												"enum": ["EU", "NA"]
+												"enum": ["EU", "NA", "SA"]
 											},
 											"guild": {
 												"properties": {
@@ -301,7 +301,7 @@
 				}
 			}
 		},
-		"/guild": {
+		"/v1/guild": {
 			"get": {
 				"summary": "Retrieve guild profile.",
 				"description": "Retrieve the profile of a guild by its name.",
@@ -335,7 +335,7 @@
 										},
 										"region": {
 											"type": "string",
-											"enum": ["EU", "NA"]
+											"enum": ["EU", "NA", "SA"]
 										},
 										"createdOn": {
 											"type": "string",
@@ -395,7 +395,7 @@
 				}
 			}
 		},
-		"/guild/search": {
+		"/v1/guild/search": {
 			"get": {
 				"summary": "Search for a guild.",
 				"description": "Search for a guild by combination of its region and name.",
@@ -440,7 +440,7 @@
 											},
 											"region": {
 												"type": "string",
-												"enum": ["EU", "NA"]
+												"enum": ["EU", "NA", "SA"]
 											},
 											"createdOn": {
 												"type": "string",
