@@ -42,7 +42,14 @@ func GetAdventurerSearch(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Run the scraper
-	if data, status := scrapers.ScrapeAdventurerSearch(region, queryParams[0], searchType, uint16(page)); status == http.StatusOK {
+	data, status := scrapers.ScrapeAdventurerSearch(region, queryParams[0], searchType, uint16(page))
+
+	if scrapers.IsCloseTime() {
+		w.WriteHeader(http.StatusServiceUnavailable)
+		return
+	}
+
+	if status == http.StatusOK {
 		json.NewEncoder(w).Encode(data)
 	} else {
 		w.WriteHeader(status)

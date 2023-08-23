@@ -26,7 +26,14 @@ func GetAdventurer(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Run the scraper
-	if data, status := scrapers.ScrapeAdventurer(region, profileTargetParams[0]); status == http.StatusOK {
+	data, status := scrapers.ScrapeAdventurer(region, profileTargetParams[0])
+
+	if scrapers.IsCloseTime() {
+		w.WriteHeader(http.StatusServiceUnavailable)
+		return
+	}
+
+	if status == http.StatusOK {
 		json.NewEncoder(w).Encode(data)
 	} else {
 		w.WriteHeader(status)
