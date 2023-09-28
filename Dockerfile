@@ -5,7 +5,8 @@ COPY go.mod .
 COPY go.sum .
 RUN go mod download
 COPY . .
-RUN go build -o /bdo-rest-api -ldflags="-s -w" .
+ARG tags=none
+RUN go build -tags $tags -o /bdo-rest-api -ldflags="-s -w" .
 
 FROM alpine:3.14 AS bin
 RUN addgroup --system --gid 1001 go
