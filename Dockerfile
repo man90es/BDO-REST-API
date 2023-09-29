@@ -1,10 +1,8 @@
 FROM golang:1.21rc2-alpine3.18 AS build
 RUN apk add --no-cache git
 WORKDIR /src/bdo-rest-api
-COPY go.mod .
-COPY go.sum .
-RUN go mod download
 COPY . .
+RUN go mod download
 ARG tags=none
 RUN go build -tags $tags -o /bdo-rest-api -ldflags="-s -w" .
 
