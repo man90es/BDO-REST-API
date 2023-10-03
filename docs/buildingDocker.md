@@ -17,3 +17,11 @@ You can run a Docker container you just built by executing this command:
 ```bash
 sudo docker container run bdo-rest-api -p 8001:8001
 ```
+
+## Environment variables
+Use a proxy to make requests to BDO servers (direct by default):
+```bash
+sudo docker container run bdo-rest-api -p 8001:8001 -e "PROXY=http://123.123.123.123:8080"
+# or
+sudo docker container run bdo-rest-api -p 8001:8001 -e "PROXY=http://123.123.123.123:8080 http://124.124.124.124:8081"
+```
