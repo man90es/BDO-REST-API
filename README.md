@@ -10,7 +10,7 @@ A scraper for Black Desert Online player in-game data with a REST API. It curren
 ## How to start using it
 There are two ways to use this scraper for your needs:
 * By querying https://bdo.hemlo.cc/communityapi/v1 — this is the "official" instance hosted by me.
-* If you want to have more control over the API, host the scraper yourself. It's [available on DockerHub](https://hub.docker.com/r/man90/bdo-rest-api) (exposes port 8001), preconfigured for Heroku, and can be built from source as described in [this guide](docs/buildingFromSource.md) (this gives you a bit more control over how the scraper behaves). You can also buitd Docker image on your machine like it's explained [here](docs/buildingDocker.md).
+* If you want to have more control over the API, host the scraper yourself. It's [available on DockerHub](https://hub.docker.com/r/man90/bdo-rest-api) (exposes port 8001), preconfigured for Heroku, and can be built from source as described in [this guide](docs/buildingFromSource.md) (this gives you a bit more control over how the scraper behaves). You can also build Docker image on your machine like it's explained [here](docs/buildingDocker.md).
 
 API documentation can be viewed [here](https://man90es.github.io/BDO-REST-API/).
 
