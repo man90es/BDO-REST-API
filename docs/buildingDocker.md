@@ -1,4 +1,4 @@
-# Building from source
+# Building Docker image
 Building a Docker image yourself can be preferable over using a Docker Image from [Docker Hub](https://hub.docker.com/r/man90/bdo-rest-api) if you want to disable caching.
 
 ## Building an image
@@ -15,13 +15,5 @@ sudo docker build -t bdo-rest-api --build-arg tags=cacheless .
 ## Running a container
 You can run a Docker container you just built by executing this command:
 ```bash
-sudo docker container run bdo-rest-api -p 8001:8001
-```
-
-## Environment variables
-Use a proxy to make requests to BDO servers (direct by default):
-```bash
-sudo docker container run bdo-rest-api -p 8001:8001 -e "PROXY=http://123.123.123.123:8080"
-# or
-sudo docker container run bdo-rest-api -p 8001:8001 -e "PROXY=http://123.123.123.123:8080 http://124.124.124.124:8081"
+sudo docker container run -p 8001:8001 bdo-rest-api
 ```
