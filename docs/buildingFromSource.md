@@ -6,7 +6,7 @@ Building the scraper from source may be preferable in some cases. This way, the 
 - Go compiler >=v1.15
 
 ## Compilation
-By default, scraped results are cached in memory and stored for up to 2 hours. This helps to ease the pressure on BDO servers and decreases the response time tremendously (for cached responses). Use this command to compile the app:
+By default, scraped results are cached in memory and stored for 3 hours. This helps to ease the pressure on BDO servers and decreases the response time tremendously (for cached responses). Use this command to compile the app:
 ```bash
 go build
 ```

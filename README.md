@@ -15,34 +15,33 @@ There are two ways to use this scraper for your needs:
 
 API documentation can be viewed [here](https://man90es.github.io/BDO-REST-API/).
 
-## Tuning your installation
-If you're hosting the API yourself, you can control some of its features to a higher degree.
+## Flags
+If you host the API yourself, either via Docker or natively, you can control some of its features by executing it with flags.
 
-### Flags
 Available flags:
-- -cachecap
-	- Allows to specify cache capacity
+- `-cachecap`
+	- Allows to specify response cache capacity
 	- Type: unsigned integer
-	- Default value: 10000
-- -cachettl
+	- Default value: `10000`
+- `-cachettl`
 	- Allows to specify cache TTL in minutes
 	- Type: unsigned integer
-	- Default value: 180
-- -port
+	- Default value: `180`
+- `-port`
 	- Allows to specify API server's port
 	- Type: unsigned integer
-	- Default value: 8001
-	- Also available as PORT environment variable (doesn't work in Docker)
-- -proxy
+	- Default value: `8001`
+	- Also available as `PORT` environment variable (doesn't work in Docker)
+- `-proxy`
 	- Allows to specify a list of proxies to make requests to BDO servers through
 	- Type: string, space-separated list of IP addresses or URLs
 	- Default value: none, requests are made directly
-	- Also available as PROXY environment variable
-- -verbose
+	- Also available as `PROXY` environment variable
+- `-verbose`
 	- Allows to put the app into verbose mode and print out additional logs to stdout
 	- Default value: none, no additional output is produced
 
-Use them like this:
+You can use them like this:
 ```bash
 ./bdo-rest-api -cachettl 30
 # or
@@ -50,7 +49,7 @@ docker container run -p 8001:8001 bdo-rest-api -cachettl 30
 ```
 
 ## Contributing
-Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change. To build the binary, follow instructions [here](docs/buildingFromSource.md).
+Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
 
 ## Known bugs
 There is a number of bugs that the official BDO website has. This scraper does not do anything about them for the sake of simplicity, so your apps may need to use [workarounds](docs/brokenStuff.md).

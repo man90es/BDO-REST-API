@@ -15,7 +15,7 @@ List numbers match list numbers in the previous section:
 2. You can get some information like creation date, guild master's name and population by searching for guild instead of requesting its profile. It's not much, but better than nothing.
 3. There are no known workarounds.
 4. I believe maintenances remove "ghost members" from guilds. If you don't feel like waiting, request profiles of those players. Guild membership status in player profiles is more reliable, unless it's set to private.
-5. The lag is around a few hours, and you can only wait. This API may introduce additional lag (≤2 hours) in some cases, so if you need the most fresh data possible, consider disabling cache as it's described in [building from source manual](./buildingFromSource.md).
+5. The lag is around a few hours, and you can only wait. This API may introduce additional lag in some cases, so if you need the most fresh data possible, consider disabling cache as it's described in [building from source manual](./buildingFromSource.md) or [building a Docker image manual](./buildingDocker.md).
 
 ## Contribute to this list
 If you found a bug on the original BDO website that affects this API and is not listed in this file, you can contribute by either:
