@@ -126,5 +126,9 @@ func ScrapeAdventurer(region string, profileTarget string) (profile models.Profi
 
 	c.Visit(fmt.Sprintf("/Profile?profileTarget=%v", url.QueryEscape(profileTarget)), region)
 
+	if IsCloseTime() {
+		status = http.StatusServiceUnavailable
+	}
+
 	return
 }

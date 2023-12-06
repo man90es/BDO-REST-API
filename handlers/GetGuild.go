@@ -28,11 +28,6 @@ func GetGuild(w http.ResponseWriter, r *http.Request) {
 	// Run the scraper
 	data, status := scrapers.ScrapeGuild(region, nameParams[0])
 
-	if scrapers.IsCloseTime() {
-		w.WriteHeader(http.StatusServiceUnavailable)
-		return
-	}
-
 	if status == http.StatusOK {
 		json.NewEncoder(w).Encode(data)
 	} else {

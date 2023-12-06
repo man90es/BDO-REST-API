@@ -43,7 +43,9 @@ func registerHandlers(handlerMap map[string]func(http.ResponseWriter, *http.Requ
 		router.Handle(route,
 			cacheClient.Middleware(
 				middleware.SetHeaders(
-					http.HandlerFunc(handler),
+					middleware.CheckForMaintenance(
+						http.HandlerFunc(handler),
+					),
 				),
 			),
 		).Methods("GET")

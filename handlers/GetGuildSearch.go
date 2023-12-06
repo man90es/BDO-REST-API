@@ -35,11 +35,6 @@ func GetGuildSearch(w http.ResponseWriter, r *http.Request) {
 	// Run the scraper
 	data, status := scrapers.ScrapeGuildSearch(region, queryParams[0], uint16(page))
 
-	if scrapers.IsCloseTime() {
-		w.WriteHeader(http.StatusServiceUnavailable)
-		return
-	}
-
 	if status == http.StatusOK {
 		json.NewEncoder(w).Encode(data)
 	} else {

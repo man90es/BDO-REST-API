@@ -61,5 +61,9 @@ func ScrapeGuild(region, name string) (guildProfile models.GuildProfile, status 
 
 	c.Visit(fmt.Sprintf("/Guild/GuildProfile?guildName=%v&region=%v", name, region), region)
 
+	if IsCloseTime() {
+		status = http.StatusServiceUnavailable
+	}
+
 	return
 }
