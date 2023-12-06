@@ -16,22 +16,22 @@ import (
 )
 
 func ScrapeAdventurer(region string, profileTarget string) (profile models.Profile, status int) {
-	s := createScraper()
+	c := createScraper()
 
 	profile.ProfileTarget = profileTarget
 	profile.Region = region
 	status = http.StatusNotFound
 
-	s.OnHTML(`.nick`, func(e *colly.HTMLElement) {
+	c.OnHTML(`.nick`, func(e *colly.HTMLElement) {
 		profile.FamilyName = e.Text
 		status = http.StatusOK
 	})
 
-	s.OnHTML(`.region_info`, func(e *colly.HTMLElement) {
+	c.OnHTML(`.region_info`, func(e *colly.HTMLElement) {
 		profile.Region = e.Text
 	})
 
-	s.OnHTML(`.desc.guild a`, func(e *colly.HTMLElement) {
+	c.OnHTML(`.desc.guild a`, func(e *colly.HTMLElement) {
 		if e.Attr("href") != "javscript:void(0)" {
 			profile.Guild = &models.GuildProfile{
 				Name: e.Text,
@@ -39,16 +39,16 @@ func ScrapeAdventurer(region string, profileTarget string) (profile models.Profi
 		}
 	})
 
-	s.OnHTML(`.desc.guild span`, func(e *colly.HTMLElement) {
+	c.OnHTML(`.desc.guild span`, func(e *colly.HTMLElement) {
 		profile.Privacy = profile.Privacy | models.PrivateGuild
 	})
 
-	s.OnHTML(`.line_list .desc:not(.guild)`, func(e *colly.HTMLElement) {
+	c.OnHTML(`.line_list .desc:not(.guild)`, func(e *colly.HTMLElement) {
 		createdOn := utils.ParseDate(e.Text)
 		profile.CreatedOn = &createdOn
 	})
 
-	s.OnHTML(`.character_desc_area .character_info span:nth-child(3) em`, func(e *colly.HTMLElement) {
+	c.OnHTML(`.character_desc_area .character_info span:nth-child(3) em`, func(e *colly.HTMLElement) {
 		if e.Text != "Private" {
 			contributionPoints, _ := strconv.Atoi(e.Text)
 			profile.ContributionPoints = uint16(contributionPoints)
@@ -57,7 +57,7 @@ func ScrapeAdventurer(region string, profileTarget string) (profile models.Profi
 		}
 	})
 
-	s.OnHTML(`.character_desc_area`, func(e *colly.HTMLElement) {
+	c.OnHTML(`.character_desc_area`, func(e *colly.HTMLElement) {
 		character := models.Character{
 			Class: e.ChildText(".character_info .character_symbol em:last-child"),
 		}
@@ -120,11 +120,11 @@ func ScrapeAdventurer(region string, profileTarget string) (profile models.Profi
 		profile.Characters = append(profile.Characters, character)
 	})
 
-	s.OnHTML(`.character_spec.lock`, func(e *colly.HTMLElement) {
+	c.OnHTML(`.character_spec.lock`, func(e *colly.HTMLElement) {
 		profile.Privacy = profile.Privacy | models.PrivateSpecs
 	})
 
-	s.Visit(fmt.Sprintf("/Profile?profileTarget=%v", url.QueryEscape(profileTarget)), region)
+	c.Visit(fmt.Sprintf("/Profile?profileTarget=%v", url.QueryEscape(profileTarget)), region)
 
 	return
 }

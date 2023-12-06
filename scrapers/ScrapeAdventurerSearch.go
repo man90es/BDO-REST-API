@@ -12,11 +12,11 @@ import (
 )
 
 func ScrapeAdventurerSearch(region string, query string, searchType uint8, page uint16) (profiles []models.Profile, status int) {
-	s := createScraper()
+	c := createScraper()
 
 	status = http.StatusNotFound
 
-	s.OnHTML(`.box_list_area li:not(.no_result)`, func(e *colly.HTMLElement) {
+	c.OnHTML(`.box_list_area li:not(.no_result)`, func(e *colly.HTMLElement) {
 		status = http.StatusOK
 		profile := models.Profile{
 			Region:        region,
@@ -55,7 +55,7 @@ func ScrapeAdventurerSearch(region string, query string, searchType uint8, page 
 		profiles = append(profiles, profile)
 	})
 
-	s.Visit(fmt.Sprintf("?region=%v&searchType=%v&searchKeyword=%v&Page=%v", region, searchType, query, page), region)
+	c.Visit(fmt.Sprintf("?region=%v&searchType=%v&searchKeyword=%v&Page=%v", region, searchType, query, page), region)
 
 	return
 }

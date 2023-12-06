@@ -13,11 +13,11 @@ import (
 )
 
 func ScrapeGuildSearch(region, query string, page uint16) (guildProfiles []models.GuildProfile, status int) {
-	s := createScraper()
+	c := createScraper()
 
 	status = http.StatusNotFound
 
-	s.OnHTML(`.box_list_area li:not(.no_result)`, func(e *colly.HTMLElement) {
+	c.OnHTML(`.box_list_area li:not(.no_result)`, func(e *colly.HTMLElement) {
 		createdOn := utils.ParseDate(e.ChildText(".date"))
 		status = http.StatusOK
 
@@ -48,7 +48,7 @@ func ScrapeGuildSearch(region, query string, page uint16) (guildProfiles []model
 		guildProfiles = append(guildProfiles, guildProfile)
 	})
 
-	s.Visit(fmt.Sprintf("/Guild?region=%v&page=%v&searchText=%v", region, page, query), region)
+	c.Visit(fmt.Sprintf("/Guild?region=%v&page=%v&searchText=%v", region, page, query), region)
 
 	return
 }
