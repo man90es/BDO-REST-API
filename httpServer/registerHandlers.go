@@ -29,7 +29,7 @@ func registerHandlers(handlerMap map[string]func(http.ResponseWriter, *http.Requ
 		cache.ClientWithAdapter(memcached),
 		cache.ClientWithTTL(ttl),
 		cache.ClientWithRefreshKey("opn"),
-		cache.ClientWithStatusCodeFilter(func(code int) bool { return code != 400 }),
+		cache.ClientWithStatusCodeFilter(func(code int) bool { return code != 400 && code != 503 }),
 		cache.ClientWithExpiresHeader(),
 	)
 
