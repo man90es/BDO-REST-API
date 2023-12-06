@@ -41,19 +41,13 @@ func main() {
 	scrapers.SetVerbose(*flagVerbose)
 
 	// Print out start info
-	configPrintOut := "Configuration:\n" +
+	fmt.Printf("Configuration:\n" +
 		fmt.Sprintf("\tPort:\t\t%v\n", port) +
 		fmt.Sprintf("\tProxies:\t%v\n", proxies) +
-		fmt.Sprintf("\tVerbosity:\t%v\n", *flagVerbose)
-
-	if httpServer.CacheSupport {
-		configPrintOut += fmt.Sprintf("\tCache TTL:\t%v minutes\n", *flagCacheTTL) +
-			fmt.Sprintf("\tCache capacity:\t%v\n\n", *flagCacheCap)
-	} else {
-		configPrintOut += "\tCache:\tUnsupported in this build\n\n"
-	}
-
-	fmt.Printf(configPrintOut)
+		fmt.Sprintf("\tVerbosity:\t%v\n", *flagVerbose) +
+		fmt.Sprintf("\tCache TTL:\t%v minutes\n", *flagCacheTTL) +
+		fmt.Sprintf("\tCache capacity:\t%v\n\n", *flagCacheCap),
+	)
 
 	// Build server
 	srv := httpServer.BuildServer(&port, flagCacheTTL, flagCacheCap)
