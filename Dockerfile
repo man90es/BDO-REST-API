@@ -10,5 +10,6 @@ RUN addgroup --system --gid 1001 go
 RUN adduser --system --uid 1001 go
 COPY --from=build --chown=go:go /bdo-rest-api .
 USER go
+ENV PROXY=
 EXPOSE 8001
-CMD ["/bdo-rest-api"]
+ENTRYPOINT ["/bdo-rest-api"]
