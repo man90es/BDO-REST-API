@@ -3,7 +3,7 @@ Building the scraper from source may be preferable in some cases. This way, the 
 
 ## Prerequisites:
 - GNU/Linux (other platforms should work as well but I haven't tested them)
-- Go compiler >=v1.15
+- Go compiler >=v1.21
 
 ## Compilation
 Use this command to compile the app:

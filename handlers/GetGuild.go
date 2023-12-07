@@ -9,20 +9,12 @@ import (
 )
 
 func GetGuild(w http.ResponseWriter, r *http.Request) {
-	regionParams, regionProvided := r.URL.Query()["region"]
 	nameParams, nameProvided := r.URL.Query()["guildName"]
+	region := validators.ValidateRegionQueryParam(r.URL.Query()["region"])
 
-	// Return status 400 if a required parameter is invalid
 	if !nameProvided || !validators.ValidateGuildName(&nameParams[0]) {
 		w.WriteHeader(http.StatusBadRequest)
 		return
-	}
-
-	// Set defaults for optional parameters
-	region := defaultRegion
-
-	if regionProvided && validators.ValidateRegion(&regionParams[0]) {
-		region = regionParams[0]
 	}
 
 	// Run the scraper

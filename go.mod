@@ -1,7 +1,7 @@
 module bdo-rest-api
 
-// +heroku goVersion go1.17
-go 1.17
+// +heroku goVersion go1.21
+go 1.21
 
 require (
 	github.com/gocolly/colly/v2 v2.1.0
