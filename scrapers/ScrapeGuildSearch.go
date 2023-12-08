@@ -13,7 +13,7 @@ import (
 )
 
 func ScrapeGuildSearch(region, query string, page uint16) (guildProfiles []models.GuildProfile, status int) {
-	c := createScraper()
+	c := newScraper()
 
 	status = http.StatusNotFound
 

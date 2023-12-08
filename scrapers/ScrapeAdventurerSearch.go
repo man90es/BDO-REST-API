@@ -12,7 +12,7 @@ import (
 )
 
 func ScrapeAdventurerSearch(region string, query string, searchType uint8, page uint16) (profiles []models.Profile, status int) {
-	c := createScraper()
+	c := newScraper()
 
 	status = http.StatusNotFound
 

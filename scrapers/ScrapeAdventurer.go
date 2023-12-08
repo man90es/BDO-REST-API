@@ -16,7 +16,7 @@ import (
 )
 
 func ScrapeAdventurer(region string, profileTarget string) (profile models.Profile, status int) {
-	c := createScraper()
+	c := newScraper()
 
 	profile.ProfileTarget = profileTarget
 	profile.Region = region

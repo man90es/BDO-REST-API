@@ -13,8 +13,10 @@ func ValidateGuildNameQueryParam(query []string) (guildName string, ok bool) {
 		return "", false
 	}
 
-	if len(query[0]) < 2 {
-		return query[0], false
+	guildName = strings.ToLower(query[0])
+
+	if len(guildName) < 2 {
+		return guildName, false
 	}
 
 	// Returns false for allowed characters
@@ -43,5 +45,5 @@ func ValidateGuildNameQueryParam(query []string) (guildName string, ok bool) {
 		return true
 	}
 
-	return query[0], strings.IndexFunc(query[0], f) == -1
+	return guildName, strings.IndexFunc(guildName, f) == -1
 }

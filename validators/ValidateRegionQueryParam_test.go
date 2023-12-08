@@ -11,6 +11,7 @@ func TestValidateRegionQueryParameter(t *testing.T) {
 	}{
 		{input: []string{}, expected: "EU"},
 		{input: []string{"NA"}, expected: "NA"},
+		{input: []string{"na"}, expected: "NA"},
 		{input: []string{"SA"}, expected: "SA"},
 		{input: []string{"EU"}, expected: "EU"},
 		{input: []string{"KR"}, expected: "EU"},       // Assuming "KR" falls back to "EU" until translations are ready

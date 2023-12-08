@@ -12,7 +12,7 @@ type scraper struct {
 	c *colly.Collector
 }
 
-func createScraper() (s scraper) {
+func newScraper() (s scraper) {
 	s.c = colly.NewCollector()
 	s.c.SetRequestTimeout(time.Minute / 2)
 
