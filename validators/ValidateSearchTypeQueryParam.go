@@ -1,6 +1,6 @@
 package validators
 
-func ValidateSearchTypeQueryParam(query []string) string {
+func ValidateSearchTypeQueryParam(query []string) (searchType string) {
 	if 1 > len(query) {
 		return "familyName"
 	}

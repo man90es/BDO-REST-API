@@ -9,17 +9,16 @@ import (
 )
 
 func GetGuildSearch(w http.ResponseWriter, r *http.Request) {
+	name, nameOk := validators.ValidateGuildNameQueryParam(r.URL.Query()["query"])
 	page := validators.ValidatePageQueryParam(r.URL.Query()["page"])
-	queryParams, queryProvided := r.URL.Query()["query"]
 	region := validators.ValidateRegionQueryParam(r.URL.Query()["region"])
 
-	if !queryProvided || !validators.ValidateGuildName(&queryParams[0]) {
+	if !nameOk {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
-	// Run the scraper
-	data, status := scrapers.ScrapeGuildSearch(region, queryParams[0], uint16(page))
+	data, status := scrapers.ScrapeGuildSearch(region, name, page)
 
 	if status == http.StatusOK {
 		json.NewEncoder(w).Encode(data)

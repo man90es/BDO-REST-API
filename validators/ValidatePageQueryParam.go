@@ -2,7 +2,7 @@ package validators
 
 import "strconv"
 
-func ValidatePageQueryParam(query []string) uint16 {
+func ValidatePageQueryParam(query []string) (page uint16) {
 	if 1 > len(query) {
 		return 1
 	}

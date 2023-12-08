@@ -1,6 +1,6 @@
 package validators
 
-func ValidateRegionQueryParam(query []string) string {
+func ValidateRegionQueryParam(query []string) (region string) {
 	if 1 > len(query) {
 		return "EU"
 	}

@@ -7,10 +7,13 @@ import (
 
 // The naming policies in BDO are fucked up
 // This function only checks the length and allowed symbols
-// I also assumed that the allowed symbols are the same as for adventurer names
-func ValidateGuildName(name *string) bool {
-	if len(*name) < 2 {
-		return false
+func ValidateAdventurerNameQueryParam(query []string) (name string, ok bool) {
+	if 1 > len(query) {
+		return "", false
+	}
+
+	if len(query[0]) < 3 || len(query[0]) > 16 {
+		return query[0], false
 	}
 
 	// Returns false for allowed characters
@@ -39,5 +42,5 @@ func ValidateGuildName(name *string) bool {
 		return true
 	}
 
-	return strings.IndexFunc(*name, f) == -1
+	return query[0], strings.IndexFunc(query[0], f) == -1
 }

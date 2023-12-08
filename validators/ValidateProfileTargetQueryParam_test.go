@@ -4,30 +4,30 @@ import "testing"
 
 func TestValidateProfileTargetQueryParam(t *testing.T) {
 	tests := []struct {
-		expectedGood bool
-		expectedPT   string
-		input        []string
+		expectedOk bool
+		expectedPT string
+		input      []string
 	}{
 		// Valid profile targets with lengths >= 150
-		{input: []string{repeat("A", 150)}, expectedPT: repeat("A", 150), expectedGood: true},
-		{input: []string{repeat("A", 200)}, expectedPT: repeat("A", 200), expectedGood: true},
+		{input: []string{repeat("A", 150)}, expectedPT: repeat("A", 150), expectedOk: true},
+		{input: []string{repeat("A", 200)}, expectedPT: repeat("A", 200), expectedOk: true},
 
 		// Invalid profile targets with lengths < 150
-		{input: []string{""}, expectedPT: "", expectedGood: false},
-		{input: []string{"Short"}, expectedPT: "Short", expectedGood: false},
-		{input: []string{repeat("A", 149)}, expectedPT: repeat("A", 149), expectedGood: false},
+		{input: []string{""}, expectedPT: "", expectedOk: false},
+		{input: []string{"Short"}, expectedPT: "Short", expectedOk: false},
+		{input: []string{repeat("A", 149)}, expectedPT: repeat("A", 149), expectedOk: false},
 
 		// Query param not provided
-		{input: []string{}, expectedPT: "", expectedGood: false},
+		{input: []string{}, expectedPT: "", expectedOk: false},
 
 		// Several profileTargets provided
-		{input: []string{repeat("A", 150), repeat("B", 150)}, expectedPT: repeat("A", 150), expectedGood: true},
+		{input: []string{repeat("A", 150), repeat("B", 150)}, expectedPT: repeat("A", 150), expectedOk: true},
 	}
 
 	for _, test := range tests {
-		pT, good := ValidateProfileTargetQueryParam(test.input)
-		if pT != test.expectedPT || good != test.expectedGood {
-			t.Errorf("Input: %v, Expected: %v %v, Got: %v %v", test.input, test.expectedPT, test.expectedGood, pT, good)
+		pT, ok := ValidateProfileTargetQueryParam(test.input)
+		if pT != test.expectedPT || ok != test.expectedOk {
+			t.Errorf("Input: %v, Expected: %v %v, Got: %v %v", test.input, test.expectedPT, test.expectedOk, pT, ok)
 		}
 	}
 }

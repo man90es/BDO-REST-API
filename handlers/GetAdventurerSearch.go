@@ -10,11 +10,11 @@ import (
 
 func GetAdventurerSearch(w http.ResponseWriter, r *http.Request) {
 	page := validators.ValidatePageQueryParam(r.URL.Query()["page"])
-	queryParams, queryProvided := r.URL.Query()["query"]
+	query, queryOk := validators.ValidateAdventurerNameQueryParam(r.URL.Query()["query"])
 	region := validators.ValidateRegionQueryParam(r.URL.Query()["region"])
 	searchTypeParam := validators.ValidateSearchTypeQueryParam(r.URL.Query()["searchType"])
 
-	if !queryProvided || !validators.ValidateAdventurerName(&queryParams[0]) {
+	if !queryOk {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
@@ -24,8 +24,7 @@ func GetAdventurerSearch(w http.ResponseWriter, r *http.Request) {
 		"familyName":    2,
 	}[searchTypeParam]
 
-	// Run the scraper
-	data, status := scrapers.ScrapeAdventurerSearch(region, queryParams[0], searchType, uint16(page))
+	data, status := scrapers.ScrapeAdventurerSearch(region, query, searchType, page)
 
 	if status == http.StatusOK {
 		json.NewEncoder(w).Encode(data)
