@@ -5,6 +5,8 @@ import (
 	"log"
 	"time"
 
+	"bdo-rest-api/config"
+
 	colly "github.com/gocolly/colly/v2"
 )
 
@@ -16,12 +18,12 @@ func newScraper() (s scraper) {
 	s.c = colly.NewCollector()
 	s.c.SetRequestTimeout(time.Minute / 2)
 
-	if len(proxies) > 0 {
-		s.c.SetProxyFunc(proxySwitcher)
+	if len(config.GetProxyList()) > 0 {
+		s.c.SetProxyFunc(config.GetProxySwitcher())
 	}
 
 	s.c.OnRequest(func(r *colly.Request) {
-		if isVerbose() {
+		if config.GetVerbosity() {
 			log.Println("Visiting", r.URL)
 		}
 	})

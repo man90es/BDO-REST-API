@@ -7,16 +7,17 @@ import (
 	"os"
 	"time"
 
+	"bdo-rest-api/config"
 	"bdo-rest-api/handlers"
 )
 
-func BuildServer(port *string, flagCacheTTL *int, flagCacheCap *int) *http.Server {
+func BuildServer() *http.Server {
 	router, err := registerHandlers(map[string]func(http.ResponseWriter, *http.Request){
 		"/v1/adventurer/search": handlers.GetAdventurerSearch,
 		"/v1/guild/search":      handlers.GetGuildSearch,
 		"/v1/adventurer":        handlers.GetAdventurer,
 		"/v1/guild":             handlers.GetGuild,
-	}, time.Duration(*flagCacheTTL)*time.Minute, *flagCacheCap)
+	})
 
 	if err != nil {
 		log.Fatal(err)
@@ -24,7 +25,7 @@ func BuildServer(port *string, flagCacheTTL *int, flagCacheCap *int) *http.Serve
 	}
 
 	return &http.Server{
-		Addr:         fmt.Sprintf("0.0.0.0:%v", *port),
+		Addr:         fmt.Sprintf("0.0.0.0:%v", config.GetPort()),
 		Handler:      router,
 		IdleTimeout:  60 * time.Second,
 		ReadTimeout:  15 * time.Second,

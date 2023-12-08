@@ -1,6 +1,7 @@
 package cache
 
 import (
+	"bdo-rest-api/config"
 	"strings"
 	"time"
 
@@ -26,8 +27,10 @@ func formatDate(date *time.Time) string {
 }
 
 func NewCache[T any]() *cache[T] {
+	cacheTTL := config.GetCacheTTL()
+
 	return &cache[T]{
-		internalCache: goCache.New(5*time.Minute, 10*time.Minute),
+		internalCache: goCache.New(cacheTTL, cacheTTL*2),
 	}
 }
 
@@ -39,7 +42,7 @@ func (c *cache[T]) AddRecord(keys []string, data T, status int) (date string, ex
 	}
 
 	c.internalCache.Add(joinKeys(keys), entry, goCache.DefaultExpiration)
-	expirationDate := entry.date.Add(5 * time.Minute)
+	expirationDate := entry.date.Add(config.GetCacheTTL())
 
 	return formatDate(&entry.date), formatDate(&expirationDate)
 }
