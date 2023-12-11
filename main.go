@@ -14,6 +14,7 @@ import (
 
 func main() {
 	flagCacheTTL := flag.Int("cachettl", 180, "Cache TTL in minutes")
+	flagMaintenanceTTL := flag.Int("maintenancettl", 5, "Allows to limit how frequently scraper can check for maintenance end in minutes")
 	flagPort := flag.Int("port", 8001, "Port to catch requests on")
 	flagProxy := flag.String("proxy", "", "Open proxy address to make requests to BDO servers")
 	flagVerbose := flag.Bool("verbose", false, "Print out additional logs into stdout")
@@ -39,8 +40,8 @@ func main() {
 		config.SetProxyList(strings.Fields(os.Getenv("PROXY")))
 	}
 
-	// Set config variables
 	config.SetCacheTTL(time.Duration(*flagCacheTTL) * time.Minute)
+	config.SetMaintenanceStatusTTL(time.Duration(*flagMaintenanceTTL) * time.Minute)
 	config.SetVerbosity(*flagVerbose)
 
 	config.PrintConfig()

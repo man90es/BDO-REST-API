@@ -10,12 +10,13 @@ import (
 )
 
 type config struct {
-	mu            sync.RWMutex
-	cacheTTL      time.Duration
-	port          int
-	proxyList     []string
-	proxySwitcher colly.ProxyFunc
-	verbosity     bool
+	mu             sync.RWMutex
+	cacheTTL       time.Duration
+	maintenanceTTL time.Duration
+	port           int
+	proxyList      []string
+	proxySwitcher  colly.ProxyFunc
+	verbosity      bool
 }
 
 var instance *config
@@ -24,10 +25,11 @@ var once sync.Once
 func getInstance() *config {
 	once.Do(func() {
 		instance = &config{
-			cacheTTL:  0,
-			port:      8001,
-			proxyList: nil,
-			verbosity: false,
+			cacheTTL:       3 * time.Hour,
+			maintenanceTTL: 5 * time.Minute,
+			port:           8001,
+			proxyList:      nil,
+			verbosity:      false,
 		}
 	})
 	return instance
@@ -43,6 +45,18 @@ func GetCacheTTL() time.Duration {
 	getInstance().mu.RLock()
 	defer getInstance().mu.RUnlock()
 	return getInstance().cacheTTL
+}
+
+func SetMaintenanceStatusTTL(ttl time.Duration) {
+	getInstance().mu.Lock()
+	defer getInstance().mu.Unlock()
+	getInstance().maintenanceTTL = ttl
+}
+
+func GetMaintenanceStatusTTL() time.Duration {
+	getInstance().mu.RLock()
+	defer getInstance().mu.RUnlock()
+	return getInstance().maintenanceTTL
 }
 
 func SetPort(port int) {

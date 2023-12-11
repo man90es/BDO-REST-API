@@ -19,14 +19,14 @@ API documentation can be viewed [here](https://man90es.github.io/BDO-REST-API/).
 If you host the API yourself, either via Docker or natively, you can control some of its features by executing it with flags.
 
 Available flags:
-- `-cachecap`
-	- Allows to specify response cache capacity
-	- Type: unsigned integer
-	- Default value: `10000`
 - `-cachettl`
 	- Allows to specify cache TTL in minutes
 	- Type: unsigned integer
 	- Default value: `180`
+- `-maintenancettl`
+	- Allows to limit how frequently scraper can check for maintenance end in minutes
+	- Type: unsigned integer
+	- Default value: `5`
 - `-port`
 	- Allows to specify API server's port
 	- Type: unsigned integer

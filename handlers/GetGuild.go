@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"bdo-rest-api/cache"
+	"bdo-rest-api/config"
 	"bdo-rest-api/models"
 	"bdo-rest-api/scrapers"
 	"bdo-rest-api/validators"
@@ -28,7 +29,7 @@ func GetGuild(w http.ResponseWriter, r *http.Request) {
 		data, status = scrapers.ScrapeGuild(region, name)
 
 		if status == http.StatusServiceUnavailable {
-			w.Header().Set("Expires", time.Now().Add(5*time.Minute).Format(time.RFC1123Z))
+			w.Header().Set("Expires", time.Now().Add(config.GetMaintenanceStatusTTL()).Format(time.RFC1123Z))
 			w.WriteHeader(status)
 			return
 		}
