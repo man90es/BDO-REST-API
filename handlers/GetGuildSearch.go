@@ -4,10 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"time"
 
 	"bdo-rest-api/cache"
-	"bdo-rest-api/config"
 	"bdo-rest-api/models"
 	"bdo-rest-api/scrapers"
 	"bdo-rest-api/utils"
@@ -31,8 +29,8 @@ func GetGuildSearch(w http.ResponseWriter, r *http.Request) {
 	if !found {
 		data, status = scrapers.ScrapeGuildSearch(region, name, page)
 
-		if status == http.StatusServiceUnavailable {
-			w.Header().Set("Expires", utils.FormatDateForHeaders(time.Now().Add(config.GetMaintenanceStatusTTL())))
+		if isCloseTime, expires := scrapers.GetCloseTime(); isCloseTime {
+			w.Header().Set("Expires", utils.FormatDateForHeaders(expires))
 			w.WriteHeader(status)
 			return
 		}

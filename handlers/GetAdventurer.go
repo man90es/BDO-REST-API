@@ -3,10 +3,8 @@ package handlers
 import (
 	"encoding/json"
 	"net/http"
-	"time"
 
 	"bdo-rest-api/cache"
-	"bdo-rest-api/config"
 	"bdo-rest-api/models"
 	"bdo-rest-api/scrapers"
 	"bdo-rest-api/utils"
@@ -29,8 +27,8 @@ func GetAdventurer(w http.ResponseWriter, r *http.Request) {
 	if !found {
 		data, status = scrapers.ScrapeAdventurer(region, profileTarget)
 
-		if status == http.StatusServiceUnavailable {
-			w.Header().Set("Expires", utils.FormatDateForHeaders(time.Now().Add(config.GetMaintenanceStatusTTL())))
+		if isCloseTime, expires := scrapers.GetCloseTime(); isCloseTime {
+			w.Header().Set("Expires", utils.FormatDateForHeaders(expires))
 			w.WriteHeader(status)
 			return
 		}

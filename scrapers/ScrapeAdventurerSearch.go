@@ -57,7 +57,7 @@ func ScrapeAdventurerSearch(region string, query string, searchType uint8, page 
 
 	c.Visit(fmt.Sprintf("?region=%v&searchType=%v&searchKeyword=%v&Page=%v", region, searchType, query, page), region)
 
-	if IsCloseTime() {
+	if isCloseTime, _ := GetCloseTime(); isCloseTime {
 		status = http.StatusServiceUnavailable
 	}
 
