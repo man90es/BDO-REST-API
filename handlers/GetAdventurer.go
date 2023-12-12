@@ -9,6 +9,7 @@ import (
 	"bdo-rest-api/config"
 	"bdo-rest-api/models"
 	"bdo-rest-api/scrapers"
+	"bdo-rest-api/utils"
 	"bdo-rest-api/validators"
 )
 
@@ -29,7 +30,7 @@ func GetAdventurer(w http.ResponseWriter, r *http.Request) {
 		data, status = scrapers.ScrapeAdventurer(region, profileTarget)
 
 		if status == http.StatusServiceUnavailable {
-			w.Header().Set("Expires", time.Now().Add(config.GetMaintenanceStatusTTL()).Format(time.RFC1123Z))
+			w.Header().Set("Expires", utils.FormatDateForHeaders(time.Now().Add(config.GetMaintenanceStatusTTL())))
 			w.WriteHeader(status)
 			return
 		}
