@@ -20,7 +20,11 @@
 				"description": "Only Eropean, North American and South American servers are supported. If you omit this parameter, it's assumed that you want to search on the European server.",
 				"schema": {
 					"type": "string",
-					"enum": ["EU", "NA", "SA"],
+					"enum": [
+						"EU",
+						"NA",
+						"SA"
+					],
 					"default": "EU"
 				}
 			}
@@ -59,7 +63,11 @@
 						"description": "Only Eropean, North American and South American servers are supported. You may omit this parameter for the European and North American servers.",
 						"schema": {
 							"type": "string",
-							"enum": ["EU", "NA", "SA"],
+							"enum": [
+								"EU",
+								"NA",
+								"SA"
+							],
 							"default": "EU"
 						}
 					}
@@ -83,7 +91,11 @@
 										},
 										"region": {
 											"type": "string",
-											"enum": ["EU", "NA"]
+											"enum": [
+												"EU",
+												"NA",
+												"SA"
+											]
 										},
 										"guild": {
 											"properties": {
@@ -214,14 +226,17 @@
 						"description": "Switch between filtering by family name and character name. If you omit this parameter, it's assumed that you want to filter by family name.",
 						"schema": {
 							"type": "string",
-							"enum": ["familyName", "characterName"],
+							"enum": [
+								"familyName",
+								"characterName"
+							],
 							"example": "familyName"
 						}
 					},
 					{
 						"name": "page",
 						"in": "query",
-						"description": "This parameter is understood by the API, but you should either omit it or set to 1. Because of how player search works, there is never more than one page.",
+						"description": "This parameter is understood by the API, but you should either omit it or set to 1. Because of how search currently works, there is never more than one page.",
 						"schema": {
 							"type": "number",
 							"default": 1
@@ -249,7 +264,11 @@
 											},
 											"region": {
 												"type": "string",
-												"enum": ["EU", "NA", "SA"]
+												"enum": [
+													"EU",
+													"NA",
+													"SA"
+												]
 											},
 											"guild": {
 												"properties": {
@@ -335,7 +354,11 @@
 										},
 										"region": {
 											"type": "string",
-											"enum": ["EU", "NA", "SA"]
+											"enum": [
+												"EU",
+												"NA",
+												"SA"
+											]
 										},
 										"createdOn": {
 											"type": "string",
@@ -416,7 +439,7 @@
 					{
 						"name": "page",
 						"in": "query",
-						"description": "If the results have more than one page, you can navigate through those pages using this parameter. The indexing starts with 1.",
+						"description": "This parameter is understood by the API, but you should either omit it or set to 1. Because of how search currently works, there is never more than one page.",
 						"schema": {
 							"type": "number",
 							"default": 1
@@ -440,7 +463,11 @@
 											},
 											"region": {
 												"type": "string",
-												"enum": ["EU", "NA", "SA"]
+												"enum": [
+													"EU",
+													"NA",
+													"SA"
+												]
 											},
 											"createdOn": {
 												"type": "string",
@@ -461,7 +488,10 @@
 											},
 											"kind": {
 												"type": "string",
-												"enum": ["Guild", "Clan"]
+												"enum": [
+													"Guild",
+													"Clan"
+												]
 											},
 											"population": {
 												"type": "number",
