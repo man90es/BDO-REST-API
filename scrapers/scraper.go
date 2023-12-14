@@ -11,10 +11,12 @@ import (
 )
 
 type scraper struct {
-	c *colly.Collector
+	c      *colly.Collector
+	region string
 }
 
-func newScraper() (s scraper) {
+func newScraper(region string) (s scraper) {
+	s.region = region
 	s.c = colly.NewCollector()
 	s.c.SetRequestTimeout(time.Minute / 2)
 
@@ -29,7 +31,7 @@ func newScraper() (s scraper) {
 	})
 
 	s.OnHTML(`.closetime_wrap`, func(e *colly.HTMLElement) {
-		setCloseTime()
+		setCloseTime(region)
 	})
 
 	return
@@ -39,13 +41,13 @@ func (s *scraper) OnHTML(goquerySelector string, f colly.HTMLCallback) {
 	s.c.OnHTML(goquerySelector, f)
 }
 
-func (s *scraper) Visit(URL string, region string) error {
+func (s *scraper) Visit(URL string) error {
 	regionPrefix := map[string]string{
 		"EU": "naeu.playblackdesert.com/en-US",
 		"KR": "kr.playblackdesert.com/ko-KR",
 		"SA": "sa.playblackdesert.com/pt-BR",
 		"US": "naeu.playblackdesert.com/en-US",
-	}[region]
+	}[s.region]
 
 	return s.c.Visit(fmt.Sprintf("https://www.%v/Adventure%v", regionPrefix, URL))
 }

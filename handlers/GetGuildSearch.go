@@ -8,7 +8,6 @@ import (
 	"bdo-rest-api/cache"
 	"bdo-rest-api/models"
 	"bdo-rest-api/scrapers"
-	"bdo-rest-api/utils"
 	"bdo-rest-api/validators"
 )
 
@@ -24,14 +23,16 @@ func GetGuildSearch(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if ok := giveMaintenanceResponse(w, region); ok {
+		return
+	}
+
 	// Look for cached data, then run the scraper if needed
 	data, status, date, expires, found := guildSearchCache.GetRecord([]string{region, name, fmt.Sprint(page)})
 	if !found {
 		data, status = scrapers.ScrapeGuildSearch(region, name, page)
 
-		if isCloseTime, expires := scrapers.GetCloseTime(); isCloseTime {
-			w.Header().Set("Expires", utils.FormatDateForHeaders(expires))
-			w.WriteHeader(status)
+		if ok := giveMaintenanceResponse(w, region); ok {
 			return
 		}
 

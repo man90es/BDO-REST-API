@@ -12,7 +12,7 @@ import (
 )
 
 func ScrapeAdventurerSearch(region string, query string, searchType uint8, page uint16) (profiles []models.Profile, status int) {
-	c := newScraper()
+	c := newScraper(region)
 
 	status = http.StatusNotFound
 
@@ -55,9 +55,9 @@ func ScrapeAdventurerSearch(region string, query string, searchType uint8, page 
 		profiles = append(profiles, profile)
 	})
 
-	c.Visit(fmt.Sprintf("?region=%v&searchType=%v&searchKeyword=%v&Page=%v", region, searchType, query, page), region)
+	c.Visit(fmt.Sprintf("?region=%v&searchType=%v&searchKeyword=%v&Page=%v", region, searchType, query, page))
 
-	if isCloseTime, _ := GetCloseTime(); isCloseTime {
+	if isCloseTime, _ := GetCloseTime(region); isCloseTime {
 		status = http.StatusServiceUnavailable
 	}
 

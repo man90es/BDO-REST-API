@@ -14,9 +14,7 @@ func registerHandlers(handlerMap map[string]func(http.ResponseWriter, *http.Requ
 	for route, handler := range handlerMap {
 		router.Handle(route,
 			middleware.SetHeaders(
-				middleware.CheckForMaintenance(
-					http.HandlerFunc(handler),
-				),
+				http.HandlerFunc(handler),
 			),
 		).Methods("GET")
 	}

@@ -6,13 +6,17 @@ import (
 	"bdo-rest-api/config"
 )
 
-var lastCloseTime time.Time
+var lastCloseTimes = map[string]time.Time{
+	"EU": time.Time{},
+	"NA": time.Time{},
+	"SA": time.Time{},
+}
 
-func GetCloseTime() (isCloseTime bool, expires time.Time) {
-	expires = lastCloseTime.Add(config.GetMaintenanceStatusTTL())
+func GetCloseTime(region string) (isCloseTime bool, expires time.Time) {
+	expires = lastCloseTimes[region].Add(config.GetMaintenanceStatusTTL())
 	return time.Now().Before(expires), expires
 }
 
-func setCloseTime() {
-	lastCloseTime = time.Now()
+func setCloseTime(region string) {
+	lastCloseTimes[region] = time.Now()
 }

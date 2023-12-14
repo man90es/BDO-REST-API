@@ -12,7 +12,7 @@ import (
 )
 
 func ScrapeGuild(region, name string) (guildProfile models.GuildProfile, status int) {
-	c := newScraper()
+	c := newScraper(region)
 
 	guildProfile.Region = region
 	status = http.StatusNotFound
@@ -59,9 +59,9 @@ func ScrapeGuild(region, name string) (guildProfile models.GuildProfile, status 
 		guildProfile.Members = append(guildProfile.Members, member)
 	})
 
-	c.Visit(fmt.Sprintf("/Guild/GuildProfile?guildName=%v&region=%v", name, region), region)
+	c.Visit(fmt.Sprintf("/Guild/GuildProfile?guildName=%v&region=%v", name, region))
 
-	if isCloseTime, _ := GetCloseTime(); isCloseTime {
+	if isCloseTime, _ := GetCloseTime(region); isCloseTime {
 		status = http.StatusServiceUnavailable
 	}
 

@@ -8,7 +8,6 @@ import (
 	"bdo-rest-api/cache"
 	"bdo-rest-api/models"
 	"bdo-rest-api/scrapers"
-	"bdo-rest-api/utils"
 	"bdo-rest-api/validators"
 )
 
@@ -25,14 +24,16 @@ func GetAdventurerSearch(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if ok := giveMaintenanceResponse(w, region); ok {
+		return
+	}
+
 	// Look for cached data, then run the scraper if needed
 	data, status, date, expires, found := profileSearchCache.GetRecord([]string{region, query, fmt.Sprint(searchType), fmt.Sprint(page)})
 	if !found {
 		data, status = scrapers.ScrapeAdventurerSearch(region, query, searchType, page)
 
-		if isCloseTime, expires := scrapers.GetCloseTime(); isCloseTime {
-			w.Header().Set("Expires", utils.FormatDateForHeaders(expires))
-			w.WriteHeader(status)
+		if ok := giveMaintenanceResponse(w, region); ok {
 			return
 		}
 

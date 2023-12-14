@@ -16,7 +16,7 @@ import (
 )
 
 func ScrapeAdventurer(region string, profileTarget string) (profile models.Profile, status int) {
-	c := newScraper()
+	c := newScraper(region)
 
 	profile.ProfileTarget = profileTarget
 	profile.Region = region
@@ -124,9 +124,9 @@ func ScrapeAdventurer(region string, profileTarget string) (profile models.Profi
 		profile.Privacy = profile.Privacy | models.PrivateSpecs
 	})
 
-	c.Visit(fmt.Sprintf("/Profile?profileTarget=%v", url.QueryEscape(profileTarget)), region)
+	c.Visit(fmt.Sprintf("/Profile?profileTarget=%v", url.QueryEscape(profileTarget)))
 
-	if isCloseTime, _ := GetCloseTime(); isCloseTime {
+	if isCloseTime, _ := GetCloseTime(region); isCloseTime {
 		status = http.StatusServiceUnavailable
 	}
 
