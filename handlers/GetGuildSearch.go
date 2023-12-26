@@ -16,9 +16,9 @@ var guildSearchCache = cache.NewCache[[]models.GuildProfile]()
 func GetGuildSearch(w http.ResponseWriter, r *http.Request) {
 	name, nameOk := validators.ValidateGuildNameQueryParam(r.URL.Query()["query"])
 	page := validators.ValidatePageQueryParam(r.URL.Query()["page"])
-	region := validators.ValidateRegionQueryParam(r.URL.Query()["region"])
+	region, regionOk := validators.ValidateRegionQueryParam(r.URL.Query()["region"])
 
-	if !nameOk {
+	if !nameOk || !regionOk {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}

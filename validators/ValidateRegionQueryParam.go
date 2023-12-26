@@ -1,18 +1,17 @@
 package validators
 
-import "strings"
+import (
+	"slices"
+	"strings"
+)
 
-func ValidateRegionQueryParam(query []string) (region string) {
+func ValidateRegionQueryParam(query []string) (region string, ok bool) {
 	if 1 > len(query) {
-		return "EU"
+		return "EU", true
 	}
 
 	region = strings.ToUpper(query[0])
 
 	// TODO: Add KR region once the translations are ready
-	if region == "NA" || region == "SA" {
-		return region
-	}
-
-	return "EU"
+	return region, slices.Contains([]string{"EU", "NA", "SA"}, region)
 }

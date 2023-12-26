@@ -6,22 +6,23 @@ import (
 
 func TestValidateRegionQueryParameter(t *testing.T) {
 	tests := []struct {
-		input    []string
-		expected string
+		expectedOk     bool
+		expectedRegion string
+		input          []string
 	}{
-		{input: []string{}, expected: "EU"},
-		{input: []string{"NA"}, expected: "NA"},
-		{input: []string{"na"}, expected: "NA"},
-		{input: []string{"SA"}, expected: "SA"},
-		{input: []string{"EU"}, expected: "EU"},
-		{input: []string{"KR"}, expected: "EU"},       // Assuming "KR" falls back to "EU" until translations are ready
-		{input: []string{"NA", "SA"}, expected: "NA"}, // Takes the first region in case of multiple regions
+		{input: []string{}, expectedRegion: "EU", expectedOk: true},
+		{input: []string{"NA"}, expectedRegion: "NA", expectedOk: true},
+		{input: []string{"na"}, expectedRegion: "NA", expectedOk: true},
+		{input: []string{"SA"}, expectedRegion: "SA", expectedOk: true},
+		{input: []string{"EU"}, expectedRegion: "EU", expectedOk: true},
+		{input: []string{"KR"}, expectedRegion: "KR", expectedOk: false},
+		{input: []string{"NA", "SA"}, expectedRegion: "NA", expectedOk: true}, // Takes the first region in case of multiple regions
 	}
 
 	for _, test := range tests {
-		result := ValidateRegionQueryParam(test.input)
-		if result != test.expected {
-			t.Errorf("For input %v, expected %s, but got %s", test.input, test.expected, result)
+		result, ok := ValidateRegionQueryParam(test.input)
+		if result != test.expectedRegion || ok != test.expectedOk {
+			t.Errorf("For input %v, expected %v %v, but got %v %v", test.input, test.expectedRegion, test.expectedOk, result, ok)
 		}
 	}
 }

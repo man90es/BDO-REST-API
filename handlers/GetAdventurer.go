@@ -14,9 +14,9 @@ var profilesCache = cache.NewCache[models.Profile]()
 
 func GetAdventurer(w http.ResponseWriter, r *http.Request) {
 	profileTarget, profileTargetOk := validators.ValidateProfileTargetQueryParam(r.URL.Query()["profileTarget"])
-	region := validators.ValidateRegionQueryParam(r.URL.Query()["region"])
+	region, regionOk := validators.ValidateRegionQueryParam(r.URL.Query()["region"])
 
-	if !profileTargetOk {
+	if !profileTargetOk || !regionOk {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}

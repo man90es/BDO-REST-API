@@ -14,9 +14,9 @@ var guildProfilesCache = cache.NewCache[models.GuildProfile]()
 
 func GetGuild(w http.ResponseWriter, r *http.Request) {
 	name, nameOk := validators.ValidateGuildNameQueryParam(r.URL.Query()["guildName"])
-	region := validators.ValidateRegionQueryParam(r.URL.Query()["region"])
+	region, regionOk := validators.ValidateRegionQueryParam(r.URL.Query()["region"])
 
-	if !nameOk {
+	if !nameOk || !regionOk {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
