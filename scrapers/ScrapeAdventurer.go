@@ -32,15 +32,21 @@ func ScrapeAdventurer(region string, profileTarget string) (profile models.Profi
 	})
 
 	c.OnHTML(`.desc.guild a`, func(e *colly.HTMLElement) {
-		if e.Attr("href") != "javscript:void(0)" {
-			profile.Guild = &models.GuildProfile{
-				Name: e.Text,
-			}
+		profile.Guild = &models.GuildProfile{
+			Name: e.Text,
 		}
 	})
 
 	c.OnHTML(`.desc.guild span`, func(e *colly.HTMLElement) {
-		profile.Privacy = profile.Privacy | models.PrivateGuild
+		guildStatus := e.Text
+
+		if region != "EU" && region != "NA" {
+			translators.TranslateMisc(&guildStatus)
+		}
+
+		if guildStatus == "Private" {
+			profile.Privacy = profile.Privacy | models.PrivateGuild
+		}
 	})
 
 	c.OnHTML(`.line_list .desc:not(.guild)`, func(e *colly.HTMLElement) {
@@ -49,8 +55,7 @@ func ScrapeAdventurer(region string, profileTarget string) (profile models.Profi
 	})
 
 	c.OnHTML(`.character_desc_area .character_info span:nth-child(3) em`, func(e *colly.HTMLElement) {
-		if e.Text != "Private" {
-			contributionPoints, _ := strconv.Atoi(e.Text)
+		if contributionPoints, err := strconv.Atoi(e.Text); err == nil {
 			profile.ContributionPoints = uint16(contributionPoints)
 		} else {
 			profile.Privacy = profile.Privacy | models.PrivateContrib
@@ -70,8 +75,7 @@ func ScrapeAdventurer(region string, profileTarget string) (profile models.Profi
 			character.Main = true
 		})
 
-		if levelStr := e.ChildText(".character_info span:nth-child(2) em"); levelStr != "Private" {
-			level, _ := strconv.Atoi(levelStr)
+		if level, err := strconv.Atoi(e.ChildText(".character_info span:nth-child(2) em")); err == nil {
 			character.Level = uint8(level)
 		} else {
 			profile.Privacy = profile.Privacy | models.PrivateLevel
