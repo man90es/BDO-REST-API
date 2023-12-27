@@ -2,38 +2,47 @@ package handlers
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
-	"strconv"
 
+	"bdo-rest-api/cache"
+	"bdo-rest-api/models"
 	"bdo-rest-api/scrapers"
 	"bdo-rest-api/validators"
 )
 
-func GetGuildSearch(w http.ResponseWriter, r *http.Request) {
-	regionParams, regionProvided := r.URL.Query()["region"]
-	pageParams, pageProvided := r.URL.Query()["page"]
-	queryParams, queryProvided := r.URL.Query()["query"]
+var guildSearchCache = cache.NewCache[[]models.GuildProfile]()
 
-	// Return status 400 if a required parameter is invalid
-	if !queryProvided || !validators.ValidateGuildName(&queryParams[0]) {
+func GetGuildSearch(w http.ResponseWriter, r *http.Request) {
+	name, nameOk := validators.ValidateGuildNameQueryParam(r.URL.Query()["query"])
+	page := validators.ValidatePageQueryParam(r.URL.Query()["page"])
+	region, regionOk := validators.ValidateRegionQueryParam(r.URL.Query()["region"])
+
+	if !nameOk || !regionOk {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
-	// Set defaults for optional parameters
-	region := defaultRegion
-	page := defaultPage
-
-	if regionProvided && validators.ValidateRegion(&regionParams[0]) {
-		region = regionParams[0]
+	if ok := giveMaintenanceResponse(w, region); ok {
+		return
 	}
 
-	if pageProvided && validators.ValidatePage(&pageParams[0]) {
-		page, _ = strconv.Atoi(pageParams[0])
+	// Look for cached data, then run the scraper if needed
+	data, status, date, expires, found := guildSearchCache.GetRecord([]string{region, name, fmt.Sprint(page)})
+	if !found {
+		data, status = scrapers.ScrapeGuildSearch(region, name, page)
+
+		if ok := giveMaintenanceResponse(w, region); ok {
+			return
+		}
+
+		date, expires = guildSearchCache.AddRecord([]string{region, name, fmt.Sprint(page)}, data, status)
 	}
 
-	// Run the scraper
-	if data, status := scrapers.ScrapeGuildSearch(region, queryParams[0], uint16(page)); status == http.StatusOK {
+	w.Header().Set("Date", date)
+	w.Header().Set("Expires", expires)
+
+	if status == http.StatusOK {
 		json.NewEncoder(w).Encode(data)
 	} else {
 		w.WriteHeader(status)

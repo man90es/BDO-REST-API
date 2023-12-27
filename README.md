@@ -10,7 +10,7 @@ A scraper for Black Desert Online player in-game data with a REST API. It curren
 There are two ways to use this scraper for your needs:
 * By querying https://bdo.hemlo.cc/communityapi/v1 — this is the "official" instance hosted by me.
 * If you want to have more control over the API, host the scraper yourself using one of the following methods:
-  - As a Docker container: the image is available on [DockerHub](https://hub.docker.com/r/man90/bdo-rest-api) or you can build it yourself following instructions [here](docs/buildingDocker.md).
+  - As a Docker container: the image is available on [DockerHub](https://hub.docker.com/r/man90/bdo-rest-api).
   - Natively: build the binary from source as described in [this guide](docs/buildingFromSource.md).
 
 API documentation can be viewed [here](https://man90es.github.io/BDO-REST-API/).
@@ -19,14 +19,14 @@ API documentation can be viewed [here](https://man90es.github.io/BDO-REST-API/).
 If you host the API yourself, either via Docker or natively, you can control some of its features by executing it with flags.
 
 Available flags:
-- `-cachecap`
-	- Allows to specify response cache capacity
-	- Type: unsigned integer
-	- Default value: `10000`
 - `-cachettl`
 	- Allows to specify cache TTL in minutes
 	- Type: unsigned integer
 	- Default value: `180`
+- `-maintenancettl`
+	- Allows to limit how frequently scraper can check for maintenance end in minutes
+	- Type: unsigned integer
+	- Default value: `5`
 - `-port`
 	- Allows to specify API server's port
 	- Type: unsigned integer

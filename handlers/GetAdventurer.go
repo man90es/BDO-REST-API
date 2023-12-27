@@ -4,29 +4,43 @@ import (
 	"encoding/json"
 	"net/http"
 
+	"bdo-rest-api/cache"
+	"bdo-rest-api/models"
 	"bdo-rest-api/scrapers"
 	"bdo-rest-api/validators"
 )
 
-func GetAdventurer(w http.ResponseWriter, r *http.Request) {
-	profileTargetParams, profileTargetProvided := r.URL.Query()["profileTarget"]
-	regionParams, regionProvided := r.URL.Query()["region"]
+var profilesCache = cache.NewCache[models.Profile]()
 
-	// Return status 400 if a required parameter is invalid
-	if !profileTargetProvided || !validators.ValidateProfileTarget(&profileTargetParams[0]) {
+func GetAdventurer(w http.ResponseWriter, r *http.Request) {
+	profileTarget, profileTargetOk := validators.ValidateProfileTargetQueryParam(r.URL.Query()["profileTarget"])
+	region, regionOk := validators.ValidateRegionQueryParam(r.URL.Query()["region"])
+
+	if !profileTargetOk || !regionOk {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
-	// Set defaults for optional parameters
-	region := defaultRegion
-
-	if regionProvided && validators.ValidateRegion(&regionParams[0]) {
-		region = regionParams[0]
+	if ok := giveMaintenanceResponse(w, region); ok {
+		return
 	}
 
-	// Run the scraper
-	if data, status := scrapers.ScrapeAdventurer(region, profileTargetParams[0]); status == http.StatusOK {
+	// Look for cached data, then run the scraper if needed
+	data, status, date, expires, found := profilesCache.GetRecord([]string{region, profileTarget})
+	if !found {
+		data, status = scrapers.ScrapeAdventurer(region, profileTarget)
+
+		if ok := giveMaintenanceResponse(w, region); ok {
+			return
+		}
+
+		date, expires = profilesCache.AddRecord([]string{region, profileTarget}, data, status)
+	}
+
+	w.Header().Set("Date", date)
+	w.Header().Set("Expires", expires)
+
+	if status == http.StatusOK {
 		json.NewEncoder(w).Encode(data)
 	} else {
 		w.WriteHeader(status)

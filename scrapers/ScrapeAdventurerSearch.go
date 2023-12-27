@@ -12,14 +12,12 @@ import (
 )
 
 func ScrapeAdventurerSearch(region string, query string, searchType uint8, page uint16) (profiles []models.Profile, status int) {
-	c := collyFactory()
-	closetime := false
+	c := newScraper(region)
 
-	c.OnHTML(closetimeSelector, func(e *colly.HTMLElement) {
-		closetime = true
-	})
+	status = http.StatusNotFound
 
 	c.OnHTML(`.box_list_area li:not(.no_result)`, func(e *colly.HTMLElement) {
+		status = http.StatusOK
 		profile := models.Profile{
 			Region:        region,
 			FamilyName:    e.ChildText(".title a"),
@@ -42,7 +40,7 @@ func ScrapeAdventurerSearch(region string, query string, searchType uint8, page 
 
 		// Site displays the main character when searching by family name
 		// And the searched character when searching by character name
-		if 2 == searchType {
+		if searchType == 2 {
 			profile.Characters[0].Main = true
 		}
 
@@ -57,14 +55,10 @@ func ScrapeAdventurerSearch(region string, query string, searchType uint8, page 
 		profiles = append(profiles, profile)
 	})
 
-	c.Visit(fmt.Sprintf("%v/Adventure?region=%v&searchType=%v&searchKeyword=%v&Page=%v", getSiteRoot(region), region, searchType, query, page))
+	c.Visit(fmt.Sprintf("?region=%v&searchType=%v&searchKeyword=%v&Page=%v", region, searchType, query, page))
 
-	if closetime {
+	if isCloseTime, _ := GetCloseTime(region); isCloseTime {
 		status = http.StatusServiceUnavailable
-	} else if len(profiles) < 1 {
-		status = http.StatusNotFound
-	} else {
-		status = http.StatusOK
 	}
 
 	return

@@ -12,14 +12,10 @@ import (
 )
 
 func ScrapeGuild(region, name string) (guildProfile models.GuildProfile, status int) {
-	c := collyFactory()
+	c := newScraper(region)
 
 	guildProfile.Region = region
 	status = http.StatusNotFound
-
-	c.OnHTML(closetimeSelector, func(e *colly.HTMLElement) {
-		status = http.StatusServiceUnavailable
-	})
 
 	c.OnHTML(`.region_info`, func(e *colly.HTMLElement) {
 		guildProfile.Region = e.Text
@@ -63,7 +59,11 @@ func ScrapeGuild(region, name string) (guildProfile models.GuildProfile, status 
 		guildProfile.Members = append(guildProfile.Members, member)
 	})
 
-	c.Visit(fmt.Sprintf("%v/Adventure/Guild/GuildProfile?guildName=%v&region=%v", getSiteRoot(region), name, region))
+	c.Visit(fmt.Sprintf("/Guild/GuildProfile?guildName=%v&region=%v", name, region))
+
+	if isCloseTime, _ := GetCloseTime(region); isCloseTime {
+		status = http.StatusServiceUnavailable
+	}
 
 	return
 }

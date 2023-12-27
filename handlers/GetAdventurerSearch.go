@@ -2,47 +2,48 @@ package handlers
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
-	"strconv"
 
+	"bdo-rest-api/cache"
+	"bdo-rest-api/models"
 	"bdo-rest-api/scrapers"
 	"bdo-rest-api/validators"
 )
 
-func GetAdventurerSearch(w http.ResponseWriter, r *http.Request) {
-	regionParams, regionProvided := r.URL.Query()["region"]
-	searchTypeParams, searchTypeProvided := r.URL.Query()["searchType"]
-	pageParams, pageProvided := r.URL.Query()["page"]
-	queryParams, queryProvided := r.URL.Query()["query"]
+var profileSearchCache = cache.NewCache[[]models.Profile]()
 
-	// Return status 400 if a required parameter is invalid
-	if !queryProvided || !validators.ValidateAdventurerName(&queryParams[0]) {
+func GetAdventurerSearch(w http.ResponseWriter, r *http.Request) {
+	page := validators.ValidatePageQueryParam(r.URL.Query()["page"])
+	query, queryOk := validators.ValidateAdventurerNameQueryParam(r.URL.Query()["query"])
+	region, regionOk := validators.ValidateRegionQueryParam(r.URL.Query()["region"])
+	searchType := validators.ValidateSearchTypeQueryParam(r.URL.Query()["searchType"])
+
+	if !queryOk || !regionOk {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
-	// Set defaults for optional parameters
-	region := defaultRegion
-	searchType := uint8(2)
-	page := defaultPage
-
-	if regionProvided && validators.ValidateRegion(&regionParams[0]) {
-		region = regionParams[0]
+	if ok := giveMaintenanceResponse(w, region); ok {
+		return
 	}
 
-	if searchTypeProvided && validators.ValidateSearchType(&searchTypeParams[0]) {
-		searchType = map[string]uint8{
-			"characterName": 1,
-			"familyName":    2,
-		}[searchTypeParams[0]]
+	// Look for cached data, then run the scraper if needed
+	data, status, date, expires, found := profileSearchCache.GetRecord([]string{region, query, fmt.Sprint(searchType), fmt.Sprint(page)})
+	if !found {
+		data, status = scrapers.ScrapeAdventurerSearch(region, query, searchType, page)
+
+		if ok := giveMaintenanceResponse(w, region); ok {
+			return
+		}
+
+		date, expires = profileSearchCache.AddRecord([]string{region, query, fmt.Sprint(searchType), fmt.Sprint(page)}, data, status)
 	}
 
-	if pageProvided && validators.ValidatePage(&pageParams[0]) {
-		page, _ = strconv.Atoi(pageParams[0])
-	}
+	w.Header().Set("Date", date)
+	w.Header().Set("Expires", expires)
 
-	// Run the scraper
-	if data, status := scrapers.ScrapeAdventurerSearch(region, queryParams[0], searchType, uint16(page)); status == http.StatusOK {
+	if status == http.StatusOK {
 		json.NewEncoder(w).Encode(data)
 	} else {
 		w.WriteHeader(status)

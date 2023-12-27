@@ -13,15 +13,13 @@ import (
 )
 
 func ScrapeGuildSearch(region, query string, page uint16) (guildProfiles []models.GuildProfile, status int) {
-	c := collyFactory()
-	closetime := false
+	c := newScraper(region)
 
-	c.OnHTML(closetimeSelector, func(e *colly.HTMLElement) {
-		closetime = true
-	})
+	status = http.StatusNotFound
 
 	c.OnHTML(`.box_list_area li:not(.no_result)`, func(e *colly.HTMLElement) {
 		createdOn := utils.ParseDate(e.ChildText(".date"))
+		status = http.StatusOK
 
 		guildProfile := models.GuildProfile{
 			Name:   e.ChildText(".guild_title a"),
@@ -50,14 +48,10 @@ func ScrapeGuildSearch(region, query string, page uint16) (guildProfiles []model
 		guildProfiles = append(guildProfiles, guildProfile)
 	})
 
-	c.Visit(fmt.Sprintf("%v/Adventure/Guild?region=%v&page=%v&searchText=%v", getSiteRoot(region), region, page, query))
+	c.Visit(fmt.Sprintf("/Guild?region=%v&page=%v&searchText=%v", region, page, query))
 
-	if closetime {
+	if isCloseTime, _ := GetCloseTime(region); isCloseTime {
 		status = http.StatusServiceUnavailable
-	} else if len(guildProfiles) < 1 {
-		status = http.StatusNotFound
-	} else {
-		status = http.StatusOK
 	}
 
 	return
