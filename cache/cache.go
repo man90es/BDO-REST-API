@@ -28,19 +28,20 @@ func NewCache[T any]() *cache[T] {
 	cacheTTL := config.GetCacheTTL()
 
 	return &cache[T]{
-		internalCache: goCache.New(cacheTTL, cacheTTL*2),
+		internalCache: goCache.New(cacheTTL, time.Hour),
 	}
 }
 
 func (c *cache[T]) AddRecord(keys []string, data T, status int) (date string, expires string) {
+	cacheTTL := config.GetCacheTTL()
 	entry := cacheEntry[T]{
 		data:   data,
 		date:   time.Now(),
 		status: status,
 	}
 
-	c.internalCache.Add(joinKeys(keys), entry, goCache.DefaultExpiration)
-	expirationDate := entry.date.Add(config.GetCacheTTL())
+	c.internalCache.Add(joinKeys(keys), entry, cacheTTL)
+	expirationDate := entry.date.Add(cacheTTL)
 
 	return utils.FormatDateForHeaders(entry.date), utils.FormatDateForHeaders(expirationDate)
 }
