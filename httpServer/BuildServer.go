@@ -13,10 +13,11 @@ import (
 
 func BuildServer() *http.Server {
 	router, err := registerHandlers(map[string]func(http.ResponseWriter, *http.Request){
-		"/v1/adventurer/search": handlers.GetAdventurerSearch,
-		"/v1/guild/search":      handlers.GetGuildSearch,
+		"/v1":                   handlers.GetStatus,
 		"/v1/adventurer":        handlers.GetAdventurer,
+		"/v1/adventurer/search": handlers.GetAdventurerSearch,
 		"/v1/guild":             handlers.GetGuild,
+		"/v1/guild/search":      handlers.GetGuildSearch,
 	})
 
 	if err != nil {

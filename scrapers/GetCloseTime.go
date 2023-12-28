@@ -7,14 +7,14 @@ import (
 )
 
 var lastCloseTimes = map[string]time.Time{
-	"EU": {},
-	"SA": {},
+	"EUNA": {},
+	"SA":   {},
 }
 
 func GetCloseTime(region string) (isCloseTime bool, expires time.Time) {
-	// NA and EU use one website
-	if region == "NA" {
-		region = "EU"
+	// EU and NA use one website
+	if region == "EU" || region == "NA" {
+		region = "EUNA"
 	}
 
 	expires = lastCloseTimes[region].Add(config.GetMaintenanceStatusTTL())
@@ -23,4 +23,8 @@ func GetCloseTime(region string) (isCloseTime bool, expires time.Time) {
 
 func setCloseTime(region string) {
 	lastCloseTimes[region] = time.Now()
+}
+
+func GetLastCloseTimes() map[string]time.Time {
+	return lastCloseTimes
 }

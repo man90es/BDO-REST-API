@@ -42,6 +42,79 @@
 		}
 	},
 	"paths": {
+		"/v1": {
+			"get": {
+				"summary": "Retrieve instance's status",
+				"operationId": "getMeta",
+				"responses": {
+					"200": {
+						"description": "OK.",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"cache": {
+											"type": "object",
+											"properties": {
+												"lastDetectedMaintenance": {
+													"type": "object",
+													"example": {
+														"EUNA": "0001-01-01T00:00:00Z",
+														"SA": "0001-01-01T00:00:00Z"
+													}
+												},
+												"responses": {
+													"type": "object",
+													"properties": {
+														"/adventurer": {
+															"type": "number"
+														},
+														"/adventurer/search": {
+															"type": "number"
+														},
+														"/guild": {
+															"type": "number"
+														},
+														"/guild/search": {
+															"type": "number"
+														}
+													}
+												},
+												"ttl": {
+													"type": "object",
+													"properties": {
+														"general": {
+															"type": "string",
+															"example": "3h0m0s"
+														},
+														"maintenanceStatus": {
+															"type": "string",
+															"example": "5m0s"
+														}
+													}
+												}
+											}
+										},
+										"proxies": {
+											"type": "number"
+										},
+										"uptime": {
+											"type": "string",
+											"example": "2m49s"
+										},
+										"version": {
+											"type": "string",
+											"example": "1.5.1"
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		},
 		"/v1/adventurer": {
 			"get": {
 				"summary": "Retrieve player's profile.",
