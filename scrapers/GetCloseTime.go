@@ -22,6 +22,11 @@ func GetCloseTime(region string) (isCloseTime bool, expires time.Time) {
 }
 
 func setCloseTime(region string) {
+	// EU and NA use one website
+	if region == "EU" || region == "NA" {
+		region = "EUNA"
+	}
+
 	lastCloseTimes[region] = time.Now()
 }
 
