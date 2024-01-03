@@ -30,6 +30,11 @@ func GetAdventurer(w http.ResponseWriter, r *http.Request) {
 	if !found {
 		data, status = scrapers.ScrapeAdventurer(region, profileTarget)
 
+		if status == http.StatusInternalServerError {
+			w.WriteHeader(status)
+			return
+		}
+
 		if ok := giveMaintenanceResponse(w, region); ok {
 			return
 		}

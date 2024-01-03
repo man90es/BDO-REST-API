@@ -22,6 +22,11 @@ func ScrapeAdventurer(region string, profileTarget string) (profile models.Profi
 	profile.Region = region
 	status = http.StatusNotFound
 
+	// Detect being banned by IP address
+	c.OnHTML(`.type_2`, func(e *colly.HTMLElement) {
+		status = http.StatusInternalServerError
+	})
+
 	c.OnHTML(`.nick`, func(e *colly.HTMLElement) {
 		profile.FamilyName = e.Text
 		status = http.StatusOK

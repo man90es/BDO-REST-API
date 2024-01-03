@@ -32,6 +32,11 @@ func GetGuildSearch(w http.ResponseWriter, r *http.Request) {
 	if !found {
 		data, status = scrapers.ScrapeGuildSearch(region, name, page)
 
+		if status == http.StatusInternalServerError {
+			w.WriteHeader(status)
+			return
+		}
+
 		if ok := giveMaintenanceResponse(w, region); ok {
 			return
 		}

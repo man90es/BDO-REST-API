@@ -16,8 +16,10 @@ type scraper struct {
 }
 
 func newScraper(region string) (s scraper) {
+	useragent := colly.UserAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Safari/537.36")
+
 	s.region = region
-	s.c = colly.NewCollector()
+	s.c = colly.NewCollector(useragent)
 	s.c.SetRequestTimeout(time.Minute / 2)
 
 	if len(config.GetProxyList()) > 0 {
@@ -30,7 +32,8 @@ func newScraper(region string) (s scraper) {
 		}
 	})
 
-	s.OnHTML(`.closetime_wrap`, func(e *colly.HTMLElement) {
+	// Detect maintenance
+	s.OnHTML(`.type_3`, func(e *colly.HTMLElement) {
 		setCloseTime(region)
 	})
 

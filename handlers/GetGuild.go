@@ -30,6 +30,11 @@ func GetGuild(w http.ResponseWriter, r *http.Request) {
 	if !found {
 		data, status = scrapers.ScrapeGuild(region, name)
 
+		if status == http.StatusInternalServerError {
+			w.WriteHeader(status)
+			return
+		}
+
 		if ok := giveMaintenanceResponse(w, region); ok {
 			return
 		}

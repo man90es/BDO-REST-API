@@ -17,6 +17,11 @@ func ScrapeGuild(region, name string) (guildProfile models.GuildProfile, status 
 	guildProfile.Region = region
 	status = http.StatusNotFound
 
+	// Detect being banned by IP address
+	c.OnHTML(`.type_2`, func(e *colly.HTMLElement) {
+		status = http.StatusInternalServerError
+	})
+
 	c.OnHTML(`.region_info`, func(e *colly.HTMLElement) {
 		guildProfile.Region = e.Text
 	})

@@ -36,6 +36,9 @@
 			"404": {
 				"description": "Not Found: try requesting something else."
 			},
+			"500": {
+				"description": "Something went wrong. Currently is returned when server's or proxy's IP address is banned on the BDO website."
+			},
 			"503": {
 				"description": "Service Unavailable: [https://naeu.playblackdesert.com](naeu.playblackdesert.com) is currently under maintenance and requested data is not cached."
 			}
@@ -269,6 +272,9 @@
 					"404": {
 						"$ref": "#/components/responses/404"
 					},
+					"500": {
+						"$ref": "#/components/responses/500"
+					},
 					"503": {
 						"$ref": "#/components/responses/503"
 					}
@@ -387,6 +393,9 @@
 					"404": {
 						"$ref": "#/components/responses/404"
 					},
+					"500": {
+						"$ref": "#/components/responses/500"
+					},
 					"503": {
 						"$ref": "#/components/responses/503"
 					}
@@ -485,6 +494,9 @@
 					"404": {
 						"$ref": "#/components/responses/404"
 					},
+					"500": {
+						"$ref": "#/components/responses/500"
+					},
 					"503": {
 						"$ref": "#/components/responses/503"
 					}
@@ -581,6 +593,9 @@
 					},
 					"404": {
 						"$ref": "#/components/responses/404"
+					},
+					"500": {
+						"$ref": "#/components/responses/500"
 					},
 					"503": {
 						"$ref": "#/components/responses/503"
