@@ -17,11 +17,6 @@ func ScrapeGuildSearch(region, query string, page uint16) (guildProfiles []model
 
 	status = http.StatusNotFound
 
-	// Detect being banned by IP address
-	c.OnHTML(`.type_2`, func(e *colly.HTMLElement) {
-		status = http.StatusInternalServerError
-	})
-
 	c.OnHTML(`.box_list_area li:not(.no_result)`, func(e *colly.HTMLElement) {
 		createdOn := utils.ParseDate(e.ChildText(".date"))
 		status = http.StatusOK
