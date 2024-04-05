@@ -1,21 +1,26 @@
 # Broken Stuff
-BDO website, where all the data is taken from, has a number of bugs, which are replicated by this API by design and, sadly, not much can be done about it.
+BDO website, where all the data is taken from, has a number of bugs, which affects by this scraper by design and, sadly, not much can be done about it.
 
 ## List of known bugs
 This is a list of bugs that either used to occur or still occur that I am aware of:
-1. You request guild's profile by its name and the API returns another guild's profile.
-2. You request a guild profile by its name and the API returns a "Not Found" status although the guild does exist.
-3. You search for a player or request his or her profile by profileTarget and the API returns no results or "Not Found" status although that player exists. [\[See issue\]](https://github.com/man90es/BDO-REST-API/issues/5)
-4. Members who left the guild remain on the guild members' list for some time.
-5. Data is not updated immediately after it is updated in game.
 
-## Workarounds and tips
-List numbers match list numbers in the previous section:
-1. Always check if the guild profile in response has the same name you specified. See tip #2.
-2. You can get some information like creation date, guild master's name and population by searching for guild instead of requesting its profile. It's not much, but better than nothing.
-3. There are no known workarounds.
-4. I believe maintenances remove "ghost members" from guilds. If you don't feel like waiting, request profiles of those players. Guild membership status in player profiles is more reliable, unless it's set to private.
-5. The lag is around a few hours, and you can only wait. This API may introduce additional lag in some cases, so if you need the most fresh data possible, consider disabling cache as it's described in [building from source manual](./buildingFromSource.md) or [building a Docker image manual](./buildingDocker.md).
+### 🐞 Data is not updated immediately after it is updated in game
+This is a common problem. The website's lag is around a few hours, and you can only wait. This API introduces additional lag that depends on the cache TTL parameter.
+
+### 🐞 Members who left the guild remain on the guild members' list for some time
+This is a common problem. I believe maintenances remove "ghost members" from guilds. If you don't feel like waiting, request profiles of those players. Guild membership status in player profiles is more reliable, unless it's set to private.
+
+### 🐞 Profile of a different guild is returned instead of the one requested
+This is an uncommon problem. Always check if the guild profile in response has the same name you specified. Also see next bug.
+
+### 🐞 Guild profile returned as "Not Found" although the guild exists in the game
+This is an uncommon problem. You can get some information like creation date, guild master's name and population by searching for guild instead of requesting its profile. It's not much, but better than nothing.
+
+### 🐞 Player profile returned as "Not Found" although that player exists in the game
+This is an uncommon problem. There are no known workarounds. [See issue #5](https://github.com/man90es/BDO-REST-API/issues/5).
+
+### 🐞 Players whose family name is longer than 16 characters aren't searchable
+This is a rare problem. Family names longer than 16 characters aren't officially allowed in BDO, but there may be a bug that allows players to take them. [See issue #13](https://github.com/man90es/BDO-REST-API/issues/13). This API won't support them unless there will be many reports of players with long family names.
 
 ## Contribute to this list
 If you found a bug on the original BDO website that affects this API and is not listed in this file, you can contribute by either:
