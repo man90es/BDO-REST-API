@@ -49,7 +49,7 @@ func (s *scraper) Visit(URL string) error {
 		"EU": "naeu.playblackdesert.com/en-US",
 		"KR": "kr.playblackdesert.com/ko-KR",
 		"SA": "sa.playblackdesert.com/pt-BR",
-		"US": "naeu.playblackdesert.com/en-US",
+		"NA": "naeu.playblackdesert.com/en-US",
 	}[s.region]
 
 	return s.c.Visit(fmt.Sprintf("https://www.%v/Adventure%v", regionPrefix, URL))
