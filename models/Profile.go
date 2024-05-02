@@ -18,4 +18,5 @@ type Profile struct {
 	CreatedOn          *time.Time    `json:"createdOn,omitempty"`
 	Characters         []Character   `json:"characters,omitempty"`
 	Privacy            int8          `json:"privacy,omitempty"`
+	SpecLevels         *Specs        `json:"specLevels,omitempty"`
 }

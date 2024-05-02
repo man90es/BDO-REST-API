@@ -118,7 +118,7 @@
 		"/v1/adventurer": {
 			"get": {
 				"summary": "Retrieve player's profile.",
-				"description": "Retrieve the full profile of a single player by his or her profileTarget. Watch out for the \"privacy\" attribute that is added to the response when the player whose profile is requested turned on at least one of the privacy options BDO website has. It is a single number that you can decode using bitmasks. `0b0001` for private character levels, `0b0010` for private guild, `0b0100` for private contribution points and `0b1000` for private lifeskill levels. If the attribute is equal to `0b1111` then everything is set to private.",
+				"description": "Retrieve the full profile of a single player by his or her profileTarget. Watch out for the \"privacy\" attribute that is added to the response when the player whose profile is requested turned on at least one of the privacy options BDO website has. It is a single number that you can decode using bitmasks. `0b0001` for private character levels, `0b0010` for private guild, `0b0100` for private contribution points and `0b1000` for private lifeskill levels. If the attribute is equal to `0b1111` then everything is set to private.\n\n<b>Important!</b> Property \"specLevels\" used to be on a character level, but BDO has changed it so that all characters have shared profession levels. This API will continue to return \"specLevels\" on the character level alongside with \"specLevels\" on the profile level for compatibility reasons until 1 September 2024.",
 				"operationId": "getAdventurer",
 				"parameters": [
 					{
@@ -208,6 +208,7 @@
 														"example": 56
 													},
 													"specLevels": {
+														"deprecated": true,
 														"properties": {
 															"gathering": {
 																"type": "string",
@@ -255,6 +256,54 @@
 															}
 														}
 													}
+												}
+											}
+										},
+										"specLevels": {
+											"properties": {
+												"gathering": {
+													"type": "string",
+													"example": "Beginner 6"
+												},
+												"fishing": {
+													"type": "string",
+													"example": "Master 18"
+												},
+												"hunting": {
+													"type": "string",
+													"example": "Beginner 1"
+												},
+												"cooking": {
+													"type": "string",
+													"example": "Beginner 4"
+												},
+												"alchemy": {
+													"type": "string",
+													"example": "Beginner 1"
+												},
+												"processing": {
+													"type": "string",
+													"example": "Beginner 9"
+												},
+												"training": {
+													"type": "string",
+													"example": "Apprentice 1"
+												},
+												"trading": {
+													"type": "string",
+													"example": "Apprentice 3"
+												},
+												"farming": {
+													"type": "string",
+													"example": "Beginner 1"
+												},
+												"sailing": {
+													"type": "string",
+													"example": "Beginner 1"
+												},
+												"barter": {
+													"type": "string",
+													"example": "Beginner 1"
 												}
 											}
 										}

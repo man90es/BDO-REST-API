@@ -62,9 +62,42 @@ func ScrapeAdventurer(region string, profileTarget string) (profile models.Profi
 		}
 	})
 
+	c.OnHTML(`.character_spec:not(.lock)`, func(e *colly.HTMLElement) {
+		specLevels := [11]string{}
+
+		e.ForEach(".spec_level", func(ind int, el *colly.HTMLElement) {
+			// "Beginner1" → "Beginner 1"
+			i := regexp.MustCompile(`[0-9]`).FindStringIndex(el.Text)[0]
+			wordLevel := el.Text[:i]
+
+			if region != "EU" && region != "NA" {
+				translators.TranslateSpecLevel(&wordLevel)
+			}
+
+			specLevels[ind] = wordLevel + " " + el.Text[i:]
+		})
+
+		if len(specLevels[0]) > 0 {
+			profile.SpecLevels = &models.Specs{
+				Gathering:  specLevels[0],
+				Fishing:    specLevels[1],
+				Hunting:    specLevels[2],
+				Cooking:    specLevels[3],
+				Alchemy:    specLevels[4],
+				Processing: specLevels[5],
+				Training:   specLevels[6],
+				Trading:    specLevels[7],
+				Farming:    specLevels[8],
+				Sailing:    specLevels[9],
+				Barter:     specLevels[10],
+			}
+		}
+	})
+
 	c.OnHTML(`.character_desc_area`, func(e *colly.HTMLElement) {
 		character := models.Character{
-			Class: e.ChildText(".character_info .character_symbol em:last-child"),
+			Class:      e.ChildText(".character_info .character_symbol em:last-child"),
+			SpecLevels: profile.SpecLevels, // Deprecated, will be removed on 1 September 2024
 		}
 
 		if region != "EU" && region != "NA" {
@@ -88,36 +121,6 @@ func ScrapeAdventurer(region string, profileTarget string) (profile models.Profi
 				character.Name = name[:nameEndIndex]
 			} else {
 				character.Name = name
-			}
-		}
-
-		if specLevels := [11]string{}; true {
-			e.ForEach(".character_spec:not(.lock) .spec_level", func(ind int, el *colly.HTMLElement) {
-				// "Beginner1" → "Beginner 1"
-				i := regexp.MustCompile(`[0-9]`).FindStringIndex(el.Text)[0]
-				wordLevel := el.Text[:i]
-
-				if region != "EU" && region != "NA" {
-					translators.TranslateSpecLevel(&wordLevel)
-				}
-
-				specLevels[ind] = wordLevel + " " + el.Text[i:]
-			})
-
-			if len(specLevels[0]) > 0 {
-				character.SpecLevels = &models.Specs{
-					Gathering:  specLevels[0],
-					Fishing:    specLevels[1],
-					Hunting:    specLevels[2],
-					Cooking:    specLevels[3],
-					Alchemy:    specLevels[4],
-					Processing: specLevels[5],
-					Training:   specLevels[6],
-					Trading:    specLevels[7],
-					Farming:    specLevels[8],
-					Sailing:    specLevels[9],
-					Barter:     specLevels[10],
-				}
 			}
 		}
 

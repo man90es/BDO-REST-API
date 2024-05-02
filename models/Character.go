@@ -5,5 +5,5 @@ type Character struct {
 	Class      string `json:"class"`
 	Main       bool   `json:"main,omitempty"`
 	Level      uint8  `json:"level,omitempty"`
-	SpecLevels *Specs `json:"specLevels,omitempty"`
+	SpecLevels *Specs `json:"specLevels,omitempty"` // Deprecated, will be removed on 1 September 2024
 }
