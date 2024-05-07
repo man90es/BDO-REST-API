@@ -91,6 +91,7 @@ func ScrapeAdventurer(region string, profileTarget string) (profile models.Profi
 				Sailing:    specLevels[9],
 				Barter:     specLevels[10],
 			}
+			profile.LifeFame = utils.CalculateLifeFame(specLevels)
 		}
 	})
 
@@ -136,6 +137,8 @@ func ScrapeAdventurer(region string, profileTarget string) (profile models.Profi
 	if isCloseTime, _ := GetCloseTime(region); isCloseTime {
 		status = http.StatusServiceUnavailable
 	}
+
+	profile.CombatFame = utils.CalculateCombatFame(profile.Characters)
 
 	return
 }
