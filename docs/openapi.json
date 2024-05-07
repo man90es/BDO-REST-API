@@ -155,14 +155,17 @@
 									"type": "object",
 									"properties": {
 										"familyName": {
+											"nullable": false,
 											"type": "string",
 											"example": "Apple"
 										},
 										"profileTarget": {
+											"nullable": false,
 											"type": "string",
 											"example": "XXX"
 										},
 										"region": {
+											"nullable": false,
 											"type": "string",
 											"enum": [
 												"EU",
@@ -171,18 +174,22 @@
 											]
 										},
 										"guild": {
+											"nullable": true,
 											"properties": {
 												"name": {
+													"nullable": false,
 													"type": "string",
 													"example": "TumblrGirls"
 												}
 											}
 										},
 										"contributionPoints": {
+											"nullable": true,
 											"type": "number",
 											"example": 100
 										},
 										"createdOn": {
+											"nullable": false,
 											"type": "string",
 											"example": "2020-02-23T00:00:00Z"
 										},
@@ -192,65 +199,81 @@
 												"type": "object",
 												"properties": {
 													"name": {
+														"nullable": false,
 														"type": "string",
 														"example": "Blue"
 													},
 													"class": {
+														"nullable": false,
 														"type": "string",
 														"example": "Ninja"
 													},
 													"main": {
+														"nullable": true,
 														"type": "boolean",
 														"example": true
 													},
 													"level": {
+														"nullable": true,
 														"type": "number",
 														"example": 56
 													},
 													"specLevels": {
 														"deprecated": true,
+														"nullable": true,
 														"properties": {
 															"gathering": {
+																"nullable": false,
 																"type": "string",
 																"example": "Beginner 6"
 															},
 															"fishing": {
+																"nullable": false,
 																"type": "string",
 																"example": "Master 18"
 															},
 															"hunting": {
+																"nullable": false,
 																"type": "string",
 																"example": "Beginner 1"
 															},
 															"cooking": {
+																"nullable": false,
 																"type": "string",
 																"example": "Beginner 4"
 															},
 															"alchemy": {
+																"nullable": false,
 																"type": "string",
 																"example": "Beginner 1"
 															},
 															"processing": {
+																"nullable": false,
 																"type": "string",
 																"example": "Beginner 9"
 															},
 															"training": {
+																"nullable": false,
 																"type": "string",
 																"example": "Apprentice 1"
 															},
 															"trading": {
+																"nullable": false,
 																"type": "string",
 																"example": "Apprentice 3"
 															},
 															"farming": {
+																"nullable": false,
 																"type": "string",
 																"example": "Beginner 1"
 															},
 															"sailing": {
+																"nullable": false,
 																"type": "string",
 																"example": "Beginner 1"
 															},
 															"barter": {
+																"nullable": false,
 																"type": "string",
 																"example": "Beginner 1"
 															}
@@ -260,52 +283,74 @@
 											}
 										},
 										"specLevels": {
+											"nullable": true,
 											"properties": {
 												"gathering": {
+													"nullable": false,
 													"type": "string",
 													"example": "Beginner 6"
 												},
 												"fishing": {
+													"nullable": false,
 													"type": "string",
 													"example": "Master 18"
 												},
 												"hunting": {
+													"nullable": false,
 													"type": "string",
 													"example": "Beginner 1"
 												},
 												"cooking": {
+													"nullable": false,
 													"type": "string",
 													"example": "Beginner 4"
 												},
 												"alchemy": {
+													"nullable": false,
 													"type": "string",
 													"example": "Beginner 1"
 												},
 												"processing": {
+													"nullable": false,
 													"type": "string",
 													"example": "Beginner 9"
 												},
 												"training": {
+													"nullable": false,
 													"type": "string",
 													"example": "Apprentice 1"
 												},
 												"trading": {
+													"nullable": false,
 													"type": "string",
 													"example": "Apprentice 3"
 												},
 												"farming": {
+													"nullable": false,
 													"type": "string",
 													"example": "Beginner 1"
 												},
 												"sailing": {
+													"nullable": false,
 													"type": "string",
 													"example": "Beginner 1"
 												},
 												"barter": {
+													"nullable": false,
 													"type": "string",
 													"example": "Beginner 1"
 												}
 											}
+										},
+										"lifeFame": {
+											"example": 907,
+											"nullable": true,
+											"type": "number"
+										},
+										"combatFame": {
+											"example": 1136,
+											"nullable": true,
+											"type": "number"
 										}
 									}
 								}

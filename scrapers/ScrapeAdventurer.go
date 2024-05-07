@@ -138,7 +138,9 @@ func ScrapeAdventurer(region string, profileTarget string) (profile models.Profi
 		status = http.StatusServiceUnavailable
 	}
 
-	profile.CombatFame = utils.CalculateCombatFame(profile.Characters)
+	if profile.Privacy&models.PrivateLevel == 0 {
+		profile.CombatFame = utils.CalculateCombatFame(profile.Characters)
+	}
 
 	return
 }
