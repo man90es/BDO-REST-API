@@ -28,7 +28,7 @@ func NewCache[T any]() *cache[T] {
 	cacheTTL := config.GetCacheTTL()
 
 	return &cache[T]{
-		internalCache: goCache.New(cacheTTL, time.Hour),
+		internalCache: goCache.New(cacheTTL, min(time.Hour, cacheTTL)),
 	}
 }
 

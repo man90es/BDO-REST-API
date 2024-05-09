@@ -18,7 +18,7 @@ func CalculateLifeFame(specs [11]string) (lifeFame uint16) {
 		} else if text == "Master" {
 			lifeFame += 150 + uint16(number)*3
 		} else if text == "Guru" {
-			lifeFame += 253
+			lifeFame += 240 + uint16(number)*3
 		}
 	}
 
