@@ -8,6 +8,7 @@ var classNameTranslationMap = map[string]string{
 	"Cavaleira Negra":      "Dark Knight",
 	"Corsária":             "Corsair",
 	"Domadora":             "Tamer",
+	"Erudita":              "Scholar",
 	"Erudite":              "Scholar",
 	"Feiticeira":           "Sorceress",
 	"Guardiã":              "Guardian",
