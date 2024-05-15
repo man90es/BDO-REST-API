@@ -28,6 +28,6 @@ func GetStatus(w http.ResponseWriter, r *http.Request) {
 		},
 		"proxies": len(config.GetProxyList()),
 		"uptime":  time.Since(initTime).Round(time.Second).String(),
-		"version": "1.7.1",
+		"version": "1.8.0",
 	})
 }
