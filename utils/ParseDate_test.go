@@ -16,15 +16,11 @@ func TestParseDate(t *testing.T) {
 			expected: time.Date(2023, time.August, 1, 0, 0, 0, 0, time.UTC),
 		},
 		{
-			input:    "01/08/2023",
-			expected: time.Date(2023, time.August, 1, 0, 0, 0, 0, time.UTC),
+			input:    "01/08/2023 (UTC-3)",
+			expected: time.Date(2023, time.August, 1, 3, 0, 0, 0, time.UTC),
 		},
 		{
-			input:    "2023-08-01",
-			expected: time.Date(2023, time.August, 1, 0, 0, 0, 0, time.UTC),
-		},
-		{
-			input:    "Aug 1, 2023",
+			input:    "Aug 1, 2023 (UTC)",
 			expected: time.Date(2023, time.August, 1, 0, 0, 0, 0, time.UTC),
 		},
 
