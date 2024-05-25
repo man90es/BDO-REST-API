@@ -34,7 +34,7 @@ func ScrapeAdventurerSearch(region string, query string, searchType uint8, page 
 			}
 		}
 
-		// Sometime site displays text "You have not set your main character."
+		// Sometimes site displays text "You have not set your main character."
 		// instead of a character
 		if len(e.ChildText(".name")) > 0 {
 			profile.Characters = make([]models.Character, 1)
