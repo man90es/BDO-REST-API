@@ -422,14 +422,17 @@
 										"type": "object",
 										"properties": {
 											"familyName": {
+												"nullable": false,
 												"type": "string",
 												"example": "Apple"
 											},
 											"profileTarget": {
+												"nullable": false,
 												"type": "string",
 												"example": "XXX"
 											},
 											"region": {
+												"nullable": false,
 												"type": "string",
 												"enum": [
 													"EU",
@@ -438,31 +441,38 @@
 												]
 											},
 											"guild": {
+												"nullable": true,
 												"properties": {
 													"name": {
+														"nullable": false,
 														"type": "string",
 														"example": "TumblrGirls"
 													}
 												}
 											},
 											"characters": {
+												"nullable": true,
 												"type": "array",
 												"items": {
 													"type": "object",
 													"properties": {
 														"name": {
+															"nullable": false,
 															"type": "string",
 															"example": "Blue"
 														},
 														"class": {
+															"nullable": false,
 															"type": "string",
 															"example": "Ninja"
 														},
 														"main": {
+															"nullable": true,
 															"type": "boolean",
 															"example": true
 														},
 														"level": {
+															"nullable": false,
 															"type": "number",
 															"example": 56
 														}
