@@ -22,7 +22,6 @@ func ScrapeAdventurerSearch(region string, query string, searchType uint8, page 
 			Region:        region,
 			FamilyName:    e.ChildText(".title a"),
 			ProfileTarget: extractProfileTarget(e.ChildAttr(".title a", "href")),
-			Characters:    make([]models.Character, 1),
 		}
 
 		if region != "SA" && region != "KR" {
@@ -35,21 +34,27 @@ func ScrapeAdventurerSearch(region string, query string, searchType uint8, page 
 			}
 		}
 
-		profile.Characters[0].Class = e.ChildText(".name")
-		profile.Characters[0].Name = e.ChildText(".text")
+		// Sometimes site displays text "You have not set your main character."
+		// instead of a character
+		if len(e.ChildText(".name")) > 0 {
+			profile.Characters = make([]models.Character, 1)
 
-		// Site displays the main character when searching by family name
-		// And the searched character when searching by character name
-		if searchType == 2 {
-			profile.Characters[0].Main = true
-		}
+			profile.Characters[0].Class = e.ChildText(".name")
+			profile.Characters[0].Name = e.ChildText(".text")
 
-		if region != "EU" && region != "NA" {
-			translators.TranslateClassName(&profile.Characters[0].Class)
-		}
+			// Site displays the main character when searching by family name
+			// And the searched character when searching by character name
+			if searchType == 2 {
+				profile.Characters[0].Main = true
+			}
 
-		if level, err := strconv.Atoi(e.ChildText(".level")[3:]); err == nil {
-			profile.Characters[0].Level = uint8(level)
+			if region != "EU" && region != "NA" {
+				translators.TranslateClassName(&profile.Characters[0].Class)
+			}
+
+			if level, err := strconv.Atoi(e.ChildText(".level")[3:]); err == nil {
+				profile.Characters[0].Level = uint8(level)
+			}
 		}
 
 		profiles = append(profiles, profile)
