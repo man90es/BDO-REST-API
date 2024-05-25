@@ -34,24 +34,26 @@ func ScrapeAdventurerSearch(region string, query string, searchType uint8, page 
 			}
 		}
 
+		// Sometime site displays text "You have not set your main character."
+		// instead of a character
 		if len(e.ChildText(".name")) > 0 {
 			profile.Characters = make([]models.Character, 1)
 
-			profile.Characters[0].Class = e.ChildText(".name") //
-			profile.Characters[0].Name = e.ChildText(".text")  //
+			profile.Characters[0].Class = e.ChildText(".name")
+			profile.Characters[0].Name = e.ChildText(".text")
 
 			// Site displays the main character when searching by family name
 			// And the searched character when searching by character name
 			if searchType == 2 {
-				profile.Characters[0].Main = true //
+				profile.Characters[0].Main = true
 			}
 
 			if region != "EU" && region != "NA" {
-				translators.TranslateClassName(&profile.Characters[0].Class) //
+				translators.TranslateClassName(&profile.Characters[0].Class)
 			}
 
 			if level, err := strconv.Atoi(e.ChildText(".level")[3:]); err == nil {
-				profile.Characters[0].Level = uint8(level) //
+				profile.Characters[0].Level = uint8(level)
 			}
 		}
 
