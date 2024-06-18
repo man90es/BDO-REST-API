@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strings"
 
 	"bdo-rest-api/cache"
 	"bdo-rest-api/models"
@@ -27,6 +28,9 @@ func GetAdventurerSearch(w http.ResponseWriter, r *http.Request) {
 	if ok := giveMaintenanceResponse(w, region); ok {
 		return
 	}
+
+	// All names are non-case-sensitive, so this will allow to utilise cache better
+	query = strings.ToLower(query)
 
 	// Look for cached data, then run the scraper if needed
 	data, status, date, expires, found := profileSearchCache.GetRecord([]string{region, query, fmt.Sprint(searchType), fmt.Sprint(page)})
