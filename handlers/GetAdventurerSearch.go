@@ -21,7 +21,7 @@ func GetAdventurerSearch(w http.ResponseWriter, r *http.Request) {
 	searchType := validators.ValidateSearchTypeQueryParam(r.URL.Query()["searchType"])
 
 	if !queryOk || !regionOk {
-		w.WriteHeader(http.StatusBadRequest)
+		giveBadRequestResponse(w)
 		return
 	}
 

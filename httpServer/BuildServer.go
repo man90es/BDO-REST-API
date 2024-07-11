@@ -18,7 +18,7 @@ func BuildServer() *http.Server {
 		"/v1/adventurer/search": handlers.GetAdventurerSearch,
 		"/v1/guild":             handlers.GetGuild,
 		"/v1/guild/search":      handlers.GetGuildSearch,
-	})
+	}, handlers.Catchall)
 
 	if err != nil {
 		log.Fatal(err)

@@ -18,7 +18,7 @@ func GetGuild(w http.ResponseWriter, r *http.Request) {
 	region, regionOk := validators.ValidateRegionQueryParam(r.URL.Query()["region"])
 
 	if !nameOk || !regionOk {
-		w.WriteHeader(http.StatusBadRequest)
+		giveBadRequestResponse(w)
 		return
 	}
 
