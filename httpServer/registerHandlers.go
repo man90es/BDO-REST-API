@@ -8,7 +8,7 @@ import (
 	"github.com/gorilla/mux"
 )
 
-func registerHandlers(handlerMap map[string]func(http.ResponseWriter, *http.Request)) (*mux.Router, error) {
+func registerHandlers(handlerMap map[string]func(http.ResponseWriter, *http.Request), catchall func(http.ResponseWriter, *http.Request)) (*mux.Router, error) {
 	router := mux.NewRouter()
 
 	for route, handler := range handlerMap {
@@ -18,6 +18,7 @@ func registerHandlers(handlerMap map[string]func(http.ResponseWriter, *http.Requ
 			),
 		).Methods("GET")
 	}
+	router.PathPrefix("/").HandlerFunc(catchall)
 
 	return router, nil
 }
