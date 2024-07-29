@@ -711,104 +711,110 @@
 								"schema": {
 									"type": "object",
 									"properties": {
-										"responses": {
-											"type": "object",
-											"properties": {
-												"/adventurer": {
-													"type": "object",
-													"properties": {
-														"profileTarget": {
-															"nullable": false,
-															"type": "string",
-															"example": "XXX"
-														},
-														"region": {
-															"nullable": false,
-															"type": "string",
-															"enum": [
-																"EU",
-																"NA",
-																"SA"
-															]
-														}
+										"/adventurer": {
+											"type": "array",
+											"items": {
+												"type": "object",
+												"properties": {
+													"profileTarget": {
+														"nullable": false,
+														"type": "string",
+														"example": "XXX"
+													},
+													"region": {
+														"nullable": false,
+														"type": "string",
+														"enum": [
+															"EU",
+															"NA",
+															"SA"
+														]
 													}
-												},
-												"/adventurer/search": {
-													"type": "object",
-													"properties": {
-														"page": {
-															"deprecated": true,
-															"nullable": false,
-															"type": "number",
-															"example": 1
-														},
-														"query": {
-															"nullable": false,
-															"type": "string",
-															"example": "Apple"
-														},
-														"region": {
-															"nullable": false,
-															"type": "string",
-															"enum": [
-																"EU",
-																"NA",
-																"SA"
-															]
-														},
-														"searchType": {
-															"nullable": false,
-															"type": "string",
-															"enum": [
-																"familyName",
-																"characterName"
-															]
-														}
+												}
+											}
+										},
+										"/adventurer/search": {
+											"type": "array",
+											"items": {
+												"type": "object",
+												"properties": {
+													"page": {
+														"deprecated": true,
+														"nullable": false,
+														"type": "number",
+														"example": 1
+													},
+													"query": {
+														"nullable": false,
+														"type": "string",
+														"example": "Apple"
+													},
+													"region": {
+														"nullable": false,
+														"type": "string",
+														"enum": [
+															"EU",
+															"NA",
+															"SA"
+														]
+													},
+													"searchType": {
+														"nullable": false,
+														"type": "string",
+														"enum": [
+															"familyName",
+															"characterName"
+														]
 													}
-												},
-												"/guild": {
-													"type": "object",
-													"properties": {
-														"guildName": {
-															"nullable": false,
-															"type": "string",
-															"example": "TumblrGirls"
-														},
-														"region": {
-															"nullable": false,
-															"type": "string",
-															"enum": [
-																"EU",
-																"NA",
-																"SA"
-															]
-														}
+												}
+											}
+										},
+										"/guild": {
+											"type": "array",
+											"items": {
+												"type": "object",
+												"properties": {
+													"guildName": {
+														"nullable": false,
+														"type": "string",
+														"example": "TumblrGirls"
+													},
+													"region": {
+														"nullable": false,
+														"type": "string",
+														"enum": [
+															"EU",
+															"NA",
+															"SA"
+														]
 													}
-												},
-												"/guild/search": {
-													"deprecated": true,
-													"type": "object",
-													"properties": {
-														"page": {
-															"deprecated": true,
-															"nullable": false,
-															"type": "number",
-															"example": 1
-														},
-														"query": {
-															"nullable": false,
-															"type": "string",
-															"example": "TumblrGirls"
-														},
-														"region": {
-															"nullable": false,
-															"type": "string",
-															"enum": [
-																"EU",
-																"NA",
-																"SA"
-															]
-														}
+												}
+											}
+										},
+										"/guild/search": {
+											"deprecated": true,
+											"type": "array",
+											"items": {
+												"type": "object",
+												"properties": {
+													"page": {
+														"nullable": false,
+														"type": "number",
+														"example": 1
+													},
+													"query": {
+														"nullable": false,
+														"type": "string",
+														"example": "TumblrGirls"
+													},
+													"region": {
+														"nullable": false,
+														"type": "string",
+														"enum": [
+															"EU",
+															"NA",
+															"SA"
+														]
 													}
 												}
 											}
