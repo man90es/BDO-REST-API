@@ -14,12 +14,12 @@ func getParseCacheKey(cacheType string) func(string) map[string]interface{} {
 		parts := strings.Split(key, ",")
 
 		switch cacheType {
-		case "adventurer":
+		case "/adventurer":
 			return map[string]interface{}{
 				"region":        parts[0],
 				"profileTarget": parts[1],
 			}
-		case "adventurerSearch":
+		case "/adventurer/search":
 			page, _ := strconv.Atoi(parts[3])
 
 			return map[string]interface{}{
@@ -28,12 +28,12 @@ func getParseCacheKey(cacheType string) func(string) map[string]interface{} {
 				"searhType": parts[2],
 				"page":      page,
 			}
-		case "guild":
+		case "/guild":
 			return map[string]interface{}{
 				"region":    parts[0],
 				"guildName": parts[1],
 			}
-		case "guildSearch":
+		case "/guild/search":
 			page, _ := strconv.Atoi(parts[2])
 
 			return map[string]interface{}{
@@ -49,9 +49,9 @@ func getParseCacheKey(cacheType string) func(string) map[string]interface{} {
 
 func GetCache(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(map[string]interface{}{
-		"adventurer":       sf.Map(profilesCache.GetKeys(), getParseCacheKey("adventurer")),
-		"adventurerSearch": sf.Map(profileSearchCache.GetKeys(), getParseCacheKey("adventurerSearch")),
-		"guild":            sf.Map(guildProfilesCache.GetKeys(), getParseCacheKey("guild")),
-		"guildSearch":      sf.Map(guildSearchCache.GetKeys(), getParseCacheKey("guildSearch")),
+		"/adventurer":        sf.Map(profilesCache.GetKeys(), getParseCacheKey("/adventurer")),
+		"/adventurer/search": sf.Map(profileSearchCache.GetKeys(), getParseCacheKey("/adventurer/search")),
+		"/guild":             sf.Map(guildProfilesCache.GetKeys(), getParseCacheKey("/guild")),
+		"/guild/search":      sf.Map(guildSearchCache.GetKeys(), getParseCacheKey("/guild/search")),
 	})
 }
