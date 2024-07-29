@@ -5,6 +5,7 @@ import (
 	"time"
 
 	goCache "github.com/patrickmn/go-cache"
+	"golang.org/x/exp/maps"
 
 	"bdo-rest-api/config"
 	"bdo-rest-api/utils"
@@ -63,4 +64,8 @@ func (c *cache[T]) GetRecord(keys []string) (data T, status int, date string, ex
 
 func (c *cache[T]) GetItemCount() int {
 	return c.internalCache.ItemCount()
+}
+
+func (c *cache[T]) GetKeys() []string {
+	return maps.Keys(c.internalCache.Items())
 }

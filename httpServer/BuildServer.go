@@ -16,6 +16,7 @@ func BuildServer() *http.Server {
 		"/v1":                   handlers.GetStatus,
 		"/v1/adventurer":        handlers.GetAdventurer,
 		"/v1/adventurer/search": handlers.GetAdventurerSearch,
+		"/v1/cache":             handlers.GetCache,
 		"/v1/guild":             handlers.GetGuild,
 		"/v1/guild/search":      handlers.GetGuildSearch,
 	}, handlers.Catchall)

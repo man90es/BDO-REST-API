@@ -3,8 +3,9 @@
 A scraper for Black Desert Online player in-game data with a REST API. It currently supports European, North American, and South American servers (Korean server support is in progress).
 
 ## Projects using this API
-- [BDO Leaderboards](https://bdo.hemlo.cc/leaderboards) ([Source](https://github.com/man90es/BDO-Leaderboards)): web-based leaderboards for Black Desert Online.
-- [Ikusa](https://ikusa.site) ([Source](https://github.com/sch-28/ikusa_api)): a powerful tool that allows you to analyze your game logs and gain valuable insights into your combat performance.
+- BDO Leaderboards ([Website](https://bdo.hemlo.cc/leaderboards), [sources](https://github.com/man90es/BDO-Leaderboards)): web-based leaderboards for Black Desert Online.
+- Ikusa ([Website](https://ikusa.site), [sources](https://github.com/sch-28/ikusa_api)): powerful tool that allows you to analyze your game logs and gain valuable insights into your combat performance.
+- GuildYapper ([Discord server](https://discord.gg/x2nKYuu2Z2)): Discord bot with various features for BDO guilds such as guild and player history logging, and automatic trial Discord management (more features TBA).
 
 ## How to start using it
 There are two ways to use this scraper for your needs:
