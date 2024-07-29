@@ -77,6 +77,7 @@
 															"type": "number"
 														},
 														"/guild/search": {
+															"deprecated": true,
 															"type": "number"
 														}
 													}
@@ -95,6 +96,10 @@
 													}
 												}
 											}
+										},
+										"docs": {
+											"type": "string",
+											"example": "https://man90es.github.io/BDO-REST-API"
 										},
 										"proxies": {
 											"type": "number"
@@ -404,6 +409,7 @@
 						"name": "page",
 						"in": "query",
 						"description": "This parameter is understood by the API, but you should either omit it or set to 1. Because of how search currently works, there is never more than one page.",
+						"deprecated": true,
 						"schema": {
 							"type": "number",
 							"default": 1
@@ -600,6 +606,7 @@
 				"summary": "Search for a guild.",
 				"description": "Search for a guild by combination of its region and name.",
 				"operationId": "getGuildSearch",
+				"deprecated": true,
 				"parameters": [
 					{
 						"name": "query",
@@ -688,6 +695,128 @@
 					},
 					"503": {
 						"$ref": "#/components/responses/503"
+					}
+				}
+			}
+		},
+		"/v1/cache": {
+			"get": {
+				"summary": "Retrieve cached routes",
+				"operationId": "getCache",
+				"responses": {
+					"200": {
+						"description": "OK.",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"responses": {
+											"type": "object",
+											"properties": {
+												"/adventurer": {
+													"type": "object",
+													"properties": {
+														"profileTarget": {
+															"nullable": false,
+															"type": "string",
+															"example": "XXX"
+														},
+														"region": {
+															"nullable": false,
+															"type": "string",
+															"enum": [
+																"EU",
+																"NA",
+																"SA"
+															]
+														}
+													}
+												},
+												"/adventurer/search": {
+													"type": "object",
+													"properties": {
+														"page": {
+															"deprecated": true,
+															"nullable": false,
+															"type": "number",
+															"example": 1
+														},
+														"query": {
+															"nullable": false,
+															"type": "string",
+															"example": "Apple"
+														},
+														"region": {
+															"nullable": false,
+															"type": "string",
+															"enum": [
+																"EU",
+																"NA",
+																"SA"
+															]
+														},
+														"searchType": {
+															"nullable": false,
+															"type": "string",
+															"enum": [
+																"familyName",
+																"characterName"
+															]
+														}
+													}
+												},
+												"/guild": {
+													"type": "object",
+													"properties": {
+														"guildName": {
+															"nullable": false,
+															"type": "string",
+															"example": "TumblrGirls"
+														},
+														"region": {
+															"nullable": false,
+															"type": "string",
+															"enum": [
+																"EU",
+																"NA",
+																"SA"
+															]
+														}
+													}
+												},
+												"/guild/search": {
+													"deprecated": true,
+													"type": "object",
+													"properties": {
+														"page": {
+															"deprecated": true,
+															"nullable": false,
+															"type": "number",
+															"example": 1
+														},
+														"query": {
+															"nullable": false,
+															"type": "string",
+															"example": "TumblrGirls"
+														},
+														"region": {
+															"nullable": false,
+															"type": "string",
+															"enum": [
+																"EU",
+																"NA",
+																"SA"
+															]
+														}
+													}
+												}
+											}
+										}
+									}
+								}
+							}
+						}
 					}
 				}
 			}
