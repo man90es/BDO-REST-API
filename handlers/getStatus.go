@@ -12,7 +12,7 @@ import (
 var initTime = time.Now()
 var version = "1.9.0"
 
-func GetStatus(w http.ResponseWriter, r *http.Request) {
+func getStatus(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(map[string]interface{}{
 		"cache": map[string]interface{}{
 			"lastDetectedMaintenance": scrapers.GetLastCloseTimes(),

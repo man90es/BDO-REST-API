@@ -47,7 +47,7 @@ func getParseCacheKey(cacheType string) func(string) map[string]interface{} {
 	}
 }
 
-func GetCache(w http.ResponseWriter, r *http.Request) {
+func getCache(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(map[string]interface{}{
 		"/adventurer":        sf.Map(profilesCache.GetKeys(), getParseCacheKey("/adventurer")),
 		"/adventurer/search": sf.Map(profileSearchCache.GetKeys(), getParseCacheKey("/adventurer/search")),
