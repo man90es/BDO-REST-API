@@ -13,7 +13,7 @@ import (
 
 var guildProfilesCache = cache.NewCache[models.GuildProfile]()
 
-func GetGuild(w http.ResponseWriter, r *http.Request) {
+func getGuild(w http.ResponseWriter, r *http.Request) {
 	name, nameOk := validators.ValidateGuildNameQueryParam(r.URL.Query()["guildName"])
 	region, regionOk := validators.ValidateRegionQueryParam(r.URL.Query()["region"])
 

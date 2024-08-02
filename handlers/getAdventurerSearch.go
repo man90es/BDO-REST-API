@@ -14,7 +14,7 @@ import (
 
 var profileSearchCache = cache.NewCache[[]models.Profile]()
 
-func GetAdventurerSearch(w http.ResponseWriter, r *http.Request) {
+func getAdventurerSearch(w http.ResponseWriter, r *http.Request) {
 	page := validators.ValidatePageQueryParam(r.URL.Query()["page"])
 	query, queryOk := validators.ValidateAdventurerNameQueryParam(r.URL.Query()["query"])
 	region, regionOk := validators.ValidateRegionQueryParam(r.URL.Query()["region"])

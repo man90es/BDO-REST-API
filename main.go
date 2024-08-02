@@ -2,14 +2,13 @@ package main
 
 import (
 	"flag"
-	"log"
 	"os"
 	"strconv"
 	"strings"
 	"time"
 
 	"bdo-rest-api/config"
-	"bdo-rest-api/httpServer"
+	"bdo-rest-api/handlers"
 )
 
 func main() {
@@ -45,7 +44,5 @@ func main() {
 	config.SetVerbosity(*flagVerbose)
 
 	config.PrintConfig()
-	log.Println("Listening for requests")
-	srv := httpServer.BuildServer()
-	log.Fatal(srv.ListenAndServe())
+	handlers.ListenAndServe()
 }

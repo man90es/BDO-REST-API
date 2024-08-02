@@ -2,7 +2,9 @@ package handlers
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
+	"strings"
 
 	"bdo-rest-api/cache"
 	"bdo-rest-api/models"
@@ -10,13 +12,14 @@ import (
 	"bdo-rest-api/validators"
 )
 
-var profilesCache = cache.NewCache[models.Profile]()
+var guildSearchCache = cache.NewCache[[]models.GuildProfile]()
 
-func GetAdventurer(w http.ResponseWriter, r *http.Request) {
-	profileTarget, profileTargetOk := validators.ValidateProfileTargetQueryParam(r.URL.Query()["profileTarget"])
+func getGuildSearch(w http.ResponseWriter, r *http.Request) {
+	name, nameOk := validators.ValidateGuildNameQueryParam(r.URL.Query()["query"])
+	page := validators.ValidatePageQueryParam(r.URL.Query()["page"])
 	region, regionOk := validators.ValidateRegionQueryParam(r.URL.Query()["region"])
 
-	if !profileTargetOk || !regionOk {
+	if !nameOk || !regionOk {
 		giveBadRequestResponse(w)
 		return
 	}
@@ -25,10 +28,13 @@ func GetAdventurer(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// All names are non-case-sensitive, so this will allow to utilise cache better
+	name = strings.ToLower(name)
+
 	// Look for cached data, then run the scraper if needed
-	data, status, date, expires, found := profilesCache.GetRecord([]string{region, profileTarget})
+	data, status, date, expires, found := guildSearchCache.GetRecord([]string{region, name, fmt.Sprint(page)})
 	if !found {
-		data, status = scrapers.ScrapeAdventurer(region, profileTarget)
+		data, status = scrapers.ScrapeGuildSearch(region, name, page)
 
 		if status == http.StatusInternalServerError {
 			w.WriteHeader(status)
@@ -39,7 +45,7 @@ func GetAdventurer(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		date, expires = profilesCache.AddRecord([]string{region, profileTarget}, data, status)
+		date, expires = guildSearchCache.AddRecord([]string{region, name, fmt.Sprint(page)}, data, status)
 	}
 
 	w.Header().Set("Date", date)
