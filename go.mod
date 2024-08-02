@@ -1,6 +1,5 @@
 module bdo-rest-api
 
-// +heroku goVersion go1.21
 go 1.21
 
 require (
