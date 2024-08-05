@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"bdo-rest-api/config"
+	"bdo-rest-api/middleware"
 )
 
 func ListenAndServe() {
@@ -20,10 +21,14 @@ func ListenAndServe() {
 	mux.HandleFunc("GET /v1/guild/search", getGuildSearch)
 	mux.HandleFunc("/", catchall)
 
+	middlewareStack := middleware.CreateStack(
+		middleware.SetHeaders,
+	)
+
 	log.Println("Listening for requests")
 	srv := &http.Server{
 		Addr:         fmt.Sprintf("0.0.0.0:%v", config.GetPort()),
-		Handler:      mux,
+		Handler:      middlewareStack(mux),
 		IdleTimeout:  60 * time.Second,
 		ReadTimeout:  15 * time.Second,
 		WriteTimeout: 15 * time.Second,
