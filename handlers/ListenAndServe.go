@@ -23,6 +23,7 @@ func ListenAndServe() {
 
 	middlewareStack := middleware.CreateStack(
 		middleware.SetHeaders,
+		middleware.Ratelimit,
 	)
 
 	log.Println("Listening for requests")
