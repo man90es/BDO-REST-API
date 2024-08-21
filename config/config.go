@@ -10,12 +10,13 @@ import (
 )
 
 type config struct {
-	mu             sync.RWMutex
 	cacheTTL       time.Duration
 	maintenanceTTL time.Duration
+	mu             sync.RWMutex
 	port           int
 	proxyList      []string
 	proxySwitcher  colly.ProxyFunc
+	rateLimit      int64
 	verbosity      bool
 }
 
@@ -29,6 +30,7 @@ func getInstance() *config {
 			maintenanceTTL: 5 * time.Minute,
 			port:           8001,
 			proxyList:      nil,
+			rateLimit:      512,
 			verbosity:      false,
 		}
 	})
@@ -102,11 +104,24 @@ func GetVerbosity() bool {
 	return getInstance().verbosity
 }
 
+func SetRateLimit(rateLimit int64) {
+	getInstance().mu.Lock()
+	defer getInstance().mu.Unlock()
+	getInstance().rateLimit = rateLimit
+}
+
+func GetRateLimit() int64 {
+	getInstance().mu.RLock()
+	defer getInstance().mu.RUnlock()
+	return getInstance().rateLimit
+}
+
 func PrintConfig() {
 	fmt.Printf("Configuration:\n" +
 		fmt.Sprintf("\tPort:\t\t%v\n", GetPort()) +
 		fmt.Sprintf("\tProxies:\t%v\n", GetProxyList()) +
 		fmt.Sprintf("\tVerbosity:\t%v\n", GetVerbosity()) +
-		fmt.Sprintf("\tCache TTL:\t%v\n", GetCacheTTL()),
+		fmt.Sprintf("\tCache TTL:\t%v\n", GetCacheTTL()) +
+		fmt.Sprintf("\tRate limit:\t%v/min\n", GetRateLimit()),
 	)
 }

@@ -16,6 +16,7 @@ func main() {
 	flagMaintenanceTTL := flag.Int("maintenancettl", 5, "Allows to limit how frequently scraper can check for maintenance end in minutes")
 	flagPort := flag.Int("port", 8001, "Port to catch requests on")
 	flagProxy := flag.String("proxy", "", "Open proxy address to make requests to BDO servers")
+	flagRateLimit := flag.Int64("ratelimit", 512, "Maximum number of requests per minute per IP")
 	flagVerbose := flag.Bool("verbose", false, "Print out additional logs into stdout")
 	flag.Parse()
 
@@ -42,6 +43,7 @@ func main() {
 	config.SetCacheTTL(time.Duration(*flagCacheTTL) * time.Minute)
 	config.SetMaintenanceStatusTTL(time.Duration(*flagMaintenanceTTL) * time.Minute)
 	config.SetVerbosity(*flagVerbose)
+	config.SetRateLimit(*flagRateLimit)
 
 	config.PrintConfig()
 	handlers.ListenAndServe()
