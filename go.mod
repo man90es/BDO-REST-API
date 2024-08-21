@@ -6,6 +6,7 @@ require (
 	github.com/gocolly/colly/v2 v2.1.0
 	github.com/patrickmn/go-cache v2.1.0+incompatible
 	github.com/sa-/slicefunk v0.1.4
+	github.com/ulule/limiter/v3 v3.11.2
 	golang.org/x/exp v0.0.0-20240719175910-8a7402abbf56
 )
 
@@ -22,7 +23,6 @@ require (
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/saintfish/chardet v0.0.0-20230101081208-5e3ef4b5456d // indirect
 	github.com/temoto/robotstxt v1.1.2 // indirect
-	github.com/ulule/limiter/v3 v3.11.2 // indirect
 	golang.org/x/net v0.19.0 // indirect
 	golang.org/x/text v0.14.0 // indirect
 	google.golang.org/appengine v1.6.8 // indirect
