@@ -27,9 +27,10 @@ func getStatus(w http.ResponseWriter, r *http.Request) {
 				"maintenanceStatus": config.GetMaintenanceStatusTTL().Round(time.Minute).String(),
 			},
 		},
-		"docs":    docsLink,
-		"proxies": len(config.GetProxyList()),
-		"uptime":  time.Since(initTime).Round(time.Second).String(),
-		"version": version,
+		"docs":      docsLink,
+		"proxies":   len(config.GetProxyList()),
+		"rateLimit": config.GetRateLimit(),
+		"uptime":    time.Since(initTime).Round(time.Second).String(),
+		"version":   version,
 	})
 }
