@@ -1,16 +1,13 @@
 package validators
 
-func ValidateSearchTypeQueryParam(query []string) (searchType uint8) {
+func ValidateSearchTypeQueryParam(query []string) (searchType uint8, searchTypeAsString string) {
 	if 1 > len(query) {
-		return 2
+		return 2, "familyName"
 	}
 
 	if query[0] == "characterName" {
-		return map[string]uint8{
-			"characterName": 1,
-			"familyName":    2,
-		}[query[0]]
+		return 1, "characterName"
 	}
 
-	return 2
+	return 2, "familyName"
 }
