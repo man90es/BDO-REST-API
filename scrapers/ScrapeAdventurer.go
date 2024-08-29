@@ -37,7 +37,7 @@ func ScrapeAdventurer(region string, profileTarget string) (profile models.Profi
 		}
 	})
 
-	c.OnHTML(`.desc.guild span`, func(e *colly.HTMLElement) {
+	c.OnHTML(`.line_list li:nth-child(1) .desc span`, func(e *colly.HTMLElement) {
 		guildStatus := e.Text
 
 		if region != "EU" && region != "NA" {
@@ -49,12 +49,12 @@ func ScrapeAdventurer(region string, profileTarget string) (profile models.Profi
 		}
 	})
 
-	c.OnHTML(`.line_list .desc:not(.guild)`, func(e *colly.HTMLElement) {
+	c.OnHTML(`.line_list li:nth-child(2) .desc`, func(e *colly.HTMLElement) {
 		createdOn := utils.ParseDate(e.Text)
 		profile.CreatedOn = &createdOn
 	})
 
-	c.OnHTML(`.character_desc_area .character_info span:nth-child(3) em`, func(e *colly.HTMLElement) {
+	c.OnHTML(`.line_list li:nth-child(3) .desc`, func(e *colly.HTMLElement) {
 		if contributionPoints, err := strconv.Atoi(e.Text); err == nil {
 			profile.ContributionPoints = uint16(contributionPoints)
 		} else {
