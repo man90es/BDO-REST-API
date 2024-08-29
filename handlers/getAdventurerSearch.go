@@ -19,7 +19,7 @@ func getAdventurerSearch(w http.ResponseWriter, r *http.Request) {
 	query, queryOk := validators.ValidateAdventurerNameQueryParam(r.URL.Query()["query"])
 	region, regionOk := validators.ValidateRegionQueryParam(r.URL.Query()["region"])
 	searchTypeQueryParam := r.URL.Query()["searchType"]
-	searchType := validators.ValidateSearchTypeQueryParam(searchTypeQueryParam)
+	searchType, searchTypeAsString := validators.ValidateSearchTypeQueryParam(searchTypeQueryParam)
 
 	if !queryOk || !regionOk {
 		giveBadRequestResponse(w)
@@ -34,7 +34,7 @@ func getAdventurerSearch(w http.ResponseWriter, r *http.Request) {
 	query = strings.ToLower(query)
 
 	// Look for cached data, then run the scraper if needed
-	data, status, date, expires, found := profileSearchCache.GetRecord([]string{region, query, searchTypeQueryParam[0], fmt.Sprint(page)})
+	data, status, date, expires, found := profileSearchCache.GetRecord([]string{region, query, searchTypeAsString, fmt.Sprint(page)})
 	if !found {
 		data, status = scrapers.ScrapeAdventurerSearch(region, query, searchType, page)
 
@@ -47,7 +47,7 @@ func getAdventurerSearch(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		date, expires = profileSearchCache.AddRecord([]string{region, query, searchTypeQueryParam[0], fmt.Sprint(page)}, data, status)
+		date, expires = profileSearchCache.AddRecord([]string{region, query, searchTypeAsString, fmt.Sprint(page)}, data, status)
 	}
 
 	w.Header().Set("Date", date)
