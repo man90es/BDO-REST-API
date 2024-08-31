@@ -622,6 +622,7 @@
 						"name": "page",
 						"in": "query",
 						"description": "This parameter is understood by the API, but you should either omit it or set to 1. Because of how search currently works, there is never more than one page.",
+						"deprecated": true,
 						"schema": {
 							"type": "number",
 							"default": 1
@@ -795,6 +796,7 @@
 												"type": "object",
 												"properties": {
 													"page": {
+														"deprecated": true,
 														"nullable": false,
 														"type": "number",
 														"example": 1
