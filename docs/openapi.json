@@ -77,7 +77,6 @@
 															"type": "number"
 														},
 														"/guild/search": {
-															"deprecated": true,
 															"type": "number"
 														}
 													}
@@ -606,7 +605,6 @@
 				"summary": "Search for a guild.",
 				"description": "Search for a guild by combination of its region and name.",
 				"operationId": "getGuildSearch",
-				"deprecated": true,
 				"parameters": [
 					{
 						"name": "query",
@@ -792,7 +790,6 @@
 											}
 										},
 										"/guild/search": {
-											"deprecated": true,
 											"type": "array",
 											"items": {
 												"type": "object",
