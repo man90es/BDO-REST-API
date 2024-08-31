@@ -97,8 +97,7 @@ func ScrapeAdventurer(region string, profileTarget string) (profile models.Profi
 
 	c.OnHTML(`.character_desc_area`, func(e *colly.HTMLElement) {
 		character := models.Character{
-			Class:      e.ChildText(".character_info .character_symbol em:last-child"),
-			SpecLevels: profile.SpecLevels, // Deprecated, will be removed on 1 September 2024
+			Class: e.ChildText(".character_info .character_symbol em:last-child"),
 		}
 
 		if region != "EU" && region != "NA" {

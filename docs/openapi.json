@@ -222,67 +222,6 @@
 														"nullable": true,
 														"type": "number",
 														"example": 56
-													},
-													"specLevels": {
-														"deprecated": true,
-														"nullable": true,
-														"properties": {
-															"gathering": {
-																"nullable": false,
-																"type": "string",
-																"example": "Beginner 6"
-															},
-															"fishing": {
-																"nullable": false,
-																"type": "string",
-																"example": "Master 18"
-															},
-															"hunting": {
-																"nullable": false,
-																"type": "string",
-																"example": "Beginner 1"
-															},
-															"cooking": {
-																"nullable": false,
-																"type": "string",
-																"example": "Beginner 4"
-															},
-															"alchemy": {
-																"nullable": false,
-																"type": "string",
-																"example": "Beginner 1"
-															},
-															"processing": {
-																"nullable": false,
-																"type": "string",
-																"example": "Beginner 9"
-															},
-															"training": {
-																"nullable": false,
-																"type": "string",
-																"example": "Apprentice 1"
-															},
-															"trading": {
-																"nullable": false,
-																"type": "string",
-																"example": "Apprentice 3"
-															},
-															"farming": {
-																"nullable": false,
-																"type": "string",
-																"example": "Beginner 1"
-															},
-															"sailing": {
-																"nullable": false,
-																"type": "string",
-																"example": "Beginner 1"
-															},
-															"barter": {
-																"nullable": false,
-																"type": "string",
-																"example": "Beginner 1"
-															}
-														}
 													}
 												}
 											}
