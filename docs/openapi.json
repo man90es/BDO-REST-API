@@ -77,7 +77,6 @@
 															"type": "number"
 														},
 														"/guild/search": {
-															"deprecated": true,
 															"type": "number"
 														}
 													}
@@ -606,7 +605,6 @@
 				"summary": "Search for a guild.",
 				"description": "Search for a guild by combination of its region and name.",
 				"operationId": "getGuildSearch",
-				"deprecated": true,
 				"parameters": [
 					{
 						"name": "query",
@@ -624,6 +622,7 @@
 						"name": "page",
 						"in": "query",
 						"description": "This parameter is understood by the API, but you should either omit it or set to 1. Because of how search currently works, there is never more than one page.",
+						"deprecated": true,
 						"schema": {
 							"type": "number",
 							"default": 1
@@ -792,12 +791,12 @@
 											}
 										},
 										"/guild/search": {
-											"deprecated": true,
 											"type": "array",
 											"items": {
 												"type": "object",
 												"properties": {
 													"page": {
+														"deprecated": true,
 														"nullable": false,
 														"type": "number",
 														"example": 1
