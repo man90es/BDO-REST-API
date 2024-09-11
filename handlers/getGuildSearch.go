@@ -15,12 +15,17 @@ import (
 var guildSearchCache = cache.NewCache[[]models.GuildProfile]()
 
 func getGuildSearch(w http.ResponseWriter, r *http.Request) {
-	name, nameOk := validators.ValidateGuildNameQueryParam(r.URL.Query()["query"])
-	page := validators.ValidatePageQueryParam(r.URL.Query()["page"])
-	region, regionOk := validators.ValidateRegionQueryParam(r.URL.Query()["region"])
+	name, nameOk, nameValidationMessage := validators.ValidateGuildNameQueryParam(r.URL.Query()["query"])
+	if !nameOk {
+		giveBadRequestResponse(w, nameValidationMessage)
+		return
+	}
 
-	if !nameOk || !regionOk {
-		giveBadRequestResponse(w)
+	page := validators.ValidatePageQueryParam(r.URL.Query()["page"])
+
+	region, regionOk, regionValidationMessage := validators.ValidateRegionQueryParam(r.URL.Query()["region"])
+	if !regionOk {
+		giveBadRequestResponse(w, regionValidationMessage)
 		return
 	}
 

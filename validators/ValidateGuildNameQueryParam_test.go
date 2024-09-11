@@ -4,27 +4,28 @@ import "testing"
 
 func TestValidateGuildNameQueryParam(t *testing.T) {
 	tests := []struct {
-		expectedName string
-		expectedOk   bool
-		input        []string
+		expectedName    string
+		expectedOk      bool
+		expectedMessage string
+		input           []string
 	}{
-		{input: []string{"1NumberGuild"}, expectedName: "1numberguild", expectedOk: true}, // Contains a number
-		{input: []string{"Adventure_Guild"}, expectedName: "adventure_guild", expectedOk: true},
-		{input: []string{"FirstGuild", "SecondGuild"}, expectedName: "firstguild", expectedOk: true},
-		{input: []string{"MyGuild"}, expectedName: "myguild", expectedOk: true},
-		{input: []string{"고대신"}, expectedName: "고대신", expectedOk: true}, // Guild name with Korean characters
+		{input: []string{"1NumberGuild"}, expectedName: "1numberguild", expectedOk: true, expectedMessage: ""}, // Contains a number
+		{input: []string{"Adventure_Guild"}, expectedName: "adventure_guild", expectedOk: true, expectedMessage: ""},
+		{input: []string{"FirstGuild", "SecondGuild"}, expectedName: "firstguild", expectedOk: true, expectedMessage: ""},
+		{input: []string{"MyGuild"}, expectedName: "myguild", expectedOk: true, expectedMessage: ""},
+		{input: []string{"고대신"}, expectedName: "고대신", expectedOk: true, expectedMessage: ""}, // Guild name with Korean characters
 
-		{input: []string{""}, expectedName: "", expectedOk: false},                                       // Empty guild name
-		{input: []string{"A Guild With Spaces"}, expectedName: "a guild with spaces", expectedOk: false}, // Contains spaces
-		{input: []string{"Some$"}, expectedName: "some$", expectedOk: false},                             // Contains an invalid symbol
-		{input: []string{"x"}, expectedName: "x", expectedOk: false},                                     // Too short
-		{input: []string{}, expectedName: "", expectedOk: false},
+		{input: []string{""}, expectedName: "", expectedOk: false, expectedMessage: "Guild name can't be shorter than 2 symbols"},
+		{input: []string{"A Guild With Spaces"}, expectedName: "a guild with spaces", expectedOk: false, expectedMessage: "Guild name contains a forbidden symbol at position 2: ' '"},
+		{input: []string{"Some$"}, expectedName: "some$", expectedOk: false, expectedMessage: "Guild name contains a forbidden symbol at position 5: '$'"},
+		{input: []string{"x"}, expectedName: "x", expectedOk: false, expectedMessage: "Guild name can't be shorter than 2 symbols"},
+		{input: []string{}, expectedName: "", expectedOk: false, expectedMessage: "Guild name is missing from request"},
 	}
 
 	for _, test := range tests {
-		name, ok := ValidateGuildNameQueryParam(test.input)
-		if name != test.expectedName || ok != test.expectedOk {
-			t.Errorf("Input: %v, Expected: %v %v, Got: %v %v", test.input, test.expectedName, test.expectedOk, name, ok)
+		name, ok, message := ValidateGuildNameQueryParam(test.input)
+		if name != test.expectedName || ok != test.expectedOk || message != test.expectedMessage {
+			t.Errorf("Input: %v, Expected: %v %v %v, Got: %v %v %v", test.input, test.expectedName, test.expectedOk, test.expectedMessage, name, ok, message)
 		}
 	}
 }

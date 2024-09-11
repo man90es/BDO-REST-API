@@ -13,11 +13,15 @@ import (
 var profilesCache = cache.NewCache[models.Profile]()
 
 func getAdventurer(w http.ResponseWriter, r *http.Request) {
-	profileTarget, profileTargetOk := validators.ValidateProfileTargetQueryParam(r.URL.Query()["profileTarget"])
-	region, regionOk := validators.ValidateRegionQueryParam(r.URL.Query()["region"])
+	profileTarget, profileTargetOk, profileTargetValidationMessage := validators.ValidateProfileTargetQueryParam(r.URL.Query()["profileTarget"])
+	if !profileTargetOk {
+		giveBadRequestResponse(w, profileTargetValidationMessage)
+		return
+	}
 
-	if !profileTargetOk || !regionOk {
-		giveBadRequestResponse(w)
+	region, regionOk, regionValidationMessage := validators.ValidateRegionQueryParam(r.URL.Query()["region"])
+	if !regionOk {
+		giveBadRequestResponse(w, regionValidationMessage)
 		return
 	}
 
