@@ -15,16 +15,21 @@ import (
 var profileSearchCache = cache.NewCache[[]models.Profile]()
 
 func getAdventurerSearch(w http.ResponseWriter, r *http.Request) {
-	page := validators.ValidatePageQueryParam(r.URL.Query()["page"])
-	query, queryOk := validators.ValidateAdventurerNameQueryParam(r.URL.Query()["query"])
 	region, regionOk := validators.ValidateRegionQueryParam(r.URL.Query()["region"])
-	searchTypeQueryParam := r.URL.Query()["searchType"]
-	searchType, searchTypeAsString := validators.ValidateSearchTypeQueryParam(searchTypeQueryParam)
-
-	if !queryOk || !regionOk {
+	if !regionOk {
 		giveBadRequestResponse(w)
 		return
 	}
+
+	query, queryOk := validators.ValidateAdventurerNameQueryParam(r.URL.Query()["query"], region)
+	if !queryOk {
+		giveBadRequestResponse(w)
+		return
+	}
+
+	page := validators.ValidatePageQueryParam(r.URL.Query()["page"])
+	searchTypeQueryParam := r.URL.Query()["searchType"]
+	searchType, searchTypeAsString := validators.ValidateSearchTypeQueryParam(searchTypeQueryParam)
 
 	if ok := giveMaintenanceResponse(w, region); ok {
 		return
