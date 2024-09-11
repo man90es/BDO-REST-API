@@ -14,11 +14,15 @@ import (
 var guildProfilesCache = cache.NewCache[models.GuildProfile]()
 
 func getGuild(w http.ResponseWriter, r *http.Request) {
-	name, nameOk := validators.ValidateGuildNameQueryParam(r.URL.Query()["guildName"])
-	region, regionOk := validators.ValidateRegionQueryParam(r.URL.Query()["region"])
+	name, nameOk, nameValidationMessage := validators.ValidateGuildNameQueryParam(r.URL.Query()["guildName"])
+	if !nameOk {
+		giveBadRequestResponse(w, nameValidationMessage)
+		return
+	}
 
-	if !nameOk || !regionOk {
-		giveBadRequestResponse(w)
+	region, regionOk, regionValidationMessage := validators.ValidateRegionQueryParam(r.URL.Query()["region"])
+	if !regionOk {
+		giveBadRequestResponse(w, regionValidationMessage)
 		return
 	}
 

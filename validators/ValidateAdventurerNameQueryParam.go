@@ -1,15 +1,16 @@
 package validators
 
 import (
+	"fmt"
 	"strings"
 	"unicode"
 )
 
 // The naming policies in BDO are fucked up
 // This function only checks the length and allowed symbols
-func ValidateAdventurerNameQueryParam(query []string, region string) (name string, ok bool) {
+func ValidateAdventurerNameQueryParam(query []string, region string) (name string, ok bool, errorMessage string) {
 	if 1 > len(query) {
-		return "", false
+		return "", false, "Adventurer name is missing from request"
 	}
 
 	minLength := map[string]int{
@@ -19,7 +20,7 @@ func ValidateAdventurerNameQueryParam(query []string, region string) (name strin
 	}[region]
 
 	if len(query[0]) < minLength || len(query[0]) > 16 {
-		return query[0], false
+		return query[0], false, fmt.Sprintf("Adventurer name should be between %v and 16 symbols long", minLength)
 	}
 
 	// Returns false for allowed characters
@@ -48,5 +49,9 @@ func ValidateAdventurerNameQueryParam(query []string, region string) (name strin
 		return true
 	}
 
-	return query[0], strings.IndexFunc(query[0], f) == -1
+	if i := strings.IndexFunc(query[0], f); i != -1 {
+		return query[0], false, fmt.Sprintf("Adventurer name contains a forbidden symbol at position %v: %q", i+1, query[0][i])
+	}
+
+	return query[0], true, ""
 }
