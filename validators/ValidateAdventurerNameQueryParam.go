@@ -7,12 +7,18 @@ import (
 
 // The naming policies in BDO are fucked up
 // This function only checks the length and allowed symbols
-func ValidateAdventurerNameQueryParam(query []string) (name string, ok bool) {
+func ValidateAdventurerNameQueryParam(query []string, region string) (name string, ok bool) {
 	if 1 > len(query) {
 		return "", false
 	}
 
-	if len(query[0]) < 3 || len(query[0]) > 16 {
+	minLength := map[string]int{
+		"SA": 2,
+		"NA": 3,
+		"EU": 3,
+	}[region]
+
+	if len(query[0]) < minLength || len(query[0]) > 16 {
 		return query[0], false
 	}
 
