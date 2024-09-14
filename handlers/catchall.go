@@ -5,5 +5,5 @@ import (
 )
 
 func catchall(w http.ResponseWriter, r *http.Request) {
-	giveBadRequestResponse(w)
+	giveBadRequestResponse(w, "Requested route is invalid. See documentation "+docsLink)
 }
