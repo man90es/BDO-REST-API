@@ -103,6 +103,10 @@
 										"proxies": {
 											"type": "number"
 										},
+										"rateLimit": {
+											"type": "number",
+											"example": 512
+										},
 										"uptime": {
 											"type": "string",
 											"example": "2m49s"

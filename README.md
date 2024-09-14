@@ -38,6 +38,10 @@ Available flags:
 	- Type: string, space-separated list of IP addresses or URLs
 	- Default value: none, requests are made directly
 	- Also available as `PROXY` environment variable
+- `-ratelimit`
+	- Sets the maximum number of requests per minute per IP address
+	- Type: unsigned integer
+	- Default value: 512
 - `-verbose`
 	- Allows to put the app into verbose mode and print out additional logs to stdout
 	- Default value: none, no additional output is produced

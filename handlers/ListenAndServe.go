@@ -22,7 +22,8 @@ func ListenAndServe() {
 	mux.HandleFunc("/", catchall)
 
 	middlewareStack := middleware.CreateStack(
-		middleware.SetHeaders,
+		middleware.GetSetHeadersMiddleware(),
+		middleware.GetRateLimitMiddleware(),
 	)
 
 	log.Println("Listening for requests")
