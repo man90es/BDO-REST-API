@@ -2,10 +2,10 @@ package scrapers
 
 import (
 	"fmt"
-	"log"
 	"time"
 
 	"bdo-rest-api/config"
+	"bdo-rest-api/logger"
 
 	colly "github.com/gocolly/colly/v2"
 )
@@ -26,10 +26,12 @@ func newScraper(region string) (s scraper) {
 		s.c.SetProxyFunc(config.GetProxySwitcher())
 	}
 
-	s.c.OnRequest(func(r *colly.Request) {
-		if config.GetVerbosity() {
-			log.Println("Visiting", r.URL)
-		}
+	s.c.OnError(func(r *colly.Response, err error) {
+		logger.Error(fmt.Sprintf("%v", err))
+	})
+
+	s.c.OnResponse(func(r *colly.Response) {
+		logger.Info(fmt.Sprintf("Received response code for %v: %v", r.Request.URL, r.StatusCode))
 	})
 
 	// Detect maintenance

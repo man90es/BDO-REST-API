@@ -9,11 +9,13 @@ import (
 
 	"bdo-rest-api/config"
 	"bdo-rest-api/handlers"
+	"bdo-rest-api/logger"
 )
 
 func main() {
 	flagCacheTTL := flag.Int("cachettl", 180, "Cache TTL in minutes")
 	flagMaintenanceTTL := flag.Int("maintenancettl", 5, "Allows to limit how frequently scraper can check for maintenance end in minutes")
+	flagMongo := flag.String("mongo", "", "MongoDB connection string for loggig")
 	flagPort := flag.Int("port", 8001, "Port to catch requests on")
 	flagProxy := flag.String("proxy", "", "Open proxy address to make requests to BDO servers")
 	flagRateLimit := flag.Int64("ratelimit", 512, "Maximum number of requests per minute per IP")
@@ -42,9 +44,10 @@ func main() {
 
 	config.SetCacheTTL(time.Duration(*flagCacheTTL) * time.Minute)
 	config.SetMaintenanceStatusTTL(time.Duration(*flagMaintenanceTTL) * time.Minute)
-	config.SetVerbosity(*flagVerbose)
+	config.SetMongoDB(*flagMongo)
 	config.SetRateLimit(*flagRateLimit)
+	config.SetVerbosity(*flagVerbose)
 
-	config.PrintConfig()
+	logger.InitLogger()
 	handlers.ListenAndServe()
 }
