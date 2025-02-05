@@ -2,11 +2,11 @@ package handlers
 
 import (
 	"fmt"
-	"log"
 	"net/http"
 	"time"
 
 	"bdo-rest-api/config"
+	"bdo-rest-api/logger"
 	"bdo-rest-api/middleware"
 )
 
@@ -26,7 +26,6 @@ func ListenAndServe() {
 		middleware.GetRateLimitMiddleware(),
 	)
 
-	log.Println("Listening for requests")
 	srv := &http.Server{
 		Addr:         fmt.Sprintf("0.0.0.0:%v", config.GetPort()),
 		Handler:      middlewareStack(mux),
@@ -34,5 +33,6 @@ func ListenAndServe() {
 		ReadTimeout:  15 * time.Second,
 		WriteTimeout: 15 * time.Second,
 	}
-	log.Fatal(srv.ListenAndServe())
+
+	logger.Error(srv.ListenAndServe().Error())
 }

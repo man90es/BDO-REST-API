@@ -12,6 +12,7 @@ import (
 type config struct {
 	cacheTTL       time.Duration
 	maintenanceTTL time.Duration
+	mongoDB        string
 	mu             sync.RWMutex
 	port           int
 	proxyList      []string
@@ -116,12 +117,23 @@ func GetRateLimit() int64 {
 	return getInstance().rateLimit
 }
 
-func PrintConfig() {
-	fmt.Printf("Configuration:\n" +
-		fmt.Sprintf("\tPort:\t\t%v\n", GetPort()) +
+func SetMongoDB(mongoDB string) {
+	getInstance().mu.Lock()
+	defer getInstance().mu.Unlock()
+	getInstance().mongoDB = mongoDB
+}
+
+func GetMongoDB() string {
+	getInstance().mu.RLock()
+	defer getInstance().mu.RUnlock()
+	return getInstance().mongoDB
+}
+
+func SprintfConfig() string {
+	return fmt.Sprintf("\tPort:\t\t%v\n", GetPort()) +
 		fmt.Sprintf("\tProxies:\t%v\n", GetProxyList()) +
 		fmt.Sprintf("\tVerbosity:\t%v\n", GetVerbosity()) +
 		fmt.Sprintf("\tCache TTL:\t%v\n", GetCacheTTL()) +
-		fmt.Sprintf("\tRate limit:\t%v/min\n", GetRateLimit()),
-	)
+		fmt.Sprintf("\tRate limit:\t%v/min\n", GetRateLimit()) +
+		fmt.Sprintf("\tMongoDB:\t%v", GetMongoDB())
 }
