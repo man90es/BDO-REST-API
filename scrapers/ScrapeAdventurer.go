@@ -10,12 +10,13 @@ import (
 
 	"github.com/gocolly/colly/v2"
 
+	"bdo-rest-api/cache"
 	"bdo-rest-api/models"
 	"bdo-rest-api/translators"
 	"bdo-rest-api/utils"
 )
 
-func ScrapeAdventurer(region string, profileTarget string) (profile models.Profile, status int) {
+func ScrapeAdventurer(region string, profileTarget string) (profile models.Profile, status int, date string, expires string) {
 	c := newScraper(region)
 
 	profile.ProfileTarget = profileTarget
@@ -135,11 +136,13 @@ func ScrapeAdventurer(region string, profileTarget string) (profile models.Profi
 
 	if isCloseTime, _ := GetCloseTime(region); isCloseTime {
 		status = http.StatusServiceUnavailable
+		return
 	}
 
 	if profile.Privacy&models.PrivateLevel == 0 {
 		profile.CombatFame = utils.CalculateCombatFame(profile.Characters)
 	}
 
+	date, expires = cache.Profiles.AddRecord([]string{region, profileTarget}, profile, status)
 	return
 }

@@ -7,11 +7,12 @@ import (
 
 	"github.com/gocolly/colly/v2"
 
+	"bdo-rest-api/cache"
 	"bdo-rest-api/models"
 	"bdo-rest-api/translators"
 )
 
-func ScrapeAdventurerSearch(region string, query string, searchType string) (profiles []models.Profile, status int) {
+func ScrapeAdventurerSearch(region string, query string, searchType string) (profiles []models.Profile, status int, date string, expires string) {
 	c := newScraper(region)
 
 	status = http.StatusNotFound
@@ -64,7 +65,9 @@ func ScrapeAdventurerSearch(region string, query string, searchType string) (pro
 
 	if isCloseTime, _ := GetCloseTime(region); isCloseTime {
 		status = http.StatusServiceUnavailable
+		return
 	}
 
+	date, expires = cache.ProfileSearch.AddRecord([]string{region, query, searchType}, profiles, status)
 	return
 }

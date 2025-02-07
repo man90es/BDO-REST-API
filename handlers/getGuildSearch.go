@@ -33,18 +33,11 @@ func getGuildSearch(w http.ResponseWriter, r *http.Request) {
 	// Look for cached data, then run the scraper if needed
 	data, status, date, expires, found := cache.GuildSearch.GetRecord([]string{region, name})
 	if !found {
-		data, status = scrapers.ScrapeGuildSearch(region, name)
-
-		if status == http.StatusInternalServerError {
-			w.WriteHeader(status)
-			return
-		}
+		data, status, date, expires = scrapers.ScrapeGuildSearch(region, name)
 
 		if ok := giveMaintenanceResponse(w, region); ok {
 			return
 		}
-
-		date, expires = cache.GuildSearch.AddRecord([]string{region, name}, data, status)
 	}
 
 	w.Header().Set("Date", date)

@@ -36,18 +36,11 @@ func getAdventurerSearch(w http.ResponseWriter, r *http.Request) {
 	// Look for cached data, then run the scraper if needed
 	data, status, date, expires, found := cache.ProfileSearch.GetRecord([]string{region, query, searchType})
 	if !found {
-		data, status = scrapers.ScrapeAdventurerSearch(region, query, searchType)
-
-		if status == http.StatusInternalServerError {
-			w.WriteHeader(status)
-			return
-		}
+		data, status, date, expires = scrapers.ScrapeAdventurerSearch(region, query, searchType)
 
 		if ok := giveMaintenanceResponse(w, region); ok {
 			return
 		}
-
-		date, expires = cache.ProfileSearch.AddRecord([]string{region, query, searchType}, data, status)
 	}
 
 	w.Header().Set("Date", date)

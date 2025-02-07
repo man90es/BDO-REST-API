@@ -7,11 +7,12 @@ import (
 
 	"github.com/gocolly/colly/v2"
 
+	"bdo-rest-api/cache"
 	"bdo-rest-api/models"
 	"bdo-rest-api/utils"
 )
 
-func ScrapeGuild(region, name string) (guildProfile models.GuildProfile, status int) {
+func ScrapeGuild(region, name string) (guildProfile models.GuildProfile, status int, date string, expires string) {
 	c := newScraper(region)
 
 	guildProfile.Region = region
@@ -63,7 +64,9 @@ func ScrapeGuild(region, name string) (guildProfile models.GuildProfile, status 
 
 	if isCloseTime, _ := GetCloseTime(region); isCloseTime {
 		status = http.StatusServiceUnavailable
+		return
 	}
 
+	date, expires = cache.GuildProfiles.AddRecord([]string{region, name}, guildProfile, status)
 	return
 }
