@@ -5,6 +5,7 @@ import (
 	"time"
 
 	goCache "github.com/patrickmn/go-cache"
+	messagebus "github.com/vardius/message-bus"
 	"golang.org/x/exp/maps"
 
 	"bdo-rest-api/config"
@@ -12,13 +13,15 @@ import (
 	"bdo-rest-api/utils"
 )
 
-type cacheEntry[T any] struct {
-	data   T
-	date   time.Time
-	status int
+type CacheEntry[T any] struct {
+	Data    T
+	Date    time.Time
+	Expires time.Time // FIXME: Expiration date is also stored in the cache library but it's harder to reach
+	Status  int
 }
 
 type cache[T any] struct {
+	Bus           messagebus.MessageBus
 	internalCache *goCache.Cache
 }
 
@@ -30,37 +33,36 @@ func newCache[T any]() *cache[T] {
 	cacheTTL := config.GetCacheTTL()
 
 	return &cache[T]{
+		Bus:           messagebus.New(100), // Idk what buffer size is optimal
 		internalCache: goCache.New(cacheTTL, min(time.Hour, cacheTTL)),
 	}
 }
 
 func (c *cache[T]) AddRecord(keys []string, data T, status int) (date string, expires string) {
 	cacheTTL := config.GetCacheTTL()
-	entry := cacheEntry[T]{
-		data:   data,
-		date:   time.Now(),
-		status: status,
+	entry := CacheEntry[T]{
+		Data:    data,
+		Date:    time.Now(),
+		Expires: time.Now().Add(cacheTTL),
+		Status:  status,
 	}
 
 	c.internalCache.Add(joinKeys(keys), entry, cacheTTL)
-	expirationDate := entry.date.Add(cacheTTL)
+	c.Bus.Publish(joinKeys(keys), entry)
 
-	return utils.FormatDateForHeaders(entry.date), utils.FormatDateForHeaders(expirationDate)
+	return utils.FormatDateForHeaders(entry.Date), utils.FormatDateForHeaders(entry.Expires)
 }
 
 func (c *cache[T]) GetRecord(keys []string) (data T, status int, date string, expires string, found bool) {
-	var anyEntry interface{}
-	var expirationDate time.Time
-
-	anyEntry, expirationDate, found = c.internalCache.GetWithExpiration(joinKeys(keys))
+	anyEntry, found := c.internalCache.Get(joinKeys(keys))
 
 	if !found {
 		return
 	}
 
-	entry := anyEntry.(cacheEntry[T])
+	entry := anyEntry.(CacheEntry[T])
 
-	return entry.data, entry.status, utils.FormatDateForHeaders(entry.date), utils.FormatDateForHeaders(expirationDate), found
+	return entry.Data, entry.Status, utils.FormatDateForHeaders(entry.Date), utils.FormatDateForHeaders(entry.Expires), found
 }
 
 func (c *cache[T]) GetItemCount() int {

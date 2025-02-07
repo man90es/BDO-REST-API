@@ -3,9 +3,13 @@ package handlers
 import (
 	"encoding/json"
 	"net/http"
+	"strings"
+	"sync"
 
 	"bdo-rest-api/cache"
+	"bdo-rest-api/models"
 	"bdo-rest-api/scrapers"
+	"bdo-rest-api/utils"
 	"bdo-rest-api/validators"
 )
 
@@ -29,11 +33,22 @@ func getAdventurer(w http.ResponseWriter, r *http.Request) {
 	// Look for cached data, then run the scraper if needed
 	data, status, date, expires, found := cache.Profiles.GetRecord([]string{region, profileTarget})
 	if !found {
-		data, status, date, expires = scrapers.ScrapeAdventurer(region, profileTarget)
+		go scrapers.ScrapeAdventurer(region, profileTarget)
 
-		if ok := giveMaintenanceResponse(w, region); ok {
-			return
-		}
+		var wg sync.WaitGroup
+		wg.Add(1)
+
+		// TODO: Maintenance handling if it was detected while waiting for the scraper
+		cache.Profiles.Bus.Subscribe(strings.Join([]string{region, profileTarget}, ","), func(v cache.CacheEntry[models.Profile]) {
+			data = v.Data
+			date = utils.FormatDateForHeaders(v.Date)
+			expires = utils.FormatDateForHeaders(v.Expires)
+			status = v.Status
+
+			wg.Done()
+		})
+
+		wg.Wait()
 	}
 
 	w.Header().Set("Date", date)
