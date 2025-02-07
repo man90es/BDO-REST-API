@@ -9,6 +9,7 @@ import (
 	"bdo-rest-api/logger"
 
 	colly "github.com/gocolly/colly/v2"
+	"github.com/gocolly/colly/v2/extensions"
 )
 
 type scraper struct {
@@ -17,16 +18,16 @@ type scraper struct {
 }
 
 func newScraper(region string) (s scraper) {
-	useragent := colly.UserAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Safari/537.36")
-
 	s.region = region
-	s.c = colly.NewCollector(useragent)
+
+	s.c = colly.NewCollector()
+	extensions.RandomUserAgent(s.c)
 	s.c.SetRequestTimeout(time.Minute / 2)
 
 	if len(config.GetProxyList()) > 0 {
 		s.c.WithTransport(&http.Transport{
 			// https://github.com/gocolly/colly/issues/759
-			// Make sure that the ProxyFunc is called on every request.
+			// Make sure that the ProxyFunc is called on every request
 			DisableKeepAlives: true,
 		})
 		s.c.SetProxyFunc(config.GetProxySwitcher())
