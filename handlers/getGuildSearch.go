@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"strings"
 
@@ -18,8 +17,6 @@ func getGuildSearch(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	page := validators.ValidatePageQueryParam(r.URL.Query()["page"])
-
 	region, regionOk, regionValidationMessage := validators.ValidateRegionQueryParam(r.URL.Query()["region"])
 	if !regionOk {
 		giveBadRequestResponse(w, regionValidationMessage)
@@ -34,9 +31,9 @@ func getGuildSearch(w http.ResponseWriter, r *http.Request) {
 	name = strings.ToLower(name)
 
 	// Look for cached data, then run the scraper if needed
-	data, status, date, expires, found := cache.GuildSearch.GetRecord([]string{region, name, fmt.Sprint(page)})
+	data, status, date, expires, found := cache.GuildSearch.GetRecord([]string{region, name})
 	if !found {
-		data, status = scrapers.ScrapeGuildSearch(region, name, page)
+		data, status = scrapers.ScrapeGuildSearch(region, name)
 
 		if status == http.StatusInternalServerError {
 			w.WriteHeader(status)
@@ -47,7 +44,7 @@ func getGuildSearch(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		date, expires = cache.GuildSearch.AddRecord([]string{region, name, fmt.Sprint(page)}, data, status)
+		date, expires = cache.GuildSearch.AddRecord([]string{region, name}, data, status)
 	}
 
 	w.Header().Set("Date", date)

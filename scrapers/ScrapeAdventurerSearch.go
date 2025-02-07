@@ -11,7 +11,7 @@ import (
 	"bdo-rest-api/translators"
 )
 
-func ScrapeAdventurerSearch(region string, query string, searchType uint8, page uint16) (profiles []models.Profile, status int) {
+func ScrapeAdventurerSearch(region string, query string, searchType string) (profiles []models.Profile, status int) {
 	c := newScraper(region)
 
 	status = http.StatusNotFound
@@ -44,7 +44,7 @@ func ScrapeAdventurerSearch(region string, query string, searchType uint8, page 
 
 			// Site displays the main character when searching by family name
 			// And the searched character when searching by character name
-			if searchType == 2 {
+			if searchType == "2" {
 				profile.Characters[0].Main = true
 			}
 
@@ -60,7 +60,7 @@ func ScrapeAdventurerSearch(region string, query string, searchType uint8, page 
 		profiles = append(profiles, profile)
 	})
 
-	c.Visit(fmt.Sprintf("?region=%v&searchType=%v&searchKeyword=%v&Page=%v", region, searchType, query, page))
+	c.Visit(fmt.Sprintf("?region=%v&searchType=%v&searchKeyword=%v&Page=1", region, searchType, query))
 
 	if isCloseTime, _ := GetCloseTime(region); isCloseTime {
 		status = http.StatusServiceUnavailable

@@ -12,7 +12,7 @@ import (
 	"bdo-rest-api/utils"
 )
 
-func ScrapeGuildSearch(region, query string, page uint16) (guildProfiles []models.GuildProfile, status int) {
+func ScrapeGuildSearch(region, query string) (guildProfiles []models.GuildProfile, status int) {
 	c := newScraper(region)
 
 	status = http.StatusNotFound
@@ -48,7 +48,7 @@ func ScrapeGuildSearch(region, query string, page uint16) (guildProfiles []model
 		guildProfiles = append(guildProfiles, guildProfile)
 	})
 
-	c.Visit(fmt.Sprintf("/Guild?region=%v&page=%v&searchText=%v", region, page, query))
+	c.Visit(fmt.Sprintf("/Guild?region=%v&page=1&searchText=%v", region, query))
 
 	if isCloseTime, _ := GetCloseTime(region); isCloseTime {
 		status = http.StatusServiceUnavailable
