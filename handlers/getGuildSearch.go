@@ -3,7 +3,6 @@ package handlers
 import (
 	"encoding/json"
 	"net/http"
-	"strings"
 
 	"bdo-rest-api/cache"
 	"bdo-rest-api/scrapers"
@@ -26,9 +25,6 @@ func getGuildSearch(w http.ResponseWriter, r *http.Request) {
 	if ok := giveMaintenanceResponse(w, region); ok {
 		return
 	}
-
-	// All names are non-case-sensitive, so this will allow to utilise cache better
-	name = strings.ToLower(name)
 
 	// Look for cached data, then run the scraper if needed
 	data, status, date, expires, found := cache.GuildSearch.GetRecord([]string{region, name})
