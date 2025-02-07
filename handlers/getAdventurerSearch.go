@@ -7,12 +7,9 @@ import (
 	"strings"
 
 	"bdo-rest-api/cache"
-	"bdo-rest-api/models"
 	"bdo-rest-api/scrapers"
 	"bdo-rest-api/validators"
 )
-
-var profileSearchCache = cache.NewCache[[]models.Profile]()
 
 func getAdventurerSearch(w http.ResponseWriter, r *http.Request) {
 	region, regionOk, regionValidationMessage := validators.ValidateRegionQueryParam(r.URL.Query()["region"])
@@ -39,7 +36,7 @@ func getAdventurerSearch(w http.ResponseWriter, r *http.Request) {
 	query = strings.ToLower(query)
 
 	// Look for cached data, then run the scraper if needed
-	data, status, date, expires, found := profileSearchCache.GetRecord([]string{region, query, searchTypeAsString, fmt.Sprint(page)})
+	data, status, date, expires, found := cache.ProfileSearch.GetRecord([]string{region, query, searchTypeAsString, fmt.Sprint(page)})
 	if !found {
 		data, status = scrapers.ScrapeAdventurerSearch(region, query, searchType, page)
 
@@ -52,7 +49,7 @@ func getAdventurerSearch(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		date, expires = profileSearchCache.AddRecord([]string{region, query, searchTypeAsString, fmt.Sprint(page)}, data, status)
+		date, expires = cache.ProfileSearch.AddRecord([]string{region, query, searchTypeAsString, fmt.Sprint(page)}, data, status)
 	}
 
 	w.Header().Set("Date", date)

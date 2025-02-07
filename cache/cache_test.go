@@ -13,7 +13,7 @@ func init() {
 
 func TestCache(t *testing.T) {
 	// Create a cache instance for testing
-	testCache := NewCache[string]()
+	testCache := newCache[string]()
 
 	// Test AddRecord and GetRecord
 	keys := []string{"key1", "key2"}

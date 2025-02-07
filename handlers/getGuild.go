@@ -6,12 +6,9 @@ import (
 	"strings"
 
 	"bdo-rest-api/cache"
-	"bdo-rest-api/models"
 	"bdo-rest-api/scrapers"
 	"bdo-rest-api/validators"
 )
-
-var guildProfilesCache = cache.NewCache[models.GuildProfile]()
 
 func getGuild(w http.ResponseWriter, r *http.Request) {
 	name, nameOk, nameValidationMessage := validators.ValidateGuildNameQueryParam(r.URL.Query()["guildName"])
@@ -34,7 +31,7 @@ func getGuild(w http.ResponseWriter, r *http.Request) {
 	name = strings.ToLower(name)
 
 	// Look for cached data, then run the scraper if needed
-	data, status, date, expires, found := guildProfilesCache.GetRecord([]string{region, name})
+	data, status, date, expires, found := cache.GuildProfiles.GetRecord([]string{region, name})
 	if !found {
 		data, status = scrapers.ScrapeGuild(region, name)
 
@@ -47,7 +44,7 @@ func getGuild(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		date, expires = guildProfilesCache.AddRecord([]string{region, name}, data, status)
+		date, expires = cache.GuildProfiles.AddRecord([]string{region, name}, data, status)
 	}
 
 	w.Header().Set("Date", date)

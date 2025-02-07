@@ -8,6 +8,7 @@ import (
 	"golang.org/x/exp/maps"
 
 	"bdo-rest-api/config"
+	"bdo-rest-api/models"
 	"bdo-rest-api/utils"
 )
 
@@ -25,7 +26,7 @@ func joinKeys(keys []string) string {
 	return strings.Join(keys, ",")
 }
 
-func NewCache[T any]() *cache[T] {
+func newCache[T any]() *cache[T] {
 	cacheTTL := config.GetCacheTTL()
 
 	return &cache[T]{
@@ -69,3 +70,8 @@ func (c *cache[T]) GetItemCount() int {
 func (c *cache[T]) GetKeys() []string {
 	return maps.Keys(c.internalCache.Items())
 }
+
+var GuildProfiles = newCache[models.GuildProfile]()
+var GuildSearch = newCache[[]models.GuildProfile]()
+var Profiles = newCache[models.Profile]()
+var ProfileSearch = newCache[[]models.Profile]()

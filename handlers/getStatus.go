@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"time"
 
+	"bdo-rest-api/cache"
 	"bdo-rest-api/config"
 	"bdo-rest-api/scrapers"
 )
@@ -17,10 +18,10 @@ func getStatus(w http.ResponseWriter, r *http.Request) {
 		"cache": map[string]interface{}{
 			"lastDetectedMaintenance": scrapers.GetLastCloseTimes(),
 			"responses": map[string]int{
-				"/adventurer":        profilesCache.GetItemCount(),
-				"/adventurer/search": profileSearchCache.GetItemCount(),
-				"/guild":             guildProfilesCache.GetItemCount(),
-				"/guild/search":      guildSearchCache.GetItemCount(),
+				"/adventurer":        cache.Profiles.GetItemCount(),
+				"/adventurer/search": cache.ProfileSearch.GetItemCount(),
+				"/guild":             cache.GuildProfiles.GetItemCount(),
+				"/guild/search":      cache.GuildSearch.GetItemCount(),
 			},
 			"ttl": map[string]string{
 				"general":           config.GetCacheTTL().Round(time.Minute).String(),

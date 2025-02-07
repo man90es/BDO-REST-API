@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"bdo-rest-api/cache"
 	"encoding/json"
 	"net/http"
 	"strconv"
@@ -49,9 +50,9 @@ func getParseCacheKey(cacheType string) func(string) map[string]interface{} {
 
 func getCache(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(map[string]interface{}{
-		"/adventurer":        sf.Map(profilesCache.GetKeys(), getParseCacheKey("/adventurer")),
-		"/adventurer/search": sf.Map(profileSearchCache.GetKeys(), getParseCacheKey("/adventurer/search")),
-		"/guild":             sf.Map(guildProfilesCache.GetKeys(), getParseCacheKey("/guild")),
-		"/guild/search":      sf.Map(guildSearchCache.GetKeys(), getParseCacheKey("/guild/search")),
+		"/adventurer":        sf.Map(cache.Profiles.GetKeys(), getParseCacheKey("/adventurer")),
+		"/adventurer/search": sf.Map(cache.ProfileSearch.GetKeys(), getParseCacheKey("/adventurer/search")),
+		"/guild":             sf.Map(cache.GuildProfiles.GetKeys(), getParseCacheKey("/guild")),
+		"/guild/search":      sf.Map(cache.GuildSearch.GetKeys(), getParseCacheKey("/guild/search")),
 	})
 }
