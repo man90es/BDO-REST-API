@@ -42,6 +42,7 @@ func newScraper(region string) (s scraper) {
 	})
 
 	// Detect maintenance
+	// TODO: Maybe it's a better idea to detect maintenance by detecting a redirect
 	s.OnHTML(`.type_3`, func(e *colly.HTMLElement) {
 		setCloseTime(region)
 	})
