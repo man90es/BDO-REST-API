@@ -2,6 +2,7 @@ package scrapers
 
 import (
 	"fmt"
+	"net/http"
 	"time"
 
 	"bdo-rest-api/config"
@@ -23,6 +24,11 @@ func newScraper(region string) (s scraper) {
 	s.c.SetRequestTimeout(time.Minute / 2)
 
 	if len(config.GetProxyList()) > 0 {
+		s.c.WithTransport(&http.Transport{
+			// https://github.com/gocolly/colly/issues/759
+			// Make sure that the ProxyFunc is called on every request.
+			DisableKeepAlives: true,
+		})
 		s.c.SetProxyFunc(config.GetProxySwitcher())
 	}
 
