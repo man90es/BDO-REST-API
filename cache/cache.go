@@ -2,6 +2,7 @@ package cache
 
 import (
 	"strings"
+	"sync"
 	"time"
 
 	goCache "github.com/patrickmn/go-cache"
@@ -14,10 +15,9 @@ import (
 )
 
 type CacheEntry[T any] struct {
-	Data    T
-	Date    time.Time
-	Expires time.Time // FIXME: Expiration date is also stored in the cache library but it's harder to reach
-	Status  int
+	Data   T
+	Date   time.Time
+	Status int
 }
 
 type cache[T any] struct {
@@ -41,19 +41,19 @@ func newCache[T any]() *cache[T] {
 func (c *cache[T]) AddRecord(keys []string, data T, status int) (date string, expires string) {
 	cacheTTL := config.GetCacheTTL()
 	entry := CacheEntry[T]{
-		Data:    data,
-		Date:    time.Now(),
-		Expires: time.Now().Add(cacheTTL),
-		Status:  status,
+		Data:   data,
+		Date:   time.Now(),
+		Status: status,
 	}
 
 	c.internalCache.Add(joinKeys(keys), entry, cacheTTL)
 	c.Bus.Publish(joinKeys(keys), entry)
 
-	return utils.FormatDateForHeaders(entry.Date), utils.FormatDateForHeaders(entry.Expires)
+	return utils.FormatDateForHeaders(entry.Date), utils.FormatDateForHeaders(entry.Date.Add(cacheTTL))
 }
 
 func (c *cache[T]) GetRecord(keys []string) (data T, status int, date string, expires string, found bool) {
+	cacheTTL := config.GetCacheTTL()
 	anyEntry, found := c.internalCache.Get(joinKeys(keys))
 
 	if !found {
@@ -62,7 +62,26 @@ func (c *cache[T]) GetRecord(keys []string) (data T, status int, date string, ex
 
 	entry := anyEntry.(CacheEntry[T])
 
-	return entry.Data, entry.Status, utils.FormatDateForHeaders(entry.Date), utils.FormatDateForHeaders(entry.Expires), found
+	return entry.Data, entry.Status, utils.FormatDateForHeaders(entry.Date), utils.FormatDateForHeaders(entry.Date.Add(cacheTTL)), found
+}
+
+func (c *cache[T]) WaitForRecord(keys []string) (data T, status int, date string, expires string) {
+	cacheTTL := config.GetCacheTTL()
+
+	var wg sync.WaitGroup
+	wg.Add(1)
+
+	c.Bus.Subscribe(joinKeys(keys), func(entry CacheEntry[T]) {
+		data = entry.Data
+		status = entry.Status
+		date = utils.FormatDateForHeaders(entry.Date)
+		expires = utils.FormatDateForHeaders(entry.Date.Add(cacheTTL))
+
+		wg.Done()
+	})
+
+	wg.Wait()
+	return
 }
 
 func (c *cache[T]) GetItemCount() int {
