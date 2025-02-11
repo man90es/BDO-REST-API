@@ -136,6 +136,7 @@ func ScrapeAdventurer(region string, profileTarget string) (profile models.Profi
 
 	if isCloseTime, _ := GetCloseTime(region); isCloseTime {
 		status = http.StatusServiceUnavailable
+		date, expires = cache.Profiles.SignalMaintenance([]string{region, profileTarget}, profile, status)
 		return
 	}
 

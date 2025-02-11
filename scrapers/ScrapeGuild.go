@@ -64,6 +64,7 @@ func ScrapeGuild(region, name string) (guildProfile models.GuildProfile, status 
 
 	if isCloseTime, _ := GetCloseTime(region); isCloseTime {
 		status = http.StatusServiceUnavailable
+		date, expires = cache.GuildProfiles.SignalMaintenance([]string{region, name}, guildProfile, status)
 		return
 	}
 

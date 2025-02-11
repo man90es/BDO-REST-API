@@ -39,17 +39,31 @@ func newCache[T any]() *cache[T] {
 }
 
 func (c *cache[T]) AddRecord(keys []string, data T, status int) (date string, expires string) {
-	cacheTTL := config.GetCacheTTL()
+	ttl := config.GetCacheTTL()
+	entry := CacheEntry[T]{
+		Data:   data,
+		Date:   time.Now(),
+		Status: status,
+	}
+	joinedKeys := joinKeys(keys)
+
+	c.internalCache.Add(joinedKeys, entry, ttl)
+	c.Bus.Publish(joinedKeys, entry)
+
+	return utils.FormatDateForHeaders(entry.Date), utils.FormatDateForHeaders(entry.Date.Add(ttl))
+}
+
+func (c *cache[T]) SignalMaintenance(keys []string, data T, status int) (date string, expires string) {
+	ttl := config.GetMaintenanceStatusTTL()
 	entry := CacheEntry[T]{
 		Data:   data,
 		Date:   time.Now(),
 		Status: status,
 	}
 
-	c.internalCache.Add(joinKeys(keys), entry, cacheTTL)
 	c.Bus.Publish(joinKeys(keys), entry)
 
-	return utils.FormatDateForHeaders(entry.Date), utils.FormatDateForHeaders(entry.Date.Add(cacheTTL))
+	return utils.FormatDateForHeaders(entry.Date), utils.FormatDateForHeaders(entry.Date.Add(ttl))
 }
 
 func (c *cache[T]) GetRecord(keys []string) (data T, status int, date string, expires string, found bool) {

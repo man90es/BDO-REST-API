@@ -65,6 +65,7 @@ func ScrapeAdventurerSearch(region string, query string, searchType string) (pro
 
 	if isCloseTime, _ := GetCloseTime(region); isCloseTime {
 		status = http.StatusServiceUnavailable
+		date, expires = cache.ProfileSearch.SignalMaintenance([]string{region, query, searchType}, profiles, status)
 		return
 	}
 
