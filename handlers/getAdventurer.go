@@ -5,7 +5,7 @@ import (
 	"net/http"
 
 	"bdo-rest-api/cache"
-	"bdo-rest-api/scrapers"
+	"bdo-rest-api/scraper"
 	"bdo-rest-api/validators"
 )
 
@@ -28,8 +28,7 @@ func getAdventurer(w http.ResponseWriter, r *http.Request) {
 
 	data, status, date, expires, found := cache.Profiles.GetRecord([]string{region, profileTarget})
 	if !found {
-		// TODO: Maintenance handling if it was detected while waiting for the scraper
-		go scrapers.ScrapeAdventurer(region, profileTarget)
+		go scraper.EnqueueAdventurer(region, profileTarget)
 		data, status, date, expires = cache.Profiles.WaitForRecord([]string{region, profileTarget})
 	}
 

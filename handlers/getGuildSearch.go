@@ -28,7 +28,6 @@ func getGuildSearch(w http.ResponseWriter, r *http.Request) {
 
 	data, status, date, expires, found := cache.GuildSearch.GetRecord([]string{region, name})
 	if !found {
-		// TODO: Maintenance handling if it was detected while waiting for the scraper
 		go scrapers.ScrapeGuildSearch(region, name)
 		data, status, date, expires = cache.GuildSearch.WaitForRecord([]string{region, name})
 	}

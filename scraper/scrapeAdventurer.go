@@ -1,9 +1,7 @@
-package scrapers
+package scraper
 
 import (
-	"fmt"
 	"net/http"
-	"net/url"
 	"regexp"
 	"strconv"
 	"strings"
@@ -16,54 +14,66 @@ import (
 	"bdo-rest-api/utils"
 )
 
-func ScrapeAdventurer(region string, profileTarget string) (profile models.Profile, status int, date string, expires string) {
-	c := newScraper(region)
+func scrapeAdventurer(body *colly.HTMLElement) {
+	profile := models.Profile{}
+	status := http.StatusNotFound
 
-	profile.ProfileTarget = profileTarget
-	profile.Region = region
-	status = http.StatusNotFound
+	profile.ProfileTarget = extractProfileTarget(body.Request.URL.String())
 
-	c.OnHTML(`.nick`, func(e *colly.HTMLElement) {
+	body.ForEachWithBreak(".nick", func(_ int, e *colly.HTMLElement) bool {
 		profile.FamilyName = e.Text
 		status = http.StatusOK
+		return false
 	})
 
-	c.OnHTML(`.region_info`, func(e *colly.HTMLElement) {
+	body.ForEachWithBreak(".region_info", func(_ int, e *colly.HTMLElement) bool {
 		profile.Region = e.Text
+		return false
 	})
 
-	c.OnHTML(`.desc.guild a`, func(e *colly.HTMLElement) {
+	body.ForEachWithBreak(".region_info", func(_ int, e *colly.HTMLElement) bool {
+		profile.Region = e.Text
+		return false
+	})
+
+	body.ForEachWithBreak(".desc.guild a", func(_ int, e *colly.HTMLElement) bool {
 		profile.Guild = &models.GuildProfile{
 			Name: e.Text,
 		}
+		return false
 	})
 
-	c.OnHTML(`.line_list li:nth-child(1) .desc span`, func(e *colly.HTMLElement) {
+	body.ForEachWithBreak(".line_list li:nth-child(1) .desc span", func(_ int, e *colly.HTMLElement) bool {
 		guildStatus := e.Text
 
-		if region != "EU" && region != "NA" {
+		if profile.Region != "EU" && profile.Region != "NA" {
 			translators.TranslateMisc(&guildStatus)
 		}
 
 		if guildStatus == "Private" {
 			profile.Privacy = profile.Privacy | models.PrivateGuild
 		}
+
+		return false
 	})
 
-	c.OnHTML(`.line_list li:nth-child(2) .desc`, func(e *colly.HTMLElement) {
+	body.ForEachWithBreak(".line_list li:nth-child(2) .desc", func(_ int, e *colly.HTMLElement) bool {
 		createdOn := utils.ParseDate(e.Text)
 		profile.CreatedOn = &createdOn
+		return false
 	})
 
-	c.OnHTML(`.line_list li:nth-child(3) .desc`, func(e *colly.HTMLElement) {
+	body.ForEachWithBreak(".line_list li:nth-child(3) .desc", func(_ int, e *colly.HTMLElement) bool {
 		if contributionPoints, err := strconv.Atoi(e.Text); err == nil {
 			profile.ContributionPoints = uint16(contributionPoints)
 		} else {
 			profile.Privacy = profile.Privacy | models.PrivateContrib
 		}
+
+		return false
 	})
 
-	c.OnHTML(`.character_spec:not(.lock)`, func(e *colly.HTMLElement) {
+	body.ForEachWithBreak(".character_spec:not(.lock)", func(_ int, e *colly.HTMLElement) bool {
 		specLevels := [11]string{}
 
 		e.ForEach(".spec_level", func(ind int, el *colly.HTMLElement) {
@@ -71,7 +81,7 @@ func ScrapeAdventurer(region string, profileTarget string) (profile models.Profi
 			i := regexp.MustCompile(`[0-9]`).FindStringIndex(el.Text)[0]
 			wordLevel := el.Text[:i]
 
-			if region != "EU" && region != "NA" {
+			if profile.Region != "EU" && profile.Region != "NA" {
 				translators.TranslateSpecLevel(&wordLevel)
 			}
 
@@ -94,19 +104,22 @@ func ScrapeAdventurer(region string, profileTarget string) (profile models.Profi
 			}
 			profile.LifeFame = utils.CalculateLifeFame(specLevels)
 		}
+
+		return false
 	})
 
-	c.OnHTML(`.character_desc_area`, func(e *colly.HTMLElement) {
+	body.ForEach(".character_desc_area", func(_ int, e *colly.HTMLElement) {
 		character := models.Character{
 			Class: e.ChildText(".character_info .character_symbol em:last-child"),
 		}
 
-		if region != "EU" && region != "NA" {
+		if profile.Region != "EU" && profile.Region != "NA" {
 			translators.TranslateClassName(&character.Class)
 		}
 
-		e.ForEach(`.selected_label`, func(ind int, el *colly.HTMLElement) {
+		e.ForEachWithBreak(".selected_label", func(_ int, _ *colly.HTMLElement) bool {
 			character.Main = true
+			return false
 		})
 
 		if level, err := strconv.Atoi(e.ChildText(".character_info span:nth-child(2) em")); err == nil {
@@ -128,22 +141,14 @@ func ScrapeAdventurer(region string, profileTarget string) (profile models.Profi
 		profile.Characters = append(profile.Characters, character)
 	})
 
-	c.OnHTML(`.character_spec.lock`, func(e *colly.HTMLElement) {
+	body.ForEachWithBreak(".character_spec.lock", func(_ int, _ *colly.HTMLElement) bool {
 		profile.Privacy = profile.Privacy | models.PrivateSpecs
+		return false
 	})
-
-	c.Visit(fmt.Sprintf("/Profile?profileTarget=%v", url.QueryEscape(profileTarget)))
-
-	if isCloseTime, _ := GetCloseTime(region); isCloseTime {
-		status = http.StatusServiceUnavailable
-		date, expires = cache.Profiles.SignalMaintenance([]string{region, profileTarget}, profile, status)
-		return
-	}
 
 	if profile.Privacy&models.PrivateLevel == 0 {
 		profile.CombatFame = utils.CalculateCombatFame(profile.Characters)
 	}
 
-	date, expires = cache.Profiles.AddRecord([]string{region, profileTarget}, profile, status)
-	return
+	cache.Profiles.AddRecord([]string{profile.Region, profile.ProfileTarget}, profile, status)
 }

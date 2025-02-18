@@ -31,7 +31,6 @@ func getAdventurerSearch(w http.ResponseWriter, r *http.Request) {
 
 	data, status, date, expires, found := cache.ProfileSearch.GetRecord([]string{region, query, searchType})
 	if !found {
-		// TODO: Maintenance handling if it was detected while waiting for the scraper
 		go scrapers.ScrapeAdventurerSearch(region, query, searchType)
 		data, status, date, expires = cache.ProfileSearch.WaitForRecord([]string{region, query, searchType})
 	}
