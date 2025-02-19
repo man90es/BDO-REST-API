@@ -40,11 +40,23 @@ func init() {
 	})
 
 	scraper.OnHTML("body", func(body *colly.HTMLElement) {
+		// TODO: Maintenance detection
+		// body.ForEachWithBreak(".type_3", func(_ int, e *colly.HTMLElement) bool {
+		// 	setCloseTime(region)
+		// 	status = http.StatusServiceUnavailable
+		// 	cache.GuildProfiles.SignalMaintenance([]string{region, name}, guildProfile, status)
+		// 	return false
+		// })
+
 		if match, _ := regexp.MatchString("/Profile[?]profileTarget=", body.Request.URL.String()); match {
 			scrapeAdventurer(body)
 		}
 
-		// TODO: Implement scraping for other page types
+		if match, _ := regexp.MatchString("/Guild/GuildProfile[?]guildName=", body.Request.URL.String()); match {
+			scrapeGuild(body)
+		}
+
+		// TODO: Implement scraping for player and guild search
 	})
 }
 

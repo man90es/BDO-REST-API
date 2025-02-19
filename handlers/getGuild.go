@@ -2,10 +2,11 @@ package handlers
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 
 	"bdo-rest-api/cache"
-	"bdo-rest-api/scrapers"
+	"bdo-rest-api/scraper"
 	"bdo-rest-api/validators"
 )
 
@@ -28,7 +29,8 @@ func getGuild(w http.ResponseWriter, r *http.Request) {
 
 	data, status, date, expires, found := cache.GuildProfiles.GetRecord([]string{region, name})
 	if !found {
-		go scrapers.ScrapeGuild(region, name)
+		go scraper.EnqueueGuild(region, name)
+		fmt.Printf("Waiting for %v %v\n", region, name)
 		data, status, date, expires = cache.GuildProfiles.WaitForRecord([]string{region, name})
 	}
 
