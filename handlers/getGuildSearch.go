@@ -22,10 +22,6 @@ func getGuildSearch(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if ok := giveMaintenanceResponse(w, region); ok {
-		return
-	}
-
 	data, status, date, expires, found := cache.GuildSearch.GetRecord([]string{region, name})
 	if !found {
 		go scraper.EnqueueGuildSearch(region, name)

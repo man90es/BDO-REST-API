@@ -22,10 +22,6 @@ func getAdventurer(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if ok := giveMaintenanceResponse(w, region); ok {
-		return
-	}
-
 	data, status, date, expires, found := cache.Profiles.GetRecord([]string{region, profileTarget})
 	if !found {
 		go scraper.EnqueueAdventurer(region, profileTarget)

@@ -25,10 +25,6 @@ func getAdventurerSearch(w http.ResponseWriter, r *http.Request) {
 	searchTypeQueryParam := r.URL.Query()["searchType"]
 	searchType := validators.ValidateSearchTypeQueryParam(searchTypeQueryParam)
 
-	if ok := giveMaintenanceResponse(w, region); ok {
-		return
-	}
-
 	data, status, date, expires, found := cache.ProfileSearch.GetRecord([]string{region, query, searchType})
 	if !found {
 		go scraper.EnqueueAdventurerSearch(region, query, searchType)
