@@ -4,12 +4,12 @@ import (
 	"net/http"
 	"time"
 
-	"bdo-rest-api/scrapers"
+	"bdo-rest-api/scraper"
 	"bdo-rest-api/utils"
 )
 
 func giveMaintenanceResponse(w http.ResponseWriter, region string) (ok bool) {
-	isCloseTime, expires := scrapers.GetCloseTime(region)
+	isCloseTime, expires := scraper.GetCloseTime(region)
 
 	if !isCloseTime {
 		return false

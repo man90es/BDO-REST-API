@@ -1,7 +1,6 @@
 package scraper
 
 import (
-	"fmt"
 	"net/http"
 	"strconv"
 	"strings"
@@ -13,14 +12,11 @@ import (
 	"bdo-rest-api/utils"
 )
 
-func scrapeGuild(body *colly.HTMLElement) {
-	guildProfile := models.GuildProfile{}
+func scrapeGuild(body *colly.HTMLElement, region string) {
 	status := http.StatusNotFound
-
-	body.ForEachWithBreak(".region_info", func(_ int, e *colly.HTMLElement) bool {
-		guildProfile.Region = e.Text
-		return false
-	})
+	guildProfile := models.GuildProfile{
+		Region: region,
+	}
 
 	body.ForEachWithBreak(".guild_name p", func(_ int, e *colly.HTMLElement) bool {
 		guildProfile.Name = e.Text
@@ -65,6 +61,5 @@ func scrapeGuild(body *colly.HTMLElement) {
 		guildProfile.Members = append(guildProfile.Members, member)
 	})
 
-	fmt.Printf("Signalling %v %v\n", guildProfile.Region, strings.ToLower(guildProfile.Name))
-	cache.GuildProfiles.AddRecord([]string{guildProfile.Region, strings.ToLower(guildProfile.Name)}, guildProfile, status)
+	cache.GuildProfiles.AddRecord([]string{region, strings.ToLower(guildProfile.Name)}, guildProfile, status)
 }

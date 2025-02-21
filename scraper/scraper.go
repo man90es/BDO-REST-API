@@ -40,6 +40,9 @@ func init() {
 	})
 
 	scraper.OnHTML("body", func(body *colly.HTMLElement) {
+		queryString, _ := url.ParseQuery(body.Request.URL.RawQuery)
+		region := queryString["region"][0]
+
 		// TODO: Maintenance detection
 		// body.ForEachWithBreak(".type_3", func(_ int, e *colly.HTMLElement) bool {
 		// 	setCloseTime(region)
@@ -49,14 +52,27 @@ func init() {
 		// })
 
 		if match, _ := regexp.MatchString("/Profile[?]profileTarget=", body.Request.URL.String()); match {
-			scrapeAdventurer(body)
+			scrapeAdventurer(body, region)
 		}
 
 		if match, _ := regexp.MatchString("/Guild/GuildProfile[?]guildName=", body.Request.URL.String()); match {
-			scrapeGuild(body)
+			scrapeGuild(body, region)
 		}
 
-		// TODO: Implement scraping for player and guild search
+		if match, _ := regexp.MatchString("&searchKeyword=", body.Request.URL.String()); match {
+			query := queryString["searchKeyword"][0]
+			searchType := queryString["searchType"][0]
+
+			scrapeAdventurerSearch(body, region, query, searchType)
+		}
+
+		if match, _ := regexp.MatchString("&page=1&searchText=", body.Request.URL.String()); match {
+			query := queryString["searchText"][0]
+
+			scrapeGuildSearch(body, region, query)
+		}
+
+		// TODO: Log that none of the scrapers fits
 	})
 }
 
@@ -70,7 +86,7 @@ func getRegionPrefix(region string) string {
 }
 
 func EnqueueAdventurer(region, profileTarget string) {
-	scraper.Visit(fmt.Sprintf("%v/Profile?profileTarget=%v", getRegionPrefix(region), url.QueryEscape(profileTarget)))
+	scraper.Visit(fmt.Sprintf("%v/Profile?profileTarget=%v&region=%v", getRegionPrefix(region), url.QueryEscape(profileTarget), region))
 }
 
 func EnqueueAdventurerSearch(region, query, searchType string) {

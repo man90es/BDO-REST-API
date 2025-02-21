@@ -5,7 +5,7 @@ import (
 	"net/http"
 
 	"bdo-rest-api/cache"
-	"bdo-rest-api/scrapers"
+	"bdo-rest-api/scraper"
 	"bdo-rest-api/validators"
 )
 
@@ -28,7 +28,7 @@ func getGuildSearch(w http.ResponseWriter, r *http.Request) {
 
 	data, status, date, expires, found := cache.GuildSearch.GetRecord([]string{region, name})
 	if !found {
-		go scrapers.ScrapeGuildSearch(region, name)
+		go scraper.EnqueueGuildSearch(region, name)
 		data, status, date, expires = cache.GuildSearch.WaitForRecord([]string{region, name})
 	}
 

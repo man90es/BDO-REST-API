@@ -1,7 +1,6 @@
-package scrapers
+package scraper
 
 import (
-	"fmt"
 	"net/http"
 	"strconv"
 
@@ -13,12 +12,11 @@ import (
 	"bdo-rest-api/utils"
 )
 
-func ScrapeGuildSearch(region, query string) (guildProfiles []models.GuildProfile, status int, date string, expires string) {
-	c := newScraper(region)
+func scrapeGuildSearch(body *colly.HTMLElement, region, query string) {
+	status := http.StatusNotFound
+	guildProfiles := make([]models.GuildProfile, 0)
 
-	status = http.StatusNotFound
-
-	c.OnHTML(`.box_list_area li:not(.no_result)`, func(e *colly.HTMLElement) {
+	body.ForEach(".box_list_area li:not(.no_result)", func(_ int, e *colly.HTMLElement) {
 		createdOn := utils.ParseDate(e.ChildText(".date"))
 		status = http.StatusOK
 
@@ -49,14 +47,5 @@ func ScrapeGuildSearch(region, query string) (guildProfiles []models.GuildProfil
 		guildProfiles = append(guildProfiles, guildProfile)
 	})
 
-	c.Visit(fmt.Sprintf("/Guild?region=%v&page=1&searchText=%v", region, query))
-
-	if isCloseTime, _ := GetCloseTime(region); isCloseTime {
-		status = http.StatusServiceUnavailable
-		date, expires = cache.GuildSearch.SignalMaintenance([]string{region, query}, guildProfiles, status)
-		return
-	}
-
-	date, expires = cache.GuildSearch.AddRecord([]string{region, query}, guildProfiles, status)
-	return
+	cache.GuildSearch.AddRecord([]string{region, query}, guildProfiles, status)
 }

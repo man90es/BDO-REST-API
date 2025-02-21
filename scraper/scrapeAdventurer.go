@@ -14,25 +14,17 @@ import (
 	"bdo-rest-api/utils"
 )
 
-func scrapeAdventurer(body *colly.HTMLElement) {
-	profile := models.Profile{}
+func scrapeAdventurer(body *colly.HTMLElement, region string) {
 	status := http.StatusNotFound
+	profile := models.Profile{
+		Region: region,
+	}
 
 	profile.ProfileTarget = extractProfileTarget(body.Request.URL.String())
 
 	body.ForEachWithBreak(".nick", func(_ int, e *colly.HTMLElement) bool {
 		profile.FamilyName = e.Text
 		status = http.StatusOK
-		return false
-	})
-
-	body.ForEachWithBreak(".region_info", func(_ int, e *colly.HTMLElement) bool {
-		profile.Region = e.Text
-		return false
-	})
-
-	body.ForEachWithBreak(".region_info", func(_ int, e *colly.HTMLElement) bool {
-		profile.Region = e.Text
 		return false
 	})
 
@@ -46,7 +38,7 @@ func scrapeAdventurer(body *colly.HTMLElement) {
 	body.ForEachWithBreak(".line_list li:nth-child(1) .desc span", func(_ int, e *colly.HTMLElement) bool {
 		guildStatus := e.Text
 
-		if profile.Region != "EU" && profile.Region != "NA" {
+		if region != "EU" && region != "NA" {
 			translators.TranslateMisc(&guildStatus)
 		}
 
@@ -81,7 +73,7 @@ func scrapeAdventurer(body *colly.HTMLElement) {
 			i := regexp.MustCompile(`[0-9]`).FindStringIndex(el.Text)[0]
 			wordLevel := el.Text[:i]
 
-			if profile.Region != "EU" && profile.Region != "NA" {
+			if region != "EU" && region != "NA" {
 				translators.TranslateSpecLevel(&wordLevel)
 			}
 
@@ -113,7 +105,7 @@ func scrapeAdventurer(body *colly.HTMLElement) {
 			Class: e.ChildText(".character_info .character_symbol em:last-child"),
 		}
 
-		if profile.Region != "EU" && profile.Region != "NA" {
+		if region != "EU" && region != "NA" {
 			translators.TranslateClassName(&character.Class)
 		}
 
@@ -150,5 +142,5 @@ func scrapeAdventurer(body *colly.HTMLElement) {
 		profile.CombatFame = utils.CalculateCombatFame(profile.Characters)
 	}
 
-	cache.Profiles.AddRecord([]string{profile.Region, profile.ProfileTarget}, profile, status)
+	cache.Profiles.AddRecord([]string{region, profile.ProfileTarget}, profile, status)
 }

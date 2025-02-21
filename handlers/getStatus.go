@@ -7,7 +7,7 @@ import (
 
 	"bdo-rest-api/cache"
 	"bdo-rest-api/config"
-	"bdo-rest-api/scrapers"
+	"bdo-rest-api/scraper"
 )
 
 var initTime = time.Now()
@@ -16,7 +16,7 @@ var version = "1.9.5"
 func getStatus(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(map[string]interface{}{
 		"cache": map[string]interface{}{
-			"lastDetectedMaintenance": scrapers.GetLastCloseTimes(),
+			"lastDetectedMaintenance": scraper.GetLastCloseTimes(),
 			"responses": map[string]int{
 				"/adventurer":        cache.Profiles.GetItemCount(),
 				"/adventurer/search": cache.ProfileSearch.GetItemCount(),
