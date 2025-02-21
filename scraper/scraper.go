@@ -7,6 +7,7 @@ import (
 	"regexp"
 	"time"
 
+	"bdo-rest-api/cache"
 	"bdo-rest-api/config"
 	"bdo-rest-api/logger"
 
@@ -36,28 +37,38 @@ func init() {
 	})
 
 	scraper.OnResponse(func(r *colly.Response) {
-		logger.Info(fmt.Sprintf("Received response code for %v: %v", r.Request.URL, r.StatusCode))
+		logger.Info(fmt.Sprintf("Loaded %v", r.Request.URL))
 	})
 
 	scraper.OnHTML("body", func(body *colly.HTMLElement) {
 		queryString, _ := url.ParseQuery(body.Request.URL.RawQuery)
 		region := queryString["region"][0]
 
-		// TODO: Maintenance detection
-		// body.ForEachWithBreak(".type_3", func(_ int, e *colly.HTMLElement) bool {
-		// 	setCloseTime(region)
-		// 	status = http.StatusServiceUnavailable
-		// 	cache.GuildProfiles.SignalMaintenance([]string{region, name}, guildProfile, status)
-		// 	return false
-		// })
+		// TODO: Test this during a maintenance
+		body.ForEachWithBreak(".type_3", func(_ int, e *colly.HTMLElement) bool {
+			setCloseTime(region)
+
+			cache.GuildProfiles.SignalMaintenance(region)
+			cache.ProfileSearch.SignalMaintenance(region)
+			cache.Profiles.SignalMaintenance(region)
+			cache.GuildSearch.SignalMaintenance(region)
+
+			return false
+		})
+
+		if isCloseTime, _ := GetCloseTime(region); isCloseTime {
+			return
+		}
 
 		if match, _ := regexp.MatchString("/Profile[?]profileTarget=", body.Request.URL.String()); match {
 			profileTarget := queryString["profileTarget"][0]
 			scrapeAdventurer(body, region, profileTarget)
+			return
 		}
 
 		if match, _ := regexp.MatchString("/Guild/GuildProfile[?]guildName=", body.Request.URL.String()); match {
 			scrapeGuild(body, region)
+			return
 		}
 
 		if match, _ := regexp.MatchString("&searchKeyword=", body.Request.URL.String()); match {
@@ -65,15 +76,17 @@ func init() {
 			searchType := queryString["searchType"][0]
 
 			scrapeAdventurerSearch(body, region, query, searchType)
+			return
 		}
 
 		if match, _ := regexp.MatchString("&page=1&searchText=", body.Request.URL.String()); match {
 			query := queryString["searchText"][0]
 
 			scrapeGuildSearch(body, region, query)
+			return
 		}
 
-		// TODO: Log that none of the scrapers fits
+		logger.Error(fmt.Sprintf("URL %v doesn't match any defined scrapers", body.Request.URL.String()))
 	})
 }
 
@@ -87,17 +100,33 @@ func getRegionPrefix(region string) string {
 }
 
 func EnqueueAdventurer(region, profileTarget string) {
+	if isCloseTime, _ := GetCloseTime(region); isCloseTime {
+		return
+	}
+
 	scraper.Visit(fmt.Sprintf("%v/Profile?profileTarget=%v&region=%v", getRegionPrefix(region), url.QueryEscape(profileTarget), region))
 }
 
 func EnqueueAdventurerSearch(region, query, searchType string) {
+	if isCloseTime, _ := GetCloseTime(region); isCloseTime {
+		return
+	}
+
 	scraper.Visit(fmt.Sprintf("%v?region=%v&searchType=%v&searchKeyword=%v&Page=1", getRegionPrefix(region), region, searchType, query))
 }
 
 func EnqueueGuild(region, name string) {
+	if isCloseTime, _ := GetCloseTime(region); isCloseTime {
+		return
+	}
+
 	scraper.Visit(fmt.Sprintf("%v/Guild/GuildProfile?guildName=%v&region=%v", getRegionPrefix(region), name, region))
 }
 
 func EnqueueGuildSearch(region, query string) {
+	if isCloseTime, _ := GetCloseTime(region); isCloseTime {
+		return
+	}
+
 	scraper.Visit(fmt.Sprintf("%v/Guild?region=%v&page=1&searchText=%v", getRegionPrefix(region), region, query))
 }

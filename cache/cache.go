@@ -1,6 +1,7 @@
 package cache
 
 import (
+	"net/http"
 	"strings"
 	"sync"
 	"time"
@@ -53,17 +54,15 @@ func (c *cache[T]) AddRecord(keys []string, data T, status int) (date string, ex
 	return utils.FormatDateForHeaders(entry.Date), utils.FormatDateForHeaders(entry.Date.Add(ttl))
 }
 
-func (c *cache[T]) SignalMaintenance(keys []string, data T, status int) (date string, expires string) {
-	ttl := config.GetMaintenanceStatusTTL()
+func (c *cache[T]) SignalMaintenance(region string) {
+	var data T
 	entry := CacheEntry[T]{
 		Data:   data,
 		Date:   time.Now(),
-		Status: status,
+		Status: http.StatusServiceUnavailable,
 	}
 
-	c.Bus.Publish(joinKeys(keys), entry)
-
-	return utils.FormatDateForHeaders(entry.Date), utils.FormatDateForHeaders(entry.Date.Add(ttl))
+	c.Bus.Publish(joinKeys([]string{"maintenance", region}), entry)
 }
 
 func (c *cache[T]) GetRecord(keys []string) (data T, status int, date string, expires string, found bool) {
@@ -80,8 +79,6 @@ func (c *cache[T]) GetRecord(keys []string) (data T, status int, date string, ex
 }
 
 func (c *cache[T]) WaitForRecord(keys []string) (data T, status int, date string, expires string) {
-	cacheTTL := config.GetCacheTTL()
-
 	var wg sync.WaitGroup
 	wg.Add(1)
 
@@ -89,7 +86,16 @@ func (c *cache[T]) WaitForRecord(keys []string) (data T, status int, date string
 		data = entry.Data
 		status = entry.Status
 		date = utils.FormatDateForHeaders(entry.Date)
-		expires = utils.FormatDateForHeaders(entry.Date.Add(cacheTTL))
+		expires = utils.FormatDateForHeaders(entry.Date.Add(config.GetCacheTTL()))
+
+		wg.Done()
+	})
+
+	c.Bus.Subscribe(joinKeys([]string{"maintenance", keys[0]}), func(entry CacheEntry[T]) {
+		data = entry.Data
+		status = entry.Status
+		date = utils.FormatDateForHeaders(entry.Date)
+		expires = utils.FormatDateForHeaders(entry.Date.Add(config.GetMaintenanceStatusTTL()))
 
 		wg.Done()
 	})
