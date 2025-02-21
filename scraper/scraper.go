@@ -52,7 +52,8 @@ func init() {
 		// })
 
 		if match, _ := regexp.MatchString("/Profile[?]profileTarget=", body.Request.URL.String()); match {
-			scrapeAdventurer(body, region)
+			profileTarget := queryString["profileTarget"][0]
+			scrapeAdventurer(body, region, profileTarget)
 		}
 
 		if match, _ := regexp.MatchString("/Guild/GuildProfile[?]guildName=", body.Request.URL.String()); match {

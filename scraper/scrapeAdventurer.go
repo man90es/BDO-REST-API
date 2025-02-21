@@ -14,13 +14,12 @@ import (
 	"bdo-rest-api/utils"
 )
 
-func scrapeAdventurer(body *colly.HTMLElement, region string) {
+func scrapeAdventurer(body *colly.HTMLElement, region, profileTarget string) {
 	status := http.StatusNotFound
 	profile := models.Profile{
-		Region: region,
+		ProfileTarget: profileTarget,
+		Region:        region,
 	}
-
-	profile.ProfileTarget = extractProfileTarget(body.Request.URL.String())
 
 	body.ForEachWithBreak(".nick", func(_ int, e *colly.HTMLElement) bool {
 		profile.FamilyName = e.Text
@@ -142,5 +141,5 @@ func scrapeAdventurer(body *colly.HTMLElement, region string) {
 		profile.CombatFame = utils.CalculateCombatFame(profile.Characters)
 	}
 
-	cache.Profiles.AddRecord([]string{region, profile.ProfileTarget}, profile, status)
+	cache.Profiles.AddRecord([]string{region, profileTarget}, profile, status)
 }
