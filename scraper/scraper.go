@@ -22,6 +22,11 @@ func init() {
 	extensions.RandomUserAgent(scraper)
 	scraper.SetRequestTimeout(time.Minute / 2)
 
+	scraper.Limit(&colly.LimitRule{
+		Delay:       time.Second,
+		RandomDelay: 5 * time.Second,
+	})
+
 	if len(config.GetProxyList()) > 0 {
 		scraper.WithTransport(&http.Transport{
 			// https://github.com/gocolly/colly/issues/759
