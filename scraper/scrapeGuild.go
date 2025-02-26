@@ -60,5 +60,5 @@ func scrapeGuild(body *colly.HTMLElement, region, guildName string) {
 		guildProfile.Members = append(guildProfile.Members, member)
 	})
 
-	cache.GuildProfiles.AddRecord([]string{region, guildName}, guildProfile, status)
+	cache.GuildProfiles.AddRecord([]string{region, guildName}, guildProfile, status, body.Request.Ctx.Get("taskId"))
 }

@@ -39,30 +39,29 @@ func newCache[T any]() *cache[T] {
 	}
 }
 
-func (c *cache[T]) AddRecord(keys []string, data T, status int) (date string, expires string) {
+func (c *cache[T]) AddRecord(keys []string, data T, status int, taskId string) (date string, expires string) {
 	ttl := config.GetCacheTTL()
 	entry := CacheEntry[T]{
 		Data:   data,
 		Date:   time.Now(),
 		Status: status,
 	}
-	joinedKeys := joinKeys(keys)
 
-	c.internalCache.Add(joinedKeys, entry, ttl)
-	c.Bus.Publish(joinedKeys, entry)
+	c.internalCache.Add(joinKeys(keys), entry, ttl)
+	c.Bus.Publish(taskId, entry)
 
 	return utils.FormatDateForHeaders(entry.Date), utils.FormatDateForHeaders(entry.Date.Add(ttl))
 }
 
-func (c *cache[T]) SignalMaintenance(region string) {
+func (c *cache[T]) SignalBypassCache(status int, taskId string) {
 	var data T
 	entry := CacheEntry[T]{
 		Data:   data,
 		Date:   time.Now(),
-		Status: http.StatusServiceUnavailable,
+		Status: status,
 	}
 
-	c.Bus.Publish(joinKeys([]string{"maintenance", region}), entry)
+	c.Bus.Publish(taskId, entry)
 }
 
 func (c *cache[T]) GetRecord(keys []string) (data T, status int, date string, expires string, found bool) {
@@ -78,24 +77,22 @@ func (c *cache[T]) GetRecord(keys []string) (data T, status int, date string, ex
 	return entry.Data, entry.Status, utils.FormatDateForHeaders(entry.Date), utils.FormatDateForHeaders(entry.Date.Add(cacheTTL)), found
 }
 
-func (c *cache[T]) WaitForRecord(keys []string) (data T, status int, date string, expires string) {
+func (c *cache[T]) WaitForRecord(taskId string) (data T, status int, date string, expires string) {
 	var wg sync.WaitGroup
 	wg.Add(1)
 
-	c.Bus.Subscribe(joinKeys(keys), func(entry CacheEntry[T]) {
+	c.Bus.Subscribe(taskId, func(entry CacheEntry[T]) {
 		data = entry.Data
 		status = entry.Status
 		date = utils.FormatDateForHeaders(entry.Date)
-		expires = utils.FormatDateForHeaders(entry.Date.Add(config.GetCacheTTL()))
 
-		wg.Done()
-	})
-
-	c.Bus.Subscribe(joinKeys([]string{"maintenance", keys[0]}), func(entry CacheEntry[T]) {
-		data = entry.Data
-		status = entry.Status
-		date = utils.FormatDateForHeaders(entry.Date)
-		expires = utils.FormatDateForHeaders(entry.Date.Add(config.GetMaintenanceStatusTTL()))
+		if entry.Status == http.StatusInternalServerError {
+			expires = date
+		} else if entry.Status == http.StatusServiceUnavailable {
+			expires = utils.FormatDateForHeaders(entry.Date.Add(config.GetMaintenanceStatusTTL()))
+		} else {
+			expires = utils.FormatDateForHeaders(entry.Date.Add(config.GetCacheTTL()))
+		}
 
 		wg.Done()
 	})

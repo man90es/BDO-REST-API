@@ -24,8 +24,8 @@ func getAdventurer(w http.ResponseWriter, r *http.Request) {
 
 	data, status, date, expires, found := cache.Profiles.GetRecord([]string{region, profileTarget})
 	if !found {
-		go scraper.EnqueueAdventurer(region, profileTarget)
-		data, status, date, expires = cache.Profiles.WaitForRecord([]string{region, profileTarget})
+		taskId := scraper.EnqueueAdventurer(region, profileTarget)
+		data, status, date, expires = cache.Profiles.WaitForRecord(taskId)
 	}
 
 	w.Header().Set("Date", date)

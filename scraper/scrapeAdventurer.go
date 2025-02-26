@@ -141,5 +141,5 @@ func scrapeAdventurer(body *colly.HTMLElement, region, profileTarget string) {
 		profile.CombatFame = utils.CalculateCombatFame(profile.Characters)
 	}
 
-	cache.Profiles.AddRecord([]string{region, profileTarget}, profile, status)
+	cache.Profiles.AddRecord([]string{region, profileTarget}, profile, status, body.Request.Ctx.Get("taskId"))
 }

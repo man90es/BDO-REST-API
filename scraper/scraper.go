@@ -13,6 +13,7 @@ import (
 
 	colly "github.com/gocolly/colly/v2"
 	"github.com/gocolly/colly/v2/extensions"
+	"github.com/google/uuid"
 )
 
 var scraper *colly.Collector
@@ -36,6 +37,13 @@ func init() {
 
 		scraper.SetProxyFunc(config.GetProxySwitcher())
 	}
+
+	scraper.OnRequest(func(r *colly.Request) {
+		query := r.URL.Query()
+		r.Ctx.Put("taskId", query.Get("taskId"))
+		query.Del("taskId")
+		r.URL.RawQuery = query.Encode()
+	})
 
 	scraper.OnError(func(r *colly.Response, err error) {
 		logger.Error(fmt.Sprintf("%v", err))
@@ -64,10 +72,11 @@ func init() {
 		body.ForEachWithBreak(".type_3", func(_ int, e *colly.HTMLElement) bool {
 			setCloseTime(region)
 
-			cache.GuildProfiles.SignalMaintenance(region)
-			cache.ProfileSearch.SignalMaintenance(region)
-			cache.Profiles.SignalMaintenance(region)
-			cache.GuildSearch.SignalMaintenance(region)
+			// TODO: Only signal on the waiting type
+			cache.GuildProfiles.SignalBypassCache(http.StatusServiceUnavailable, body.Request.Ctx.Get("taskId"))
+			cache.ProfileSearch.SignalBypassCache(http.StatusServiceUnavailable, body.Request.Ctx.Get("taskId"))
+			cache.Profiles.SignalBypassCache(http.StatusServiceUnavailable, body.Request.Ctx.Get("taskId"))
+			cache.GuildSearch.SignalBypassCache(http.StatusServiceUnavailable, body.Request.Ctx.Get("taskId"))
 
 			return false
 		})
@@ -116,34 +125,50 @@ func getRegionPrefix(region string) string {
 	}[region])
 }
 
-func EnqueueAdventurer(region, profileTarget string) {
+func EnqueueAdventurer(region, profileTarget string) (taskId string) {
 	if isCloseTime, _ := GetCloseTime(region); isCloseTime {
 		return
 	}
 
-	scraper.Visit(fmt.Sprintf("%v/Profile?profileTarget=%v&region=%v", getRegionPrefix(region), url.QueryEscape(profileTarget), region))
+	taskId = uuid.New().String()
+	url := fmt.Sprintf("%v/Profile?profileTarget=%v&region=%v&taskId=%v", getRegionPrefix(region), url.QueryEscape(profileTarget), region, taskId)
+	go scraper.Visit(url)
+
+	return
 }
 
-func EnqueueAdventurerSearch(region, query, searchType string) {
+func EnqueueAdventurerSearch(region, query, searchType string) (taskId string) {
 	if isCloseTime, _ := GetCloseTime(region); isCloseTime {
 		return
 	}
 
-	scraper.Visit(fmt.Sprintf("%v?region=%v&searchType=%v&searchKeyword=%v&Page=1", getRegionPrefix(region), region, searchType, query))
+	taskId = uuid.New().String()
+	url := fmt.Sprintf("%v?region=%v&searchType=%v&searchKeyword=%v&Page=1&taskId=%v", getRegionPrefix(region), region, searchType, query, taskId)
+	go scraper.Visit(url)
+
+	return
 }
 
-func EnqueueGuild(region, name string) {
+func EnqueueGuild(region, name string) (taskId string) {
 	if isCloseTime, _ := GetCloseTime(region); isCloseTime {
 		return
 	}
 
-	scraper.Visit(fmt.Sprintf("%v/Guild/GuildProfile?guildName=%v&region=%v", getRegionPrefix(region), name, region))
+	taskId = uuid.New().String()
+	url := fmt.Sprintf("%v/Guild/GuildProfile?guildName=%v&region=%v&taskId=%v", getRegionPrefix(region), name, region, taskId)
+	go scraper.Visit(url)
+
+	return
 }
 
-func EnqueueGuildSearch(region, query string) {
+func EnqueueGuildSearch(region, query string) (taskId string) {
 	if isCloseTime, _ := GetCloseTime(region); isCloseTime {
 		return
 	}
 
-	scraper.Visit(fmt.Sprintf("%v/Guild?region=%v&page=1&searchText=%v", getRegionPrefix(region), region, query))
+	taskId = uuid.New().String()
+	url := fmt.Sprintf("%v/Guild?region=%v&page=1&searchText=%v&taskId=%v", getRegionPrefix(region), region, query, taskId)
+	go scraper.Visit(url)
+
+	return
 }

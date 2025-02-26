@@ -49,5 +49,5 @@ func scrapeAdventurerSearch(body *colly.HTMLElement, region, query, searchType s
 		profiles = append(profiles, profile)
 	})
 
-	cache.ProfileSearch.AddRecord([]string{region, query, searchType}, profiles, status)
+	cache.ProfileSearch.AddRecord([]string{region, query, searchType}, profiles, status, body.Request.Ctx.Get("taskId"))
 }
