@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
-	"regexp"
 	"time"
 
 	"bdo-rest-api/cache"
@@ -40,8 +39,13 @@ func init() {
 
 	scraper.OnRequest(func(r *colly.Request) {
 		query := r.URL.Query()
+
 		r.Ctx.Put("taskId", query.Get("taskId"))
 		query.Del("taskId")
+
+		r.Ctx.Put("taskType", query.Get("taskType"))
+		query.Del("taskType")
+
 		r.URL.RawQuery = query.Encode()
 	})
 
@@ -72,11 +76,22 @@ func init() {
 		body.ForEachWithBreak(".type_3", func(_ int, e *colly.HTMLElement) bool {
 			setCloseTime(region)
 
-			// TODO: Only signal on the waiting type
-			cache.GuildProfiles.SignalBypassCache(http.StatusServiceUnavailable, body.Request.Ctx.Get("taskId"))
-			cache.ProfileSearch.SignalBypassCache(http.StatusServiceUnavailable, body.Request.Ctx.Get("taskId"))
-			cache.Profiles.SignalBypassCache(http.StatusServiceUnavailable, body.Request.Ctx.Get("taskId"))
-			cache.GuildSearch.SignalBypassCache(http.StatusServiceUnavailable, body.Request.Ctx.Get("taskId"))
+			switch body.Request.Ctx.Get("taskType") {
+			case "player":
+				cache.Profiles.SignalBypassCache(http.StatusServiceUnavailable, body.Request.Ctx.Get("taskId"))
+
+			case "playerSearch":
+				cache.ProfileSearch.SignalBypassCache(http.StatusServiceUnavailable, body.Request.Ctx.Get("taskId"))
+
+			case "guild":
+				cache.GuildProfiles.SignalBypassCache(http.StatusServiceUnavailable, body.Request.Ctx.Get("taskId"))
+
+			case "guildSearch":
+				cache.GuildSearch.SignalBypassCache(http.StatusServiceUnavailable, body.Request.Ctx.Get("taskId"))
+
+			default:
+				logger.Error(fmt.Sprintf("URL %v doesn't match any defined scrapers", body.Request.URL.String()))
+			}
 
 			return false
 		})
@@ -85,34 +100,27 @@ func init() {
 			return
 		}
 
-		if match, _ := regexp.MatchString("/Profile[?]profileTarget=", body.Request.URL.String()); match {
+		switch body.Request.Ctx.Get("taskType") {
+		case "player":
 			profileTarget := queryString["profileTarget"][0]
 			scrapeAdventurer(body, region, profileTarget)
-			return
-		}
 
-		if match, _ := regexp.MatchString("/Guild/GuildProfile[?]guildName=", body.Request.URL.String()); match {
-			guildName := queryString["guildName"][0]
-			scrapeGuild(body, region, guildName)
-			return
-		}
-
-		if match, _ := regexp.MatchString("&searchKeyword=", body.Request.URL.String()); match {
+		case "playerSearch":
 			query := queryString["searchKeyword"][0]
 			searchType := queryString["searchType"][0]
-
 			scrapeAdventurerSearch(body, region, query, searchType)
-			return
-		}
+		case "guild":
+			guildName := queryString["guildName"][0]
+			scrapeGuild(body, region, guildName)
 
-		if match, _ := regexp.MatchString("&page=1&searchText=", body.Request.URL.String()); match {
+		case "guildSearch":
 			query := queryString["searchText"][0]
-
 			scrapeGuildSearch(body, region, query)
-			return
+
+		default:
+			logger.Error(fmt.Sprintf("URL %v doesn't match any defined scrapers", body.Request.URL.String()))
 		}
 
-		logger.Error(fmt.Sprintf("URL %v doesn't match any defined scrapers", body.Request.URL.String()))
 	})
 }
 
@@ -131,7 +139,13 @@ func EnqueueAdventurer(region, profileTarget string) (taskId string) {
 	}
 
 	taskId = uuid.New().String()
-	url := fmt.Sprintf("%v/Profile?profileTarget=%v&region=%v&taskId=%v", getRegionPrefix(region), url.QueryEscape(profileTarget), region, taskId)
+	url := fmt.Sprintf(
+		"%v/Profile?profileTarget=%v&region=%v&taskId=%v&taskType=player",
+		getRegionPrefix(region),
+		url.QueryEscape(profileTarget),
+		region,
+		taskId,
+	)
 	go scraper.Visit(url)
 
 	return
@@ -143,7 +157,14 @@ func EnqueueAdventurerSearch(region, query, searchType string) (taskId string) {
 	}
 
 	taskId = uuid.New().String()
-	url := fmt.Sprintf("%v?region=%v&searchType=%v&searchKeyword=%v&Page=1&taskId=%v", getRegionPrefix(region), region, searchType, query, taskId)
+	url := fmt.Sprintf(
+		"%v?region=%v&searchType=%v&searchKeyword=%v&Page=1&taskId=%v&taskType=playerSearch",
+		getRegionPrefix(region),
+		region,
+		searchType,
+		query,
+		taskId,
+	)
 	go scraper.Visit(url)
 
 	return
@@ -155,7 +176,13 @@ func EnqueueGuild(region, name string) (taskId string) {
 	}
 
 	taskId = uuid.New().String()
-	url := fmt.Sprintf("%v/Guild/GuildProfile?guildName=%v&region=%v&taskId=%v", getRegionPrefix(region), name, region, taskId)
+	url := fmt.Sprintf(
+		"%v/Guild/GuildProfile?guildName=%v&region=%v&taskId=%v&taskType=guild",
+		getRegionPrefix(region),
+		name,
+		region,
+		taskId,
+	)
 	go scraper.Visit(url)
 
 	return
@@ -167,7 +194,13 @@ func EnqueueGuildSearch(region, query string) (taskId string) {
 	}
 
 	taskId = uuid.New().String()
-	url := fmt.Sprintf("%v/Guild?region=%v&page=1&searchText=%v&taskId=%v", getRegionPrefix(region), region, query, taskId)
+	url := fmt.Sprintf(
+		"%v/Guild?region=%v&page=1&searchText=%v&taskId=%v&taskType=guildSearch",
+		getRegionPrefix(region),
+		region,
+		query,
+		taskId,
+	)
 	go scraper.Visit(url)
 
 	return
