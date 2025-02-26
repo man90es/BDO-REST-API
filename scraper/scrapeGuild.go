@@ -3,7 +3,6 @@ package scraper
 import (
 	"net/http"
 	"strconv"
-	"strings"
 
 	"github.com/gocolly/colly/v2"
 
@@ -12,7 +11,7 @@ import (
 	"bdo-rest-api/utils"
 )
 
-func scrapeGuild(body *colly.HTMLElement, region string) {
+func scrapeGuild(body *colly.HTMLElement, region, guildName string) {
 	status := http.StatusNotFound
 	guildProfile := models.GuildProfile{
 		Region: region,
@@ -61,5 +60,5 @@ func scrapeGuild(body *colly.HTMLElement, region string) {
 		guildProfile.Members = append(guildProfile.Members, member)
 	})
 
-	cache.GuildProfiles.AddRecord([]string{region, strings.ToLower(guildProfile.Name)}, guildProfile, status)
+	cache.GuildProfiles.AddRecord([]string{region, guildName}, guildProfile, status)
 }

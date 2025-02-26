@@ -46,8 +46,19 @@ func init() {
 	})
 
 	scraper.OnHTML("body", func(body *colly.HTMLElement) {
+		imperva := false
 		queryString, _ := url.ParseQuery(body.Request.URL.RawQuery)
 		region := queryString["region"][0]
+
+		body.ForEachWithBreak("iframe", func(_ int, e *colly.HTMLElement) bool {
+			imperva = true
+			return false
+		})
+
+		if imperva {
+			logger.Error("Imperva")
+			return
+		}
 
 		// TODO: Test this during a maintenance
 		body.ForEachWithBreak(".type_3", func(_ int, e *colly.HTMLElement) bool {
@@ -72,7 +83,8 @@ func init() {
 		}
 
 		if match, _ := regexp.MatchString("/Guild/GuildProfile[?]guildName=", body.Request.URL.String()); match {
-			scrapeGuild(body, region)
+			guildName := queryString["guildName"][0]
+			scrapeGuild(body, region, guildName)
 			return
 		}
 
