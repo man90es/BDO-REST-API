@@ -24,7 +24,13 @@ func getGuildSearch(w http.ResponseWriter, r *http.Request) {
 
 	data, status, date, expires, found := cache.GuildSearch.GetRecord([]string{region, name})
 	if !found {
-		taskId := scraper.EnqueueGuildSearch(region, name)
+		taskId, maintenance := scraper.EnqueueGuildSearch(region, name)
+
+		if maintenance {
+			w.WriteHeader(http.StatusServiceUnavailable)
+			return
+		}
+
 		data, status, date, expires = cache.GuildSearch.WaitForRecord(taskId)
 	}
 

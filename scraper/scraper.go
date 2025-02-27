@@ -20,6 +20,7 @@ var scraper *colly.Collector
 func init() {
 	scraper = colly.NewCollector()
 	extensions.RandomUserAgent(scraper)
+	scraper.AllowURLRevisit = true
 	scraper.SetRequestTimeout(time.Minute / 2)
 
 	scraper.Limit(&colly.LimitRule{
@@ -46,11 +47,14 @@ func init() {
 		r.Ctx.Put("taskType", query.Get("taskType"))
 		query.Del("taskType")
 
+		r.Ctx.Put("taskRegion", query.Get("taskRegion"))
+		query.Del("taskRegion")
+
 		r.URL.RawQuery = query.Encode()
 	})
 
 	scraper.OnError(func(r *colly.Response, err error) {
-		logger.Error(fmt.Sprintf("%v", err))
+		logger.Error(fmt.Sprintf("Error occured while loading %v: %v", r.Request.URL, err))
 	})
 
 	scraper.OnResponse(func(r *colly.Response) {
@@ -60,7 +64,7 @@ func init() {
 	scraper.OnHTML("body", func(body *colly.HTMLElement) {
 		imperva := false
 		queryString, _ := url.ParseQuery(body.Request.URL.RawQuery)
-		region := queryString["region"][0]
+		region := body.Request.Ctx.Get("taskRegion")
 
 		body.ForEachWithBreak("iframe", func(_ int, e *colly.HTMLElement) bool {
 			imperva = true
@@ -72,10 +76,14 @@ func init() {
 			return
 		}
 
-		// TODO: Test this during a maintenance
 		body.ForEachWithBreak(".type_3", func(_ int, e *colly.HTMLElement) bool {
+			// Request gets redirected to https://www.naeu.playblackdesert.com/en-US/shutdown/closetime?shutDownType=0
+			// Maybe a better way to detect maintenance would be looking at the URL
 			setCloseTime(region)
+			return false
+		})
 
+		if isCloseTime, _ := GetCloseTime(region); isCloseTime {
 			switch body.Request.Ctx.Get("taskType") {
 			case "player":
 				cache.Profiles.SignalBypassCache(http.StatusServiceUnavailable, body.Request.Ctx.Get("taskId"))
@@ -93,10 +101,6 @@ func init() {
 				logger.Error(fmt.Sprintf("URL %v doesn't match any defined scrapers", body.Request.URL.String()))
 			}
 
-			return false
-		})
-
-		if isCloseTime, _ := GetCloseTime(region); isCloseTime {
 			return
 		}
 
@@ -109,6 +113,7 @@ func init() {
 			query := queryString["searchKeyword"][0]
 			searchType := queryString["searchType"][0]
 			scrapeAdventurerSearch(body, region, query, searchType)
+
 		case "guild":
 			guildName := queryString["guildName"][0]
 			scrapeGuild(body, region, guildName)
@@ -133,73 +138,80 @@ func getRegionPrefix(region string) string {
 	}[region])
 }
 
-func EnqueueAdventurer(region, profileTarget string) (taskId string) {
+func EnqueueAdventurer(region, profileTarget string) (taskId string, maintenance bool) {
 	if isCloseTime, _ := GetCloseTime(region); isCloseTime {
+		maintenance = true
 		return
 	}
 
 	taskId = uuid.New().String()
 	url := fmt.Sprintf(
-		"%v/Profile?profileTarget=%v&region=%v&taskId=%v&taskType=player",
+		"%v/Profile?profileTarget=%v&taskId=%v&taskType=player&taskRegion=%v",
 		getRegionPrefix(region),
 		url.QueryEscape(profileTarget),
-		region,
 		taskId,
+		region,
 	)
 	go scraper.Visit(url)
 
 	return
 }
 
-func EnqueueAdventurerSearch(region, query, searchType string) (taskId string) {
+func EnqueueAdventurerSearch(region, query, searchType string) (taskId string, maintenance bool) {
 	if isCloseTime, _ := GetCloseTime(region); isCloseTime {
+		maintenance = true
 		return
 	}
 
 	taskId = uuid.New().String()
 	url := fmt.Sprintf(
-		"%v?region=%v&searchType=%v&searchKeyword=%v&Page=1&taskId=%v&taskType=playerSearch",
+		"%v?region=%v&searchType=%v&searchKeyword=%v&Page=1&taskId=%v&taskType=playerSearch&taskRegion=%v",
 		getRegionPrefix(region),
 		region,
 		searchType,
 		query,
 		taskId,
+		region,
 	)
 	go scraper.Visit(url)
 
 	return
 }
 
-func EnqueueGuild(region, name string) (taskId string) {
+func EnqueueGuild(region, name string) (taskId string, maintenance bool) {
 	if isCloseTime, _ := GetCloseTime(region); isCloseTime {
+		maintenance = true
 		return
 	}
 
 	taskId = uuid.New().String()
 	url := fmt.Sprintf(
-		"%v/Guild/GuildProfile?guildName=%v&region=%v&taskId=%v&taskType=guild",
+		"%v/Guild/GuildProfile?guildName=%v&region=%v&taskId=%v&taskType=guild&taskRegion=%v",
 		getRegionPrefix(region),
 		name,
 		region,
 		taskId,
+		region,
 	)
 	go scraper.Visit(url)
 
 	return
 }
 
-func EnqueueGuildSearch(region, query string) (taskId string) {
+func EnqueueGuildSearch(region, query string) (taskId string, maintenance bool) {
 	if isCloseTime, _ := GetCloseTime(region); isCloseTime {
+		maintenance = true
 		return
 	}
 
 	taskId = uuid.New().String()
 	url := fmt.Sprintf(
-		"%v/Guild?region=%v&page=1&searchText=%v&taskId=%v&taskType=guildSearch",
+		"%v/Guild?region=%v&page=1&searchText=%v&taskId=%v&taskType=guildSearch&taskRegion=%v",
 		getRegionPrefix(region),
 		region,
 		query,
 		taskId,
+		region,
 	)
 	go scraper.Visit(url)
 
