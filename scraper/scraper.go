@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"strconv"
 	"time"
 
 	"bdo-rest-api/cache"
@@ -50,6 +51,9 @@ func init() {
 		r.Ctx.Put("taskRegion", query.Get("taskRegion"))
 		query.Del("taskRegion")
 
+		r.Ctx.Put("taskRetries", query.Get("taskRetries"))
+		query.Del("taskRetries")
+
 		r.URL.RawQuery = query.Encode()
 	})
 
@@ -73,6 +77,40 @@ func init() {
 
 		if imperva {
 			logger.Error("Imperva")
+			time.Sleep(10 * time.Second)
+
+			retries, _ := strconv.Atoi(body.Request.Ctx.Get("taskRetries"))
+			taskType := body.Request.Ctx.Get("taskType")
+
+			if retries < 2 {
+				url := fmt.Sprintf(
+					"%v&taskId=%v&taskType=%v&taskRegion=%v&taskRetries=%v",
+					body.Request.URL.String(),
+					body.Request.Ctx.Get("taskId"),
+					taskType,
+					body.Request.Ctx.Get("taskRegion"),
+					retries+1,
+				)
+				go scraper.Visit(url)
+			} else {
+				switch taskType {
+				case "player":
+					cache.Profiles.SignalBypassCache(http.StatusInternalServerError, body.Request.Ctx.Get("taskId"))
+
+				case "playerSearch":
+					cache.ProfileSearch.SignalBypassCache(http.StatusInternalServerError, body.Request.Ctx.Get("taskId"))
+
+				case "guild":
+					cache.GuildProfiles.SignalBypassCache(http.StatusInternalServerError, body.Request.Ctx.Get("taskId"))
+
+				case "guildSearch":
+					cache.GuildSearch.SignalBypassCache(http.StatusInternalServerError, body.Request.Ctx.Get("taskId"))
+
+				default:
+					logger.Error(fmt.Sprintf("Task type %v doesn't match any defined error handlers", taskType))
+				}
+			}
+
 			return
 		}
 
@@ -98,7 +136,7 @@ func init() {
 				cache.GuildSearch.SignalBypassCache(http.StatusServiceUnavailable, body.Request.Ctx.Get("taskId"))
 
 			default:
-				logger.Error(fmt.Sprintf("URL %v doesn't match any defined scrapers", body.Request.URL.String()))
+				logger.Error(fmt.Sprintf("Task type %v doesn't match any defined maintenance handlers", body.Request.Ctx.Get("taskType")))
 			}
 
 			return
@@ -123,7 +161,7 @@ func init() {
 			scrapeGuildSearch(body, region, query)
 
 		default:
-			logger.Error(fmt.Sprintf("URL %v doesn't match any defined scrapers", body.Request.URL.String()))
+			logger.Error(fmt.Sprintf("Task type %v doesn't match any defined scrapers", body.Request.Ctx.Get("taskType")))
 		}
 
 	})
@@ -146,11 +184,12 @@ func EnqueueAdventurer(region, profileTarget string) (taskId string, maintenance
 
 	taskId = uuid.New().String()
 	url := fmt.Sprintf(
-		"%v/Profile?profileTarget=%v&taskId=%v&taskType=player&taskRegion=%v",
+		"%v/Profile?profileTarget=%v&taskId=%v&taskType=player&taskRegion=%v&taskRetries=%v",
 		getRegionPrefix(region),
 		url.QueryEscape(profileTarget),
 		taskId,
 		region,
+		0,
 	)
 	go scraper.Visit(url)
 
@@ -165,13 +204,14 @@ func EnqueueAdventurerSearch(region, query, searchType string) (taskId string, m
 
 	taskId = uuid.New().String()
 	url := fmt.Sprintf(
-		"%v?region=%v&searchType=%v&searchKeyword=%v&Page=1&taskId=%v&taskType=playerSearch&taskRegion=%v",
+		"%v?region=%v&searchType=%v&searchKeyword=%v&Page=1&taskId=%v&taskType=playerSearch&taskRegion=%v&taskRetries=%v",
 		getRegionPrefix(region),
 		region,
 		searchType,
 		query,
 		taskId,
 		region,
+		0,
 	)
 	go scraper.Visit(url)
 
@@ -186,12 +226,13 @@ func EnqueueGuild(region, name string) (taskId string, maintenance bool) {
 
 	taskId = uuid.New().String()
 	url := fmt.Sprintf(
-		"%v/Guild/GuildProfile?guildName=%v&region=%v&taskId=%v&taskType=guild&taskRegion=%v",
+		"%v/Guild/GuildProfile?guildName=%v&region=%v&taskId=%v&taskType=guild&taskRegion=%v&taskRetries=%v",
 		getRegionPrefix(region),
 		name,
 		region,
 		taskId,
 		region,
+		0,
 	)
 	go scraper.Visit(url)
 
@@ -206,12 +247,13 @@ func EnqueueGuildSearch(region, query string) (taskId string, maintenance bool) 
 
 	taskId = uuid.New().String()
 	url := fmt.Sprintf(
-		"%v/Guild?region=%v&page=1&searchText=%v&taskId=%v&taskType=guildSearch&taskRegion=%v",
+		"%v/Guild?region=%v&page=1&searchText=%v&taskId=%v&taskType=guildSearch&taskRegion=%v&taskRetries=%v",
 		getRegionPrefix(region),
 		region,
 		query,
 		taskId,
 		region,
+		0,
 	)
 	go scraper.Visit(url)
 
