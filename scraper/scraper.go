@@ -60,7 +60,12 @@ func init() {
 	})
 
 	scraper.OnError(func(r *colly.Response, err error) {
+		taskId := r.Request.Ctx.Get("taskId")
+		taskType := r.Request.Ctx.Get("taskType")
+
 		logger.Error(fmt.Sprintf("Error occured while loading %v: %v", r.Request.URL, err))
+
+		signalError(taskType, taskId, http.StatusInternalServerError)
 	})
 
 	scraper.OnResponse(func(r *colly.Response) {
@@ -92,22 +97,7 @@ func init() {
 					"taskType":    taskType,
 				}))
 			} else {
-				switch taskType {
-				case "player":
-					cache.Profiles.SignalBypassCache(http.StatusInternalServerError, taskId)
-
-				case "playerSearch":
-					cache.ProfileSearch.SignalBypassCache(http.StatusInternalServerError, taskId)
-
-				case "guild":
-					cache.GuildProfiles.SignalBypassCache(http.StatusInternalServerError, taskId)
-
-				case "guildSearch":
-					cache.GuildSearch.SignalBypassCache(http.StatusInternalServerError, taskId)
-
-				default:
-					logger.Error(fmt.Sprintf("Task type %v doesn't match any defined error handlers", taskType))
-				}
+				signalError(taskType, taskId, http.StatusInternalServerError)
 			}
 
 			return
@@ -121,23 +111,7 @@ func init() {
 		})
 
 		if isCloseTime, _ := GetCloseTime(taskRegion); isCloseTime {
-			switch taskType {
-			case "player":
-				cache.Profiles.SignalBypassCache(http.StatusServiceUnavailable, taskId)
-
-			case "playerSearch":
-				cache.ProfileSearch.SignalBypassCache(http.StatusServiceUnavailable, taskId)
-
-			case "guild":
-				cache.GuildProfiles.SignalBypassCache(http.StatusServiceUnavailable, taskId)
-
-			case "guildSearch":
-				cache.GuildSearch.SignalBypassCache(http.StatusServiceUnavailable, taskId)
-
-			default:
-				logger.Error(fmt.Sprintf("Task type %v doesn't match any defined maintenance handlers", taskType))
-			}
-
+			signalError(taskType, taskId, http.StatusServiceUnavailable)
 			return
 		}
 
@@ -163,6 +137,25 @@ func init() {
 			logger.Error(fmt.Sprintf("Task type %v doesn't match any defined scrapers", taskType))
 		}
 	})
+}
+
+func signalError(taskType, taskId string, status int) {
+	switch taskType {
+	case "player":
+		cache.Profiles.SignalBypassCache(status, taskId)
+
+	case "playerSearch":
+		cache.ProfileSearch.SignalBypassCache(status, taskId)
+
+	case "guild":
+		cache.GuildProfiles.SignalBypassCache(status, taskId)
+
+	case "guildSearch":
+		cache.GuildSearch.SignalBypassCache(status, taskId)
+
+	default:
+		logger.Error(fmt.Sprintf("Task type %v doesn't match any handlers", taskType))
+	}
 }
 
 func createTask(region, taskType string, query map[string]string) (taskId string, maintenance bool) {
