@@ -1,4 +1,4 @@
-package scrapers
+package scraper
 
 import (
 	"net/url"

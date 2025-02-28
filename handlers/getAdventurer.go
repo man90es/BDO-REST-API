@@ -5,12 +5,9 @@ import (
 	"net/http"
 
 	"bdo-rest-api/cache"
-	"bdo-rest-api/models"
-	"bdo-rest-api/scrapers"
+	"bdo-rest-api/scraper"
 	"bdo-rest-api/validators"
 )
-
-var profilesCache = cache.NewCache[models.Profile]()
 
 func getAdventurer(w http.ResponseWriter, r *http.Request) {
 	profileTarget, profileTargetOk, profileTargetValidationMessage := validators.ValidateProfileTargetQueryParam(r.URL.Query()["profileTarget"])
@@ -25,25 +22,16 @@ func getAdventurer(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if ok := giveMaintenanceResponse(w, region); ok {
-		return
-	}
-
-	// Look for cached data, then run the scraper if needed
-	data, status, date, expires, found := profilesCache.GetRecord([]string{region, profileTarget})
+	data, status, date, expires, found := cache.Profiles.GetRecord([]string{region, profileTarget})
 	if !found {
-		data, status = scrapers.ScrapeAdventurer(region, profileTarget)
+		taskId, maintenance := scraper.EnqueueAdventurer(region, profileTarget)
 
-		if status == http.StatusInternalServerError {
-			w.WriteHeader(status)
+		if maintenance {
+			w.WriteHeader(http.StatusServiceUnavailable)
 			return
 		}
 
-		if ok := giveMaintenanceResponse(w, region); ok {
-			return
-		}
-
-		date, expires = profilesCache.AddRecord([]string{region, profileTarget}, data, status)
+		data, status, date, expires = cache.Profiles.WaitForRecord(taskId)
 	}
 
 	w.Header().Set("Date", date)

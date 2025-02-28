@@ -3,15 +3,11 @@ package handlers
 import (
 	"encoding/json"
 	"net/http"
-	"strings"
 
 	"bdo-rest-api/cache"
-	"bdo-rest-api/models"
-	"bdo-rest-api/scrapers"
+	"bdo-rest-api/scraper"
 	"bdo-rest-api/validators"
 )
-
-var guildProfilesCache = cache.NewCache[models.GuildProfile]()
 
 func getGuild(w http.ResponseWriter, r *http.Request) {
 	name, nameOk, nameValidationMessage := validators.ValidateGuildNameQueryParam(r.URL.Query()["guildName"])
@@ -26,28 +22,16 @@ func getGuild(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if ok := giveMaintenanceResponse(w, region); ok {
-		return
-	}
-
-	// All names are non-case-sensitive, so this will allow to utilise cache better
-	name = strings.ToLower(name)
-
-	// Look for cached data, then run the scraper if needed
-	data, status, date, expires, found := guildProfilesCache.GetRecord([]string{region, name})
+	data, status, date, expires, found := cache.GuildProfiles.GetRecord([]string{region, name})
 	if !found {
-		data, status = scrapers.ScrapeGuild(region, name)
+		taskId, maintenance := scraper.EnqueueGuild(region, name)
 
-		if status == http.StatusInternalServerError {
-			w.WriteHeader(status)
+		if maintenance {
+			w.WriteHeader(http.StatusServiceUnavailable)
 			return
 		}
 
-		if ok := giveMaintenanceResponse(w, region); ok {
-			return
-		}
-
-		date, expires = guildProfilesCache.AddRecord([]string{region, name}, data, status)
+		data, status, date, expires = cache.GuildProfiles.WaitForRecord(taskId)
 	}
 
 	w.Header().Set("Date", date)

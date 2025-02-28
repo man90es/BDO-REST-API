@@ -5,22 +5,23 @@ import (
 	"net/http"
 	"time"
 
+	"bdo-rest-api/cache"
 	"bdo-rest-api/config"
-	"bdo-rest-api/scrapers"
+	"bdo-rest-api/scraper"
 )
 
 var initTime = time.Now()
-var version = "1.9.5"
+var version = "1.10.0"
 
 func getStatus(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(map[string]interface{}{
 		"cache": map[string]interface{}{
-			"lastDetectedMaintenance": scrapers.GetLastCloseTimes(),
+			"lastDetectedMaintenance": scraper.GetLastCloseTimes(),
 			"responses": map[string]int{
-				"/adventurer":        profilesCache.GetItemCount(),
-				"/adventurer/search": profileSearchCache.GetItemCount(),
-				"/guild":             guildProfilesCache.GetItemCount(),
-				"/guild/search":      guildSearchCache.GetItemCount(),
+				"/adventurer":        cache.Profiles.GetItemCount(),
+				"/adventurer/search": cache.ProfileSearch.GetItemCount(),
+				"/guild":             cache.GuildProfiles.GetItemCount(),
+				"/guild/search":      cache.GuildSearch.GetItemCount(),
 			},
 			"ttl": map[string]string{
 				"general":           config.GetCacheTTL().Round(time.Minute).String(),

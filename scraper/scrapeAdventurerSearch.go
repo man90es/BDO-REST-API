@@ -1,31 +1,26 @@
-package scrapers
+package scraper
 
 import (
-	"fmt"
 	"net/http"
 	"strconv"
 
 	"github.com/gocolly/colly/v2"
 
+	"bdo-rest-api/cache"
 	"bdo-rest-api/models"
 	"bdo-rest-api/translators"
 )
 
-func ScrapeAdventurerSearch(region string, query string, searchType uint8, page uint16) (profiles []models.Profile, status int) {
-	c := newScraper(region)
+func scrapeAdventurerSearch(body *colly.HTMLElement, region, query, searchType string) {
+	status := http.StatusNotFound
+	profiles := make([]models.Profile, 0)
 
-	status = http.StatusNotFound
-
-	c.OnHTML(`.box_list_area li:not(.no_result)`, func(e *colly.HTMLElement) {
+	body.ForEach(".box_list_area li:not(.no_result)", func(_ int, e *colly.HTMLElement) {
 		status = http.StatusOK
 		profile := models.Profile{
-			Region:        region,
 			FamilyName:    e.ChildText(".title a"),
 			ProfileTarget: extractProfileTarget(e.ChildAttr(".title a", "href")),
-		}
-
-		if region != "SA" && region != "KR" {
-			profile.Region = e.ChildText(".region_info")
+			Region:        region,
 		}
 
 		if len(e.ChildAttr(".state a", "href")) > 0 {
@@ -42,13 +37,7 @@ func ScrapeAdventurerSearch(region string, query string, searchType uint8, page 
 			profile.Characters[0].Class = e.ChildText(".name")
 			profile.Characters[0].Name = e.ChildText(".text")
 
-			// Site displays the main character when searching by family name
-			// And the searched character when searching by character name
-			if searchType == 2 {
-				profile.Characters[0].Main = true
-			}
-
-			if region != "EU" && region != "NA" {
+			if profile.Region != "EU" && profile.Region != "NA" {
 				translators.TranslateClassName(&profile.Characters[0].Class)
 			}
 
@@ -60,11 +49,5 @@ func ScrapeAdventurerSearch(region string, query string, searchType uint8, page 
 		profiles = append(profiles, profile)
 	})
 
-	c.Visit(fmt.Sprintf("?region=%v&searchType=%v&searchKeyword=%v&Page=%v", region, searchType, query, page))
-
-	if isCloseTime, _ := GetCloseTime(region); isCloseTime {
-		status = http.StatusServiceUnavailable
-	}
-
-	return
+	cache.ProfileSearch.AddRecord([]string{region, query, searchType}, profiles, status, body.Request.Ctx.Get("taskId"))
 }

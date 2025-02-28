@@ -1,23 +1,22 @@
-package scrapers
+package scraper
 
 import (
-	"fmt"
 	"net/http"
 	"strconv"
 
 	"github.com/gocolly/colly/v2"
 
+	"bdo-rest-api/cache"
 	"bdo-rest-api/models"
 	"bdo-rest-api/translators"
 	"bdo-rest-api/utils"
 )
 
-func ScrapeGuildSearch(region, query string, page uint16) (guildProfiles []models.GuildProfile, status int) {
-	c := newScraper(region)
+func scrapeGuildSearch(body *colly.HTMLElement, region, query string) {
+	status := http.StatusNotFound
+	guildProfiles := make([]models.GuildProfile, 0)
 
-	status = http.StatusNotFound
-
-	c.OnHTML(`.box_list_area li:not(.no_result)`, func(e *colly.HTMLElement) {
+	body.ForEach(".box_list_area li:not(.no_result)", func(_ int, e *colly.HTMLElement) {
 		createdOn := utils.ParseDate(e.ChildText(".date"))
 		status = http.StatusOK
 
@@ -48,11 +47,5 @@ func ScrapeGuildSearch(region, query string, page uint16) (guildProfiles []model
 		guildProfiles = append(guildProfiles, guildProfile)
 	})
 
-	c.Visit(fmt.Sprintf("/Guild?region=%v&page=%v&searchText=%v", region, page, query))
-
-	if isCloseTime, _ := GetCloseTime(region); isCloseTime {
-		status = http.StatusServiceUnavailable
-	}
-
-	return
+	cache.GuildSearch.AddRecord([]string{region, query}, guildProfiles, status, body.Request.Ctx.Get("taskId"))
 }

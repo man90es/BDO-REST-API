@@ -19,8 +19,10 @@ func ValidateAdventurerNameQueryParam(query []string, region string) (name strin
 		"EU": 3,
 	}[region]
 
-	if len(query[0]) < minLength || len(query[0]) > 16 {
-		return query[0], false, fmt.Sprintf("Adventurer name should be between %v and 16 symbols long", minLength)
+	name = strings.ToLower(query[0])
+
+	if len(name) < minLength || len(name) > 16 {
+		return name, false, fmt.Sprintf("Adventurer name should be between %v and 16 symbols long", minLength)
 	}
 
 	// Returns false for allowed characters
@@ -49,9 +51,9 @@ func ValidateAdventurerNameQueryParam(query []string, region string) (name strin
 		return true
 	}
 
-	if i := strings.IndexFunc(query[0], f); i != -1 {
-		return query[0], false, fmt.Sprintf("Adventurer name contains a forbidden symbol at position %v: %q", i+1, query[0][i])
+	if i := strings.IndexFunc(name, f); i != -1 {
+		return name, false, fmt.Sprintf("Adventurer name contains a forbidden symbol at position %v: %q", i+1, query[0][i])
 	}
 
-	return query[0], true, ""
+	return name, true, ""
 }

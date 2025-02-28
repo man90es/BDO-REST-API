@@ -13,14 +13,15 @@ func init() {
 
 func TestCache(t *testing.T) {
 	// Create a cache instance for testing
-	testCache := NewCache[string]()
+	testCache := newCache[string]()
 
 	// Test AddRecord and GetRecord
 	keys := []string{"key1", "key2"}
 	data := "test data"
 	status := 200
+	taskId := "task-id"
 
-	date, expires := testCache.AddRecord(keys, data, status)
+	date, expires := testCache.AddRecord(keys, data, status, taskId)
 
 	// Validate AddRecord results
 	if date == "" || expires == "" {
