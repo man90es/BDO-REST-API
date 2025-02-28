@@ -1,8 +1,6 @@
 module bdo-rest-api
 
-go 1.23.0
-
-toolchain go1.24.0
+go 1.24.0
 
 require (
 	github.com/gocolly/colly/v2 v2.1.1-0.20240605174350-99b7fb1b87d1
