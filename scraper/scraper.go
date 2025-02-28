@@ -65,7 +65,10 @@ func init() {
 	scraper.OnHTML("body", func(body *colly.HTMLElement) {
 		imperva := false
 		queryString, _ := url.ParseQuery(body.Request.URL.RawQuery)
-		region := body.Request.Ctx.Get("taskRegion")
+		taskRegion := body.Request.Ctx.Get("taskRegion")
+		taskRetries, _ := strconv.Atoi(body.Request.Ctx.Get("taskRetries"))
+		taskId := body.Request.Ctx.Get("taskId")
+		taskType := body.Request.Ctx.Get("taskType")
 
 		body.ForEachWithBreak("iframe", func(_ int, e *colly.HTMLElement) bool {
 			imperva = true
@@ -76,32 +79,26 @@ func init() {
 			logger.Error("Imperva")
 			time.Sleep(10 * time.Second)
 
-			retries, _ := strconv.Atoi(body.Request.Ctx.Get("taskRetries"))
-			taskType := body.Request.Ctx.Get("taskType")
-
-			if retries < 2 {
-				url := fmt.Sprintf(
-					"%v&taskId=%v&taskType=%v&taskRegion=%v&taskRetries=%v",
-					body.Request.URL.String(),
-					body.Request.Ctx.Get("taskId"),
-					taskType,
-					body.Request.Ctx.Get("taskRegion"),
-					retries+1,
-				)
-				go scraper.Visit(url)
+			if taskRetries < 3 {
+				go scraper.Visit(utils.BuildRequest(body.Request.URL.String(), map[string]string{
+					"taskId":      taskId,
+					"taskRegion":  taskRegion,
+					"taskRetries": strconv.Itoa(taskRetries + 1),
+					"taskType":    taskType,
+				}))
 			} else {
 				switch taskType {
 				case "player":
-					cache.Profiles.SignalBypassCache(http.StatusInternalServerError, body.Request.Ctx.Get("taskId"))
+					cache.Profiles.SignalBypassCache(http.StatusInternalServerError, taskId)
 
 				case "playerSearch":
-					cache.ProfileSearch.SignalBypassCache(http.StatusInternalServerError, body.Request.Ctx.Get("taskId"))
+					cache.ProfileSearch.SignalBypassCache(http.StatusInternalServerError, taskId)
 
 				case "guild":
-					cache.GuildProfiles.SignalBypassCache(http.StatusInternalServerError, body.Request.Ctx.Get("taskId"))
+					cache.GuildProfiles.SignalBypassCache(http.StatusInternalServerError, taskId)
 
 				case "guildSearch":
-					cache.GuildSearch.SignalBypassCache(http.StatusInternalServerError, body.Request.Ctx.Get("taskId"))
+					cache.GuildSearch.SignalBypassCache(http.StatusInternalServerError, taskId)
 
 				default:
 					logger.Error(fmt.Sprintf("Task type %v doesn't match any defined error handlers", taskType))
@@ -114,53 +111,52 @@ func init() {
 		body.ForEachWithBreak(".type_3", func(_ int, e *colly.HTMLElement) bool {
 			// Request gets redirected to https://www.naeu.playblackdesert.com/en-US/shutdown/closetime?shutDownType=0
 			// Maybe a better way to detect maintenance would be looking at the URL
-			setCloseTime(region)
+			setCloseTime(taskRegion)
 			return false
 		})
 
-		if isCloseTime, _ := GetCloseTime(region); isCloseTime {
-			switch body.Request.Ctx.Get("taskType") {
+		if isCloseTime, _ := GetCloseTime(taskRegion); isCloseTime {
+			switch taskType {
 			case "player":
-				cache.Profiles.SignalBypassCache(http.StatusServiceUnavailable, body.Request.Ctx.Get("taskId"))
+				cache.Profiles.SignalBypassCache(http.StatusServiceUnavailable, taskId)
 
 			case "playerSearch":
-				cache.ProfileSearch.SignalBypassCache(http.StatusServiceUnavailable, body.Request.Ctx.Get("taskId"))
+				cache.ProfileSearch.SignalBypassCache(http.StatusServiceUnavailable, taskId)
 
 			case "guild":
-				cache.GuildProfiles.SignalBypassCache(http.StatusServiceUnavailable, body.Request.Ctx.Get("taskId"))
+				cache.GuildProfiles.SignalBypassCache(http.StatusServiceUnavailable, taskId)
 
 			case "guildSearch":
-				cache.GuildSearch.SignalBypassCache(http.StatusServiceUnavailable, body.Request.Ctx.Get("taskId"))
+				cache.GuildSearch.SignalBypassCache(http.StatusServiceUnavailable, taskId)
 
 			default:
-				logger.Error(fmt.Sprintf("Task type %v doesn't match any defined maintenance handlers", body.Request.Ctx.Get("taskType")))
+				logger.Error(fmt.Sprintf("Task type %v doesn't match any defined maintenance handlers", taskType))
 			}
 
 			return
 		}
 
-		switch body.Request.Ctx.Get("taskType") {
+		switch taskType {
 		case "player":
 			profileTarget := queryString["profileTarget"][0]
-			scrapeAdventurer(body, region, profileTarget)
+			scrapeAdventurer(body, taskRegion, profileTarget)
 
 		case "playerSearch":
 			query := queryString["searchKeyword"][0]
 			searchType := queryString["searchType"][0]
-			scrapeAdventurerSearch(body, region, query, searchType)
+			scrapeAdventurerSearch(body, taskRegion, query, searchType)
 
 		case "guild":
 			guildName := queryString["guildName"][0]
-			scrapeGuild(body, region, guildName)
+			scrapeGuild(body, taskRegion, guildName)
 
 		case "guildSearch":
 			query := queryString["searchText"][0]
-			scrapeGuildSearch(body, region, query)
+			scrapeGuildSearch(body, taskRegion, query)
 
 		default:
-			logger.Error(fmt.Sprintf("Task type %v doesn't match any defined scrapers", body.Request.Ctx.Get("taskType")))
+			logger.Error(fmt.Sprintf("Task type %v doesn't match any defined scrapers", taskType))
 		}
-
 	})
 }
 
