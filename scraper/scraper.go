@@ -2,6 +2,7 @@ package scraper
 
 import (
 	"fmt"
+	"maps"
 	"net/http"
 	"net/url"
 	"strconv"
@@ -163,89 +164,66 @@ func init() {
 	})
 }
 
-func getRegionPrefix(region string) string {
-	return fmt.Sprintf("https://www.%v/Adventure", map[string]string{
-		"EU": "naeu.playblackdesert.com/en-US",
-		"KR": "kr.playblackdesert.com/ko-KR",
-		"SA": "sa.playblackdesert.com/pt-BR",
-		"NA": "naeu.playblackdesert.com/en-US",
-	}[region])
-}
-
-func EnqueueAdventurer(region, profileTarget string) (taskId string, maintenance bool) {
+func createTask(region, taskType string, query map[string]string) (taskId string, maintenance bool) {
 	if isCloseTime, _ := GetCloseTime(region); isCloseTime {
 		return "", true
 	}
 
 	taskId = uuid.New().String()
-	url := fmt.Sprintf("%v/Profile", getRegionPrefix(region))
-	go scraper.Visit(utils.BuildRequest(url, map[string]string{
-		"profileTarget": profileTarget,
-		"taskId":        taskId,
-		"taskRegion":    region,
-		"taskRetries":   "0",
-		"taskType":      "player",
-	}))
 
+	url := fmt.Sprintf(
+		"https://www.%v/Adventure%v",
+		map[string]string{
+			"EU": "naeu.playblackdesert.com/en-US",
+			"KR": "kr.playblackdesert.com/ko-KR",
+			"SA": "sa.playblackdesert.com/pt-BR",
+			"NA": "naeu.playblackdesert.com/en-US",
+		}[region],
+		map[string]string{
+			"guild":        "/Guild/GuildProfile",
+			"guildSearch":  "/Guild",
+			"player":       "/Profile",
+			"playerSearch": "",
+		}[taskType],
+	)
+
+	maps.Copy(query, map[string]string{
+		"taskId":      taskId,
+		"taskRegion":  region,
+		"taskRetries": "0",
+		"taskType":    taskType,
+	})
+
+	go scraper.Visit(utils.BuildRequest(url, query))
 	return
 }
 
-func EnqueueAdventurerSearch(region, query, searchType string) (taskId string, maintenance bool) {
-	if isCloseTime, _ := GetCloseTime(region); isCloseTime {
-		return "", true
-	}
+func EnqueueAdventurer(region, profileTarget string) (taskId string, maintenance bool) {
+	return createTask(region, "player", map[string]string{
+		"profileTarget": profileTarget,
+	})
+}
 
-	taskId = uuid.New().String()
-	url := fmt.Sprintf("%v", getRegionPrefix(region))
-	go scraper.Visit(utils.BuildRequest(url, map[string]string{
+func EnqueueAdventurerSearch(region, query, searchType string) (taskId string, maintenance bool) {
+	return createTask(region, "playerSearch", map[string]string{
 		"Page":          "1",
 		"region":        region,
 		"searchKeyword": query,
 		"searchType":    searchType,
-		"taskId":        taskId,
-		"taskRegion":    region,
-		"taskRetries":   "0",
-		"taskType":      "playerSearch",
-	}))
-
-	return
+	})
 }
 
 func EnqueueGuild(region, name string) (taskId string, maintenance bool) {
-	if isCloseTime, _ := GetCloseTime(region); isCloseTime {
-		return "", true
-	}
-
-	taskId = uuid.New().String()
-	url := fmt.Sprintf("%v/Guild/GuildProfile", getRegionPrefix(region))
-	go scraper.Visit(utils.BuildRequest(url, map[string]string{
-		"guildName":   name,
-		"region":      region,
-		"taskId":      taskId,
-		"taskRegion":  region,
-		"taskRetries": "0",
-		"taskType":    "guild",
-	}))
-
-	return
+	return createTask(region, "guild", map[string]string{
+		"guildName": name,
+		"region":    region,
+	})
 }
 
 func EnqueueGuildSearch(region, query string) (taskId string, maintenance bool) {
-	if isCloseTime, _ := GetCloseTime(region); isCloseTime {
-		return "", true
-	}
-
-	taskId = uuid.New().String()
-	url := fmt.Sprintf("%v/Guild", getRegionPrefix(region))
-	go scraper.Visit(utils.BuildRequest(url, map[string]string{
-		"page":        "1",
-		"region":      region,
-		"searchText":  query,
-		"taskId":      taskId,
-		"taskRegion":  region,
-		"taskRetries": "0",
-		"taskType":    "guildSearch",
-	}))
-
-	return
+	return createTask(region, "guildSearch", map[string]string{
+		"page":       "1",
+		"region":     region,
+		"searchText": query,
+	})
 }
