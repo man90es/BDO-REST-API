@@ -31,13 +31,19 @@
 		},
 		"responses": {
 			"400": {
-				"description": "Bad Request: a required parameter is either missing or in a wrong format."
+				"description": "Bad Request. A required query parameter is either missing or in a wrong format."
 			},
 			"404": {
-				"description": "Not Found: try requesting something else."
+				"description": "Not Found. Request something else, or contact instance owner if you're sure that it's a mistake."
+			},
+			"429": {
+				"description": "Too Many Requests. Try doing the same request after waiting some time."
+			},
+			"500": {
+				"description": "Internal Server Error. Try doing the same request after waiting some time, contact instance owner if the problem persists."
 			},
 			"503": {
-				"description": "Service Unavailable: [https://naeu.playblackdesert.com](naeu.playblackdesert.com) is currently under maintenance and requested data is not cached."
+				"description": "Service Unavailable. BDO website is currently under maintenance and requested data is temporarily not available."
 			}
 		}
 	},
@@ -310,6 +316,12 @@
 					"404": {
 						"$ref": "#/components/responses/404"
 					},
+					"429": {
+						"$ref": "#/components/responses/429"
+					},
+					"500": {
+						"$ref": "#/components/responses/500"
+					},
 					"503": {
 						"$ref": "#/components/responses/503"
 					}
@@ -429,6 +441,12 @@
 					"404": {
 						"$ref": "#/components/responses/404"
 					},
+					"429": {
+						"$ref": "#/components/responses/429"
+					},
+					"500": {
+						"$ref": "#/components/responses/500"
+					},
 					"503": {
 						"$ref": "#/components/responses/503"
 					}
@@ -527,6 +545,12 @@
 					"404": {
 						"$ref": "#/components/responses/404"
 					},
+					"429": {
+						"$ref": "#/components/responses/429"
+					},
+					"500": {
+						"$ref": "#/components/responses/500"
+					},
 					"503": {
 						"$ref": "#/components/responses/503"
 					}
@@ -614,6 +638,12 @@
 					},
 					"404": {
 						"$ref": "#/components/responses/404"
+					},
+					"429": {
+						"$ref": "#/components/responses/429"
+					},
+					"500": {
+						"$ref": "#/components/responses/500"
 					},
 					"503": {
 						"$ref": "#/components/responses/503"
