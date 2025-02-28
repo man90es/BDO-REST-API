@@ -174,8 +174,7 @@ func getRegionPrefix(region string) string {
 
 func EnqueueAdventurer(region, profileTarget string) (taskId string, maintenance bool) {
 	if isCloseTime, _ := GetCloseTime(region); isCloseTime {
-		maintenance = true
-		return
+		return "", true
 	}
 
 	taskId = uuid.New().String()
@@ -214,8 +213,7 @@ func EnqueueAdventurerSearch(region, query, searchType string) (taskId string, m
 
 func EnqueueGuild(region, name string) (taskId string, maintenance bool) {
 	if isCloseTime, _ := GetCloseTime(region); isCloseTime {
-		maintenance = true
-		return
+		return "", true
 	}
 
 	taskId = uuid.New().String()
@@ -234,8 +232,7 @@ func EnqueueGuild(region, name string) (taskId string, maintenance bool) {
 
 func EnqueueGuildSearch(region, query string) (taskId string, maintenance bool) {
 	if isCloseTime, _ := GetCloseTime(region); isCloseTime {
-		maintenance = true
-		return
+		return "", true
 	}
 
 	taskId = uuid.New().String()
