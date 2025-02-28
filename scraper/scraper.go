@@ -19,10 +19,10 @@ import (
 	"github.com/google/uuid"
 )
 
-var scraper *colly.Collector
+var taskQueue *TaskQueue
 
 func init() {
-	scraper = colly.NewCollector()
+	scraper := colly.NewCollector()
 	extensions.RandomUserAgent(scraper)
 	scraper.AllowURLRevisit = true
 	scraper.SetRequestTimeout(time.Minute / 2)
@@ -35,6 +35,11 @@ func init() {
 	if p, err := proxy.RoundRobinProxySwitcher(config.GetProxyList()...); err == nil {
 		scraper.SetProxyFunc(p)
 	}
+
+	taskQueue = NewTaskQueue(10000)
+	taskQueue.SetProcessFunc(func(t Task) {
+		scraper.Visit(t.URL)
+	})
 
 	scraper.OnRequest(func(r *colly.Request) {
 		query := r.URL.Query()
@@ -76,11 +81,11 @@ func init() {
 		})
 
 		if imperva {
-			logger.Error("Imperva")
-			time.Sleep(10 * time.Second)
+			logger.Error(fmt.Sprintf("Hit Imperva while loading %v, retries: %v", body.Request.URL.String(), taskRetries))
+			taskQueue.Pause(time.Duration(60-time.Now().Second()) * time.Second)
 
 			if taskRetries < 3 {
-				go scraper.Visit(utils.BuildRequest(body.Request.URL.String(), map[string]string{
+				taskQueue.AddTask(utils.BuildRequest(body.Request.URL.String(), map[string]string{
 					"taskId":      taskId,
 					"taskRegion":  taskRegion,
 					"taskRetries": strconv.Itoa(taskRetries + 1),
@@ -190,7 +195,7 @@ func createTask(region, taskType string, query map[string]string) (taskId string
 		"taskType":    taskType,
 	})
 
-	go scraper.Visit(utils.BuildRequest(url, query))
+	taskQueue.AddTask(utils.BuildRequest(url, query))
 	return
 }
 
