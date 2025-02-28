@@ -13,6 +13,7 @@ import (
 
 	colly "github.com/gocolly/colly/v2"
 	"github.com/gocolly/colly/v2/extensions"
+	"github.com/gocolly/colly/v2/proxy"
 	"github.com/google/uuid"
 )
 
@@ -29,14 +30,8 @@ func init() {
 		RandomDelay: 5 * time.Second,
 	})
 
-	if len(config.GetProxyList()) > 0 {
-		scraper.WithTransport(&http.Transport{
-			// https://github.com/gocolly/colly/issues/759
-			// Make sure that the ProxyFunc is called on every request
-			DisableKeepAlives: true,
-		})
-
-		scraper.SetProxyFunc(config.GetProxySwitcher())
+	if p, err := proxy.RoundRobinProxySwitcher(config.GetProxyList()...); err == nil {
+		scraper.SetProxyFunc(p)
 	}
 
 	scraper.OnRequest(func(r *colly.Request) {

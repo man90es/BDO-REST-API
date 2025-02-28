@@ -4,9 +4,6 @@ import (
 	"fmt"
 	"sync"
 	"time"
-
-	"github.com/gocolly/colly/v2"
-	"github.com/gocolly/colly/v2/proxy"
 )
 
 type config struct {
@@ -16,7 +13,6 @@ type config struct {
 	mu             sync.RWMutex
 	port           int
 	proxyList      []string
-	proxySwitcher  colly.ProxyFunc
 	rateLimit      int64
 	verbosity      bool
 }
@@ -78,19 +74,12 @@ func SetProxyList(proxies []string) {
 	getInstance().mu.Lock()
 	defer getInstance().mu.Unlock()
 	getInstance().proxyList = proxies
-	getInstance().proxySwitcher, _ = proxy.RoundRobinProxySwitcher(proxies...)
 }
 
 func GetProxyList() []string {
 	getInstance().mu.RLock()
 	defer getInstance().mu.RUnlock()
 	return getInstance().proxyList
-}
-
-func GetProxySwitcher() colly.ProxyFunc {
-	getInstance().mu.RLock()
-	defer getInstance().mu.RUnlock()
-	return getInstance().proxySwitcher
 }
 
 func SetVerbosity(verbosity bool) {
