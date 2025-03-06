@@ -43,22 +43,10 @@ func init() {
 
 	scraper.OnRequest(func(r *colly.Request) {
 		query := r.URL.Query()
-
-		r.Ctx.Put("taskHash", query.Get("taskHash"))
-		query.Del("taskHash")
-
-		r.Ctx.Put("taskType", query.Get("taskType"))
-		query.Del("taskType")
-
-		r.Ctx.Put("taskRegion", query.Get("taskRegion"))
-		query.Del("taskRegion")
-
-		r.Ctx.Put("taskRetries", query.Get("taskRetries"))
-		query.Del("taskRetries")
-
-		r.Ctx.Put("taskClient", query.Get("taskClient"))
-		query.Del("taskClient")
-
+		for _, key := range []string{"taskHash", "taskType", "taskRegion", "taskRetries", "taskClient"} {
+			r.Ctx.Put(key, query.Get(key))
+			query.Del(key)
+		}
 		r.URL.RawQuery = query.Encode()
 	})
 
