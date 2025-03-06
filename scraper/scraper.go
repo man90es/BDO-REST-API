@@ -137,6 +137,19 @@ func init() {
 }
 
 func createTask(clientIP, region, taskType string, query map[string]string) (tasksQuantityExceeded bool) {
+	crc32 := crc32.NewIEEE()
+	crc32.Write([]byte(strings.Join(append(slices.Collect(maps.Values(query)), region, taskType), "")))
+	hashString := strconv.Itoa(int(crc32.Sum32()))
+
+	if unique := taskQueue.CheckHashUnique(hashString); !unique {
+		return false
+	}
+
+	// TODO: Make this configurable
+	if taskQueue.CountQueuedTasksForClient(clientIP) >= 5 {
+		return true
+	}
+
 	url := fmt.Sprintf(
 		"https://www.%v/Adventure%v",
 		map[string]string{
@@ -152,19 +165,6 @@ func createTask(clientIP, region, taskType string, query map[string]string) (tas
 			"playerSearch": "",
 		}[taskType],
 	)
-
-	crc32 := crc32.NewIEEE()
-	crc32.Write([]byte(strings.Join(append(slices.Collect(maps.Values(query)), url), "")))
-	hashString := strconv.Itoa(int(crc32.Sum32()))
-
-	if unique := taskQueue.CheckHashUnique(hashString); !unique {
-		return false
-	}
-
-	// TODO: Make this configurable
-	if taskQueue.CountQueuedTasksForClient(clientIP) >= 5 {
-		return true
-	}
 
 	maps.Copy(query, map[string]string{
 		"taskRegion":  region,
