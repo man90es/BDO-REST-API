@@ -16,7 +16,6 @@ import (
 	colly "github.com/gocolly/colly/v2"
 	"github.com/gocolly/colly/v2/extensions"
 	"github.com/gocolly/colly/v2/proxy"
-	"github.com/google/uuid"
 )
 
 var taskQueue *TaskQueue
@@ -56,6 +55,9 @@ func init() {
 		r.Ctx.Put("taskRetries", query.Get("taskRetries"))
 		query.Del("taskRetries")
 
+		r.Ctx.Put("taskClient", query.Get("taskClient"))
+		query.Del("taskClient")
+
 		r.URL.RawQuery = query.Encode()
 	})
 
@@ -76,7 +78,6 @@ func init() {
 		imperva := false
 		queryString, _ := url.ParseQuery(body.Request.URL.RawQuery)
 		taskRegion := body.Request.Ctx.Get("taskRegion")
-		taskRetries, _ := strconv.Atoi(body.Request.Ctx.Get("taskRetries"))
 		taskId := body.Request.Ctx.Get("taskId")
 		taskType := body.Request.Ctx.Get("taskType")
 
@@ -86,11 +87,16 @@ func init() {
 		})
 
 		if imperva {
+			taskRetries, _ := strconv.Atoi(body.Request.Ctx.Get("taskRetries"))
+			taskClient := body.Request.Ctx.Get("taskClient")
+
 			logger.Error(fmt.Sprintf("Hit Imperva while loading %v, retries: %v", body.Request.URL.String(), taskRetries))
 			taskQueue.Pause(time.Duration(60-time.Now().Second()) * time.Second)
 
+			// TODO: Make this configurable
 			if taskRetries < 3 {
-				taskQueue.AddTask(utils.BuildRequest(body.Request.URL.String(), map[string]string{
+				taskQueue.AddTask(taskClient, utils.BuildRequest(body.Request.URL.String(), map[string]string{
+					"taskClient":  taskClient,
 					"taskId":      taskId,
 					"taskRegion":  taskRegion,
 					"taskRetries": strconv.Itoa(taskRetries + 1),
@@ -158,12 +164,13 @@ func signalError(taskType, taskId string, status int) {
 	}
 }
 
-func createTask(region, taskType string, query map[string]string) (taskId string, maintenance bool) {
-	if isCloseTime, _ := GetCloseTime(region); isCloseTime {
-		return "", true
-	}
+func createTask(clientIP, region, taskType string, query map[string]string) (tasksQuantityExceeded bool) {
+	// TODO: Check if it's already enqueued
 
-	taskId = uuid.New().String()
+	// TODO: Make this configurable
+	if taskQueue.CountQueuedTasksForClient(clientIP) >= 5 {
+		return true
+	}
 
 	url := fmt.Sprintf(
 		"https://www.%v/Adventure%v",
@@ -182,24 +189,24 @@ func createTask(region, taskType string, query map[string]string) (taskId string
 	)
 
 	maps.Copy(query, map[string]string{
-		"taskId":      taskId,
+		"taskClient":  clientIP,
 		"taskRegion":  region,
 		"taskRetries": "0",
 		"taskType":    taskType,
 	})
 
-	taskQueue.AddTask(utils.BuildRequest(url, query))
-	return
+	taskQueue.AddTask(clientIP, utils.BuildRequest(url, query))
+	return false
 }
 
-func EnqueueAdventurer(region, profileTarget string) (taskId string, maintenance bool) {
-	return createTask(region, "player", map[string]string{
+func EnqueueAdventurer(clientIP, region, profileTarget string) (tasksQuantityExceeded bool) {
+	return createTask(clientIP, region, "player", map[string]string{
 		"profileTarget": profileTarget,
 	})
 }
 
-func EnqueueAdventurerSearch(region, query, searchType string) (taskId string, maintenance bool) {
-	return createTask(region, "playerSearch", map[string]string{
+func EnqueueAdventurerSearch(clientIP, region, query, searchType string) (tasksQuantityExceeded bool) {
+	return createTask(clientIP, region, "playerSearch", map[string]string{
 		"Page":          "1",
 		"region":        region,
 		"searchKeyword": query,
@@ -207,15 +214,15 @@ func EnqueueAdventurerSearch(region, query, searchType string) (taskId string, m
 	})
 }
 
-func EnqueueGuild(region, name string) (taskId string, maintenance bool) {
-	return createTask(region, "guild", map[string]string{
+func EnqueueGuild(clientIP, region, name string) (tasksQuantityExceeded bool) {
+	return createTask(clientIP, region, "guild", map[string]string{
 		"guildName": name,
 		"region":    region,
 	})
 }
 
-func EnqueueGuildSearch(region, query string) (taskId string, maintenance bool) {
-	return createTask(region, "guildSearch", map[string]string{
+func EnqueueGuildSearch(clientIP, region, query string) (tasksQuantityExceeded bool) {
+	return createTask(clientIP, region, "guildSearch", map[string]string{
 		"page":       "1",
 		"region":     region,
 		"searchText": query,

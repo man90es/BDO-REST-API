@@ -25,24 +25,31 @@ func getAdventurerSearch(w http.ResponseWriter, r *http.Request) {
 	searchTypeQueryParam := r.URL.Query()["searchType"]
 	searchType := validators.ValidateSearchTypeQueryParam(searchTypeQueryParam)
 
-	data, status, date, expires, found := cache.ProfileSearch.GetRecord([]string{region, query, searchType})
-	if !found {
-		taskId, maintenance := scraper.EnqueueAdventurerSearch(region, query, searchType)
+	// TODO: Maintenance handling
+	if data, status, date, expires, ok := cache.ProfileSearch.GetRecord([]string{region, query, searchType}); ok {
+		w.Header().Set("Date", date)
+		w.Header().Set("Expires", expires)
 
-		if maintenance {
-			w.WriteHeader(http.StatusServiceUnavailable)
-			return
+		if status == http.StatusOK {
+			json.NewEncoder(w).Encode(data)
+		} else {
+			w.WriteHeader(status)
 		}
 
-		data, status, date, expires = cache.ProfileSearch.WaitForRecord(taskId)
+		return
 	}
 
-	w.Header().Set("Date", date)
-	w.Header().Set("Expires", expires)
+	if tasksQuantityExceeded := scraper.EnqueueAdventurerSearch(r.Header.Get("CF-Connecting-IP"), region, query, searchType); tasksQuantityExceeded {
+		w.WriteHeader(http.StatusTooManyRequests)
+		json.NewEncoder(w).Encode(map[string]string{
+			"message": "You have exceeded the maximum number of concurrent tasks.",
+		})
 
-	if status == http.StatusOK {
-		json.NewEncoder(w).Encode(data)
-	} else {
-		w.WriteHeader(status)
+		return
 	}
+
+	w.WriteHeader(http.StatusAccepted)
+	json.NewEncoder(w).Encode(map[string]string{
+		"message": "Player search is being fetched. Please try again later.",
+	})
 }

@@ -22,24 +22,31 @@ func getGuildSearch(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	data, status, date, expires, found := cache.GuildSearch.GetRecord([]string{region, name})
-	if !found {
-		taskId, maintenance := scraper.EnqueueGuildSearch(region, name)
+	// TODO: Maintenance handling
+	if data, status, date, expires, ok := cache.GuildSearch.GetRecord([]string{region, name}); ok {
+		w.Header().Set("Date", date)
+		w.Header().Set("Expires", expires)
 
-		if maintenance {
-			w.WriteHeader(http.StatusServiceUnavailable)
-			return
+		if status == http.StatusOK {
+			json.NewEncoder(w).Encode(data)
+		} else {
+			w.WriteHeader(status)
 		}
 
-		data, status, date, expires = cache.GuildSearch.WaitForRecord(taskId)
+		return
 	}
 
-	w.Header().Set("Date", date)
-	w.Header().Set("Expires", expires)
+	if tasksQuantityExceeded := scraper.EnqueueGuildSearch(r.Header.Get("CF-Connecting-IP"), region, name); tasksQuantityExceeded {
+		w.WriteHeader(http.StatusTooManyRequests)
+		json.NewEncoder(w).Encode(map[string]string{
+			"message": "You have exceeded the maximum number of concurrent tasks.",
+		})
 
-	if status == http.StatusOK {
-		json.NewEncoder(w).Encode(data)
-	} else {
-		w.WriteHeader(status)
+		return
 	}
+
+	w.WriteHeader(http.StatusAccepted)
+	json.NewEncoder(w).Encode(map[string]string{
+		"message": "Guild search is being fetched. Please try again later.",
+	})
 }
