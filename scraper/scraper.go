@@ -93,8 +93,6 @@ func init() {
 			if taskRetries < 3 {
 				taskHashI, _ := strconv.Atoi(taskHash)
 				taskQueue.AddTask(taskClient, uint32(taskHashI), utils.BuildRequest(body.Request.URL.String(), map[string]string{
-					"taskClient":  taskClient,
-					"taskHash":    taskHash,
 					"taskRegion":  taskRegion,
 					"taskRetries": strconv.Itoa(taskRetries + 1),
 					"taskType":    taskType,
@@ -169,8 +167,6 @@ func createTask(clientIP, region, taskType string, query map[string]string) (tas
 	}
 
 	maps.Copy(query, map[string]string{
-		"taskClient":  clientIP,
-		"taskHash":    strconv.Itoa(int(crc32.Sum32())),
 		"taskRegion":  region,
 		"taskRetries": "0",
 		"taskType":    taskType,

@@ -1,7 +1,9 @@
 package scraper
 
 import (
+	"bdo-rest-api/utils"
 	"slices"
+	"strconv"
 	"sync"
 	"time"
 )
@@ -32,6 +34,11 @@ func NewTaskQueue(bufferSize int) *TaskQueue {
 }
 
 func (q *TaskQueue) AddTask(clientIP string, hash uint32, url string) {
+	fullURL := utils.BuildRequest(url, map[string]string{
+		"taskClient": clientIP,
+		"taskHash":   strconv.Itoa(int(hash)),
+	})
+
 	q.mutex.Lock()
 	q.clientIPs[clientIP]++
 	q.hashes = append(q.hashes, hash)
@@ -40,7 +47,7 @@ func (q *TaskQueue) AddTask(clientIP string, hash uint32, url string) {
 	q.tasks <- Task{
 		ClientIP: clientIP,
 		Hash:     hash,
-		URL:      url,
+		URL:      fullURL,
 	}
 }
 
