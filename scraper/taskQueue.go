@@ -3,20 +3,19 @@ package scraper
 import (
 	"bdo-rest-api/utils"
 	"slices"
-	"strconv"
 	"sync"
 	"time"
 )
 
 type Task struct {
 	ClientIP string
-	Hash     uint32
+	Hash     string
 	URL      string
 }
 
 type TaskQueue struct {
 	clientIPs   map[string]int
-	hashes      []uint32
+	hashes      []string
 	mutex       sync.Mutex
 	paused      bool
 	processFunc func(Task)
@@ -33,10 +32,10 @@ func NewTaskQueue(bufferSize int) *TaskQueue {
 	return queue
 }
 
-func (q *TaskQueue) AddTask(clientIP string, hash uint32, url string) {
+func (q *TaskQueue) AddTask(clientIP, hash, url string) {
 	fullURL := utils.BuildRequest(url, map[string]string{
 		"taskClient": clientIP,
-		"taskHash":   strconv.Itoa(int(hash)),
+		"taskHash":   hash,
 	})
 
 	q.mutex.Lock()
@@ -95,9 +94,9 @@ func (q *TaskQueue) CountQueuedTasksForClient(clientIP string) (count int) {
 	return
 }
 
-func (q *TaskQueue) CheckHashUnique(hash uint32) (unique bool) {
+func (q *TaskQueue) CheckHashUnique(hash string) (unique bool) {
 	q.mutex.Lock()
-	unique = slices.Index(q.hashes, hash) == -1
+	unique = !slices.Contains(q.hashes, hash)
 	q.mutex.Unlock()
 
 	return
