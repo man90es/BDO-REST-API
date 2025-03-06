@@ -1,17 +1,20 @@
 package scraper
 
 import (
+	"slices"
 	"sync"
 	"time"
 )
 
 type Task struct {
 	ClientIP string
+	Hash     uint32
 	URL      string
 }
 
 type TaskQueue struct {
 	clientIPs   map[string]int
+	hashes      []uint32
 	mutex       sync.Mutex
 	paused      bool
 	processFunc func(Task)
@@ -28,13 +31,15 @@ func NewTaskQueue(bufferSize int) *TaskQueue {
 	return queue
 }
 
-func (q *TaskQueue) AddTask(clientIP, url string) {
+func (q *TaskQueue) AddTask(clientIP string, hash uint32, url string) {
 	q.mutex.Lock()
 	q.clientIPs[clientIP]++
+	q.hashes = append(q.hashes, hash)
 	q.mutex.Unlock()
 
 	q.tasks <- Task{
 		ClientIP: clientIP,
+		Hash:     hash,
 		URL:      url,
 	}
 }
@@ -49,6 +54,8 @@ func (q *TaskQueue) run() {
 			q.mutex.Lock()
 		}
 		q.clientIPs[task.ClientIP] = max(0, q.clientIPs[task.ClientIP]-1)
+		i := slices.Index(q.hashes, task.Hash)
+		q.hashes = slices.Delete(q.hashes, i, i+1)
 		q.mutex.Unlock()
 
 		q.processFunc(task)
@@ -76,6 +83,14 @@ func (q *TaskQueue) Pause(t time.Duration) {
 func (q *TaskQueue) CountQueuedTasksForClient(clientIP string) (count int) {
 	q.mutex.Lock()
 	count = max(0, q.clientIPs[clientIP])
+	q.mutex.Unlock()
+
+	return
+}
+
+func (q *TaskQueue) CheckHashUnique(hash uint32) (unique bool) {
+	q.mutex.Lock()
+	unique = slices.Index(q.hashes, hash) == -1
 	q.mutex.Unlock()
 
 	return

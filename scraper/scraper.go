@@ -2,13 +2,14 @@ package scraper
 
 import (
 	"fmt"
+	"hash/crc32"
 	"maps"
-	"net/http"
 	"net/url"
+	"slices"
 	"strconv"
+	"strings"
 	"time"
 
-	"bdo-rest-api/cache"
 	"bdo-rest-api/config"
 	"bdo-rest-api/logger"
 	"bdo-rest-api/utils"
@@ -43,8 +44,8 @@ func init() {
 	scraper.OnRequest(func(r *colly.Request) {
 		query := r.URL.Query()
 
-		r.Ctx.Put("taskId", query.Get("taskId"))
-		query.Del("taskId")
+		r.Ctx.Put("taskHash", query.Get("taskHash"))
+		query.Del("taskHash")
 
 		r.Ctx.Put("taskType", query.Get("taskType"))
 		query.Del("taskType")
@@ -62,12 +63,7 @@ func init() {
 	})
 
 	scraper.OnError(func(r *colly.Response, err error) {
-		taskId := r.Request.Ctx.Get("taskId")
-		taskType := r.Request.Ctx.Get("taskType")
-
 		logger.Error(fmt.Sprintf("Error occured while loading %v: %v", r.Request.URL, err))
-
-		signalError(taskType, taskId, http.StatusInternalServerError)
 	})
 
 	scraper.OnResponse(func(r *colly.Response) {
@@ -77,8 +73,8 @@ func init() {
 	scraper.OnHTML("body", func(body *colly.HTMLElement) {
 		imperva := false
 		queryString, _ := url.ParseQuery(body.Request.URL.RawQuery)
+		taskHash := body.Request.Ctx.Get("taskHash")
 		taskRegion := body.Request.Ctx.Get("taskRegion")
-		taskId := body.Request.Ctx.Get("taskId")
 		taskType := body.Request.Ctx.Get("taskType")
 
 		body.ForEachWithBreak("iframe", func(_ int, e *colly.HTMLElement) bool {
@@ -95,15 +91,14 @@ func init() {
 
 			// TODO: Make this configurable
 			if taskRetries < 3 {
-				taskQueue.AddTask(taskClient, utils.BuildRequest(body.Request.URL.String(), map[string]string{
+				taskHashI, _ := strconv.Atoi(taskHash)
+				taskQueue.AddTask(taskClient, uint32(taskHashI), utils.BuildRequest(body.Request.URL.String(), map[string]string{
 					"taskClient":  taskClient,
-					"taskId":      taskId,
+					"taskHash":    taskHash,
 					"taskRegion":  taskRegion,
 					"taskRetries": strconv.Itoa(taskRetries + 1),
 					"taskType":    taskType,
 				}))
-			} else {
-				signalError(taskType, taskId, http.StatusInternalServerError)
 			}
 
 			return
@@ -117,7 +112,6 @@ func init() {
 		})
 
 		if isCloseTime, _ := GetCloseTime(taskRegion); isCloseTime {
-			signalError(taskType, taskId, http.StatusServiceUnavailable)
 			return
 		}
 
@@ -145,33 +139,7 @@ func init() {
 	})
 }
 
-func signalError(taskType, taskId string, status int) {
-	switch taskType {
-	case "player":
-		cache.Profiles.SignalBypassCache(status, taskId)
-
-	case "playerSearch":
-		cache.ProfileSearch.SignalBypassCache(status, taskId)
-
-	case "guild":
-		cache.GuildProfiles.SignalBypassCache(status, taskId)
-
-	case "guildSearch":
-		cache.GuildSearch.SignalBypassCache(status, taskId)
-
-	default:
-		logger.Error(fmt.Sprintf("Task type %v doesn't match any handlers", taskType))
-	}
-}
-
 func createTask(clientIP, region, taskType string, query map[string]string) (tasksQuantityExceeded bool) {
-	// TODO: Check if it's already enqueued
-
-	// TODO: Make this configurable
-	if taskQueue.CountQueuedTasksForClient(clientIP) >= 5 {
-		return true
-	}
-
 	url := fmt.Sprintf(
 		"https://www.%v/Adventure%v",
 		map[string]string{
@@ -188,14 +156,27 @@ func createTask(clientIP, region, taskType string, query map[string]string) (tas
 		}[taskType],
 	)
 
+	crc32 := crc32.NewIEEE()
+	crc32.Write([]byte(strings.Join(append(slices.Collect(maps.Values(query)), url), "")))
+
+	if unique := taskQueue.CheckHashUnique(crc32.Sum32()); !unique {
+		return false
+	}
+
+	// TODO: Make this configurable
+	if taskQueue.CountQueuedTasksForClient(clientIP) >= 5 {
+		return true
+	}
+
 	maps.Copy(query, map[string]string{
 		"taskClient":  clientIP,
+		"taskHash":    strconv.Itoa(int(crc32.Sum32())),
 		"taskRegion":  region,
 		"taskRetries": "0",
 		"taskType":    taskType,
 	})
 
-	taskQueue.AddTask(clientIP, utils.BuildRequest(url, query))
+	taskQueue.AddTask(clientIP, crc32.Sum32(), utils.BuildRequest(url, query))
 	return false
 }
 
