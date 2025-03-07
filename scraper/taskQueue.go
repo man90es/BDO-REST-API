@@ -39,6 +39,10 @@ func (q *TaskQueue) AddTask(clientIP, hash, url string) {
 	})
 
 	q.mutex.Lock()
+	if duplicate := slices.Contains(q.hashes, hash); duplicate {
+		q.mutex.Unlock()
+		return
+	}
 	q.clientIPs[clientIP]++
 	q.hashes = append(q.hashes, hash)
 	q.mutex.Unlock()
@@ -59,9 +63,6 @@ func (q *TaskQueue) run() {
 			time.Sleep(time.Second)
 			q.mutex.Lock()
 		}
-		q.clientIPs[task.ClientIP] = max(0, q.clientIPs[task.ClientIP]-1)
-		i := slices.Index(q.hashes, task.Hash)
-		q.hashes = slices.Delete(q.hashes, i, i+1)
 		q.mutex.Unlock()
 
 		q.processFunc(task)
@@ -94,10 +95,11 @@ func (q *TaskQueue) CountQueuedTasksForClient(clientIP string) (count int) {
 	return
 }
 
-func (q *TaskQueue) CheckHashUnique(hash string) (unique bool) {
+func (q *TaskQueue) ConfirmTaskCompletion(clientIP string, hash string) {
 	q.mutex.Lock()
-	unique = !slices.Contains(q.hashes, hash)
+	q.clientIPs[clientIP] = max(0, q.clientIPs[clientIP]-1)
+	for i := slices.Index(q.hashes, hash); i != -1; i = slices.Index(q.hashes, hash) {
+		q.hashes = slices.Delete(q.hashes, i, i+1)
+	}
 	q.mutex.Unlock()
-
-	return
 }

@@ -52,6 +52,7 @@ func init() {
 
 	scraper.OnError(func(r *colly.Response, err error) {
 		logger.Error(fmt.Sprintf("Error occured while loading %v: %v", r.Request.URL, err))
+		taskQueue.ConfirmTaskCompletion(r.Ctx.Get("taskClient"), r.Ctx.Get("taskHash"))
 	})
 
 	scraper.OnResponse(func(r *colly.Response) {
@@ -61,6 +62,7 @@ func init() {
 	scraper.OnHTML("body", func(body *colly.HTMLElement) {
 		imperva := false
 		queryString, _ := url.ParseQuery(body.Request.URL.RawQuery)
+		taskClient := body.Request.Ctx.Get("taskClient")
 		taskHash := body.Request.Ctx.Get("taskHash")
 		taskRegion := body.Request.Ctx.Get("taskRegion")
 		taskType := body.Request.Ctx.Get("taskType")
@@ -72,10 +74,9 @@ func init() {
 
 		if imperva {
 			taskRetries, _ := strconv.Atoi(body.Request.Ctx.Get("taskRetries"))
-			taskClient := body.Request.Ctx.Get("taskClient")
-
 			logger.Error(fmt.Sprintf("Hit Imperva while loading %v, retries: %v", body.Request.URL.String(), taskRetries))
 			taskQueue.Pause(time.Duration(60-time.Now().Second()) * time.Second)
+			taskQueue.ConfirmTaskCompletion(taskClient, taskHash)
 
 			// TODO: Make this configurable
 			if taskRetries < 3 {
@@ -97,6 +98,7 @@ func init() {
 		})
 
 		if isCloseTime, _ := GetCloseTime(taskRegion); isCloseTime {
+			taskQueue.ConfirmTaskCompletion(taskClient, taskHash)
 			return
 		}
 
@@ -121,17 +123,15 @@ func init() {
 		default:
 			logger.Error(fmt.Sprintf("Task type %v doesn't match any defined scrapers", taskType))
 		}
+
+		taskQueue.ConfirmTaskCompletion(taskClient, taskHash)
 	})
 }
 
 func createTask(clientIP, region, taskType string, query map[string]string) (tasksQuantityExceeded bool) {
 	crc32 := crc32.NewIEEE()
-	crc32.Write([]byte(strings.Join(append(slices.Collect(maps.Values(query)), region, taskType), "")))
+	crc32.Write([]byte(strings.Join(append(slices.Sorted(maps.Values(query)), region, taskType), "")))
 	hashString := strconv.Itoa(int(crc32.Sum32()))
-
-	if unique := taskQueue.CheckHashUnique(hashString); !unique {
-		return false
-	}
 
 	// TODO: Make this configurable
 	if taskQueue.CountQueuedTasksForClient(clientIP) >= 5 {
