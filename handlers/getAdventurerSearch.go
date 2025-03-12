@@ -25,7 +25,10 @@ func getAdventurerSearch(w http.ResponseWriter, r *http.Request) {
 	searchTypeQueryParam := r.URL.Query()["searchType"]
 	searchType := validators.ValidateSearchTypeQueryParam(searchTypeQueryParam)
 
-	// TODO: Maintenance handling
+	if ok := giveMaintenanceResponse(w, region); ok {
+		return
+	}
+
 	if data, status, date, expires, ok := cache.ProfileSearch.GetRecord([]string{region, query, searchType}); ok {
 		w.Header().Set("Date", date)
 		w.Header().Set("Expires", expires)

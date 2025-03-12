@@ -22,7 +22,10 @@ func getAdventurer(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// TODO: Maintenance handling
+	if ok := giveMaintenanceResponse(w, region); ok {
+		return
+	}
+
 	if data, status, date, expires, ok := cache.Profiles.GetRecord([]string{region, profileTarget}); ok {
 		w.Header().Set("Date", date)
 		w.Header().Set("Expires", expires)
