@@ -30,6 +30,9 @@
 			}
 		},
 		"responses": {
+			"202": {
+				"description": "Data is being fetched. Please try again later."
+			},
 			"400": {
 				"description": "Bad Request. A required query parameter is either missing or in a wrong format."
 			},
@@ -310,6 +313,9 @@
 							}
 						}
 					},
+					"202": {
+						"$ref": "#/components/responses/202"
+					},
 					"400": {
 						"$ref": "#/components/responses/400"
 					},
@@ -435,6 +441,9 @@
 							}
 						}
 					},
+					"202": {
+						"$ref": "#/components/responses/202"
+					},
 					"400": {
 						"$ref": "#/components/responses/400"
 					},
@@ -539,6 +548,9 @@
 							}
 						}
 					},
+					"202": {
+						"$ref": "#/components/responses/202"
+					},
 					"400": {
 						"$ref": "#/components/responses/400"
 					},
@@ -632,6 +644,9 @@
 								}
 							}
 						}
+					},
+					"202": {
+						"$ref": "#/components/responses/202"
 					},
 					"400": {
 						"$ref": "#/components/responses/400"

@@ -29,9 +29,9 @@ func ListenAndServe() {
 	srv := &http.Server{
 		Addr:         fmt.Sprintf("0.0.0.0:%v", config.GetPort()),
 		Handler:      middlewareStack(mux),
-		IdleTimeout:  60 * time.Second,
-		ReadTimeout:  15 * time.Second,
-		WriteTimeout: 15 * time.Second,
+		IdleTimeout:  30 * time.Second,
+		ReadTimeout:  10 * time.Second,
+		WriteTimeout: 10 * time.Second,
 	}
 
 	logger.Error(srv.ListenAndServe().Error())

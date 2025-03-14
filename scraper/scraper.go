@@ -2,13 +2,14 @@ package scraper
 
 import (
 	"fmt"
+	"hash/crc32"
 	"maps"
-	"net/http"
 	"net/url"
+	"slices"
 	"strconv"
+	"strings"
 	"time"
 
-	"bdo-rest-api/cache"
 	"bdo-rest-api/config"
 	"bdo-rest-api/logger"
 	"bdo-rest-api/utils"
@@ -16,7 +17,6 @@ import (
 	colly "github.com/gocolly/colly/v2"
 	"github.com/gocolly/colly/v2/extensions"
 	"github.com/gocolly/colly/v2/proxy"
-	"github.com/google/uuid"
 )
 
 var taskQueue *TaskQueue
@@ -43,29 +43,16 @@ func init() {
 
 	scraper.OnRequest(func(r *colly.Request) {
 		query := r.URL.Query()
-
-		r.Ctx.Put("taskId", query.Get("taskId"))
-		query.Del("taskId")
-
-		r.Ctx.Put("taskType", query.Get("taskType"))
-		query.Del("taskType")
-
-		r.Ctx.Put("taskRegion", query.Get("taskRegion"))
-		query.Del("taskRegion")
-
-		r.Ctx.Put("taskRetries", query.Get("taskRetries"))
-		query.Del("taskRetries")
-
+		for _, key := range []string{"taskHash", "taskType", "taskRegion", "taskRetries", "taskClient"} {
+			r.Ctx.Put(key, query.Get(key))
+			query.Del(key)
+		}
 		r.URL.RawQuery = query.Encode()
 	})
 
 	scraper.OnError(func(r *colly.Response, err error) {
-		taskId := r.Request.Ctx.Get("taskId")
-		taskType := r.Request.Ctx.Get("taskType")
-
 		logger.Error(fmt.Sprintf("Error occured while loading %v: %v", r.Request.URL, err))
-
-		signalError(taskType, taskId, http.StatusInternalServerError)
+		taskQueue.ConfirmTaskCompletion(r.Ctx.Get("taskClient"), r.Ctx.Get("taskHash"))
 	})
 
 	scraper.OnResponse(func(r *colly.Response) {
@@ -75,9 +62,9 @@ func init() {
 	scraper.OnHTML("body", func(body *colly.HTMLElement) {
 		imperva := false
 		queryString, _ := url.ParseQuery(body.Request.URL.RawQuery)
+		taskClient := body.Request.Ctx.Get("taskClient")
+		taskHash := body.Request.Ctx.Get("taskHash")
 		taskRegion := body.Request.Ctx.Get("taskRegion")
-		taskRetries, _ := strconv.Atoi(body.Request.Ctx.Get("taskRetries"))
-		taskId := body.Request.Ctx.Get("taskId")
 		taskType := body.Request.Ctx.Get("taskType")
 
 		body.ForEachWithBreak("iframe", func(_ int, e *colly.HTMLElement) bool {
@@ -86,18 +73,18 @@ func init() {
 		})
 
 		if imperva {
+			taskRetries, _ := strconv.Atoi(body.Request.Ctx.Get("taskRetries"))
 			logger.Error(fmt.Sprintf("Hit Imperva while loading %v, retries: %v", body.Request.URL.String(), taskRetries))
 			taskQueue.Pause(time.Duration(60-time.Now().Second()) * time.Second)
+			taskQueue.ConfirmTaskCompletion(taskClient, taskHash)
 
+			// TODO: Make this configurable
 			if taskRetries < 3 {
-				taskQueue.AddTask(utils.BuildRequest(body.Request.URL.String(), map[string]string{
-					"taskId":      taskId,
+				taskQueue.AddTask(taskClient, taskHash, utils.BuildRequest(body.Request.URL.String(), map[string]string{
 					"taskRegion":  taskRegion,
 					"taskRetries": strconv.Itoa(taskRetries + 1),
 					"taskType":    taskType,
 				}))
-			} else {
-				signalError(taskType, taskId, http.StatusInternalServerError)
 			}
 
 			return
@@ -111,7 +98,7 @@ func init() {
 		})
 
 		if isCloseTime, _ := GetCloseTime(taskRegion); isCloseTime {
-			signalError(taskType, taskId, http.StatusServiceUnavailable)
+			taskQueue.ConfirmTaskCompletion(taskClient, taskHash)
 			return
 		}
 
@@ -136,34 +123,20 @@ func init() {
 		default:
 			logger.Error(fmt.Sprintf("Task type %v doesn't match any defined scrapers", taskType))
 		}
+
+		taskQueue.ConfirmTaskCompletion(taskClient, taskHash)
 	})
 }
 
-func signalError(taskType, taskId string, status int) {
-	switch taskType {
-	case "player":
-		cache.Profiles.SignalBypassCache(status, taskId)
+func createTask(clientIP, region, taskType string, query map[string]string) (tasksQuantityExceeded bool) {
+	crc32 := crc32.NewIEEE()
+	crc32.Write([]byte(strings.Join(append(slices.Sorted(maps.Values(query)), region, taskType), "")))
+	hashString := strconv.Itoa(int(crc32.Sum32()))
 
-	case "playerSearch":
-		cache.ProfileSearch.SignalBypassCache(status, taskId)
-
-	case "guild":
-		cache.GuildProfiles.SignalBypassCache(status, taskId)
-
-	case "guildSearch":
-		cache.GuildSearch.SignalBypassCache(status, taskId)
-
-	default:
-		logger.Error(fmt.Sprintf("Task type %v doesn't match any handlers", taskType))
+	// TODO: Make this configurable
+	if taskQueue.CountQueuedTasksForClient(clientIP) >= 5 {
+		return true
 	}
-}
-
-func createTask(region, taskType string, query map[string]string) (taskId string, maintenance bool) {
-	if isCloseTime, _ := GetCloseTime(region); isCloseTime {
-		return "", true
-	}
-
-	taskId = uuid.New().String()
 
 	url := fmt.Sprintf(
 		"https://www.%v/Adventure%v",
@@ -182,24 +155,23 @@ func createTask(region, taskType string, query map[string]string) (taskId string
 	)
 
 	maps.Copy(query, map[string]string{
-		"taskId":      taskId,
 		"taskRegion":  region,
 		"taskRetries": "0",
 		"taskType":    taskType,
 	})
 
-	taskQueue.AddTask(utils.BuildRequest(url, query))
-	return
+	taskQueue.AddTask(clientIP, hashString, utils.BuildRequest(url, query))
+	return false
 }
 
-func EnqueueAdventurer(region, profileTarget string) (taskId string, maintenance bool) {
-	return createTask(region, "player", map[string]string{
+func EnqueueAdventurer(clientIP, region, profileTarget string) (tasksQuantityExceeded bool) {
+	return createTask(clientIP, region, "player", map[string]string{
 		"profileTarget": profileTarget,
 	})
 }
 
-func EnqueueAdventurerSearch(region, query, searchType string) (taskId string, maintenance bool) {
-	return createTask(region, "playerSearch", map[string]string{
+func EnqueueAdventurerSearch(clientIP, region, query, searchType string) (tasksQuantityExceeded bool) {
+	return createTask(clientIP, region, "playerSearch", map[string]string{
 		"Page":          "1",
 		"region":        region,
 		"searchKeyword": query,
@@ -207,15 +179,15 @@ func EnqueueAdventurerSearch(region, query, searchType string) (taskId string, m
 	})
 }
 
-func EnqueueGuild(region, name string) (taskId string, maintenance bool) {
-	return createTask(region, "guild", map[string]string{
+func EnqueueGuild(clientIP, region, name string) (tasksQuantityExceeded bool) {
+	return createTask(clientIP, region, "guild", map[string]string{
 		"guildName": name,
 		"region":    region,
 	})
 }
 
-func EnqueueGuildSearch(region, query string) (taskId string, maintenance bool) {
-	return createTask(region, "guildSearch", map[string]string{
+func EnqueueGuildSearch(clientIP, region, query string) (tasksQuantityExceeded bool) {
+	return createTask(clientIP, region, "guildSearch", map[string]string{
 		"page":       "1",
 		"region":     region,
 		"searchText": query,
