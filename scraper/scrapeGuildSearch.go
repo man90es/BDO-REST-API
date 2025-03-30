@@ -8,7 +8,6 @@ import (
 
 	"bdo-rest-api/cache"
 	"bdo-rest-api/models"
-	"bdo-rest-api/translators"
 	"bdo-rest-api/utils"
 )
 
@@ -23,7 +22,7 @@ func scrapeGuildSearch(body *colly.HTMLElement, region, query string) {
 		guildProfile := models.GuildProfile{
 			Name:   e.ChildText(".guild_title a"),
 			Region: region,
-			Kind:   e.ChildText(".tag_label.guild_label"),
+			Kind:   "Guild", // TODO: Remove this deprecated field
 			Master: &models.Profile{
 				FamilyName:    e.ChildText(".guild_info a"),
 				ProfileTarget: extractProfileTarget(e.ChildAttr(".guild_info a", "href")),
@@ -33,10 +32,6 @@ func scrapeGuildSearch(body *colly.HTMLElement, region, query string) {
 
 		if region != "SA" && region != "KR" {
 			guildProfile.Region = e.ChildText(".region_info")
-		}
-
-		if region != "EU" && region != "NA" {
-			translators.TranslateGuildKind(&guildProfile.Kind)
 		}
 
 		if membersStr := e.ChildText(".member"); true {
