@@ -630,10 +630,8 @@
 											},
 											"kind": {
 												"type": "string",
-												"enum": [
-													"Guild",
-													"Clan"
-												]
+												"enum": [ "Guild" ],
+												"deprecated": true
 											},
 											"population": {
 												"type": "number",

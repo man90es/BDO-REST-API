@@ -5,7 +5,7 @@ import "time"
 type GuildProfile struct {
 	Name       string     `json:"name"`
 	Region     string     `json:"region,omitempty"`
-	Kind       string     `json:"kind,omitempty"`
+	Kind       string     `json:"kind,omitempty"` // Deprecated
 	CreatedOn  *time.Time `json:"createdOn,omitempty"`
 	Master     *Profile   `json:"master,omitempty"`
 	Population uint8      `json:"population,omitempty"`
