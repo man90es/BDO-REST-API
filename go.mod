@@ -4,7 +4,6 @@ go 1.24.0
 
 require (
 	github.com/gocolly/colly/v2 v2.1.1-0.20240605174350-99b7fb1b87d1
-	github.com/google/uuid v1.6.0
 	github.com/patrickmn/go-cache v2.1.0+incompatible
 	github.com/sa-/slicefunk v0.1.4
 	github.com/ulule/limiter/v3 v3.11.2

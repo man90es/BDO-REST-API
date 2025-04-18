@@ -1,9 +1,7 @@
 package cache
 
 import (
-	"net/http"
 	"strings"
-	"sync"
 	"time"
 
 	goCache "github.com/patrickmn/go-cache"
@@ -53,17 +51,6 @@ func (c *cache[T]) AddRecord(keys []string, data T, status int, taskId string) (
 	return utils.FormatDateForHeaders(entry.Date), utils.FormatDateForHeaders(entry.Date.Add(ttl))
 }
 
-func (c *cache[T]) SignalBypassCache(status int, taskId string) {
-	var data T
-	entry := CacheEntry[T]{
-		Data:   data,
-		Date:   time.Now(),
-		Status: status,
-	}
-
-	c.Bus.Publish(taskId, entry)
-}
-
 func (c *cache[T]) GetRecord(keys []string) (data T, status int, date string, expires string, found bool) {
 	cacheTTL := config.GetCacheTTL()
 	anyEntry, found := c.internalCache.Get(joinKeys(keys))
@@ -75,30 +62,6 @@ func (c *cache[T]) GetRecord(keys []string) (data T, status int, date string, ex
 	entry := anyEntry.(CacheEntry[T])
 
 	return entry.Data, entry.Status, utils.FormatDateForHeaders(entry.Date), utils.FormatDateForHeaders(entry.Date.Add(cacheTTL)), found
-}
-
-func (c *cache[T]) WaitForRecord(taskId string) (data T, status int, date string, expires string) {
-	var wg sync.WaitGroup
-	wg.Add(1)
-
-	c.Bus.Subscribe(taskId, func(entry CacheEntry[T]) {
-		data = entry.Data
-		status = entry.Status
-		date = utils.FormatDateForHeaders(entry.Date)
-
-		if entry.Status == http.StatusInternalServerError {
-			expires = date
-		} else if entry.Status == http.StatusServiceUnavailable {
-			expires = utils.FormatDateForHeaders(entry.Date.Add(config.GetMaintenanceStatusTTL()))
-		} else {
-			expires = utils.FormatDateForHeaders(entry.Date.Add(config.GetCacheTTL()))
-		}
-
-		wg.Done()
-	})
-
-	wg.Wait()
-	return
 }
 
 func (c *cache[T]) GetItemCount() int {
