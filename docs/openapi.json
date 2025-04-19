@@ -628,11 +628,6 @@
 													}
 												}
 											},
-											"kind": {
-												"type": "string",
-												"enum": [ "Guild" ],
-												"deprecated": true
-											},
 											"population": {
 												"type": "number",
 												"example": 1

@@ -22,7 +22,6 @@ func scrapeGuildSearch(body *colly.HTMLElement, region, query string) {
 		guildProfile := models.GuildProfile{
 			Name:   e.ChildText(".guild_title a"),
 			Region: region,
-			Kind:   "Guild", // TODO: Remove this deprecated field
 			Master: &models.Profile{
 				FamilyName:    e.ChildText(".guild_info a"),
 				ProfileTarget: extractProfileTarget(e.ChildAttr(".guild_info a", "href")),
