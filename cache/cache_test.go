@@ -4,11 +4,11 @@ import (
 	"testing"
 	"time"
 
-	"bdo-rest-api/config"
+	"github.com/spf13/viper"
 )
 
 func init() {
-	config.SetCacheTTL(time.Second)
+	viper.Set("cachettl", time.Second)
 }
 
 func TestCache(t *testing.T) {

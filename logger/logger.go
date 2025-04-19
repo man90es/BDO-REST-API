@@ -39,8 +39,9 @@ func InitLogger() {
 	configPrintOut := fmt.Sprintf("\tPort:\t\t%v\n", viper.GetInt("port")) +
 		fmt.Sprintf("\tProxies:\t%v\n", viper.GetStringSlice("proxy")) +
 		fmt.Sprintf("\tVerbosity:\t%v\n", viper.GetBool("verbose")) +
-		fmt.Sprintf("\tCache TTL:\t%v\n", viper.GetDuration("cacheTTL")) +
-		fmt.Sprintf("\tRate limit:\t%v/min\n", viper.GetInt64("rateLimit")) +
+		fmt.Sprintf("\tCache TTL:\t%v\n", viper.GetDuration("cachettl")) +
+		fmt.Sprintf("\tMaint. TTL:\t%v\n", viper.GetDuration("maintenancettl")) +
+		fmt.Sprintf("\tRate limit:\t%v/min\n", viper.GetInt64("ratelimit")) +
 		fmt.Sprintf("\tMongoDB:\t%v", viper.GetString("mongo"))
 
 	Info(fmt.Sprintf("API initialised, configuration loaded:\n%v", configPrintOut))

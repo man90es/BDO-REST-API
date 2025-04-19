@@ -27,7 +27,7 @@ func main() {
 	if *flagPort == 8001 && len(os.Getenv("PORT")) > 0 {
 		port, err := strconv.Atoi(os.Getenv("PORT"))
 
-		if nil != err {
+		if err != nil {
 			port = 8001
 		}
 
@@ -46,8 +46,6 @@ func main() {
 	viper.Set("cachettl", time.Duration(*flagCacheTTL)*time.Minute)
 	viper.Set("maintenancettl", time.Duration(*flagMaintenanceTTL)*time.Minute)
 	viper.Set("mongo", *flagMongo)
-	viper.Set("port", *flagPort)
-	viper.Set("proxy", *flagProxy)
 	viper.Set("ratelimit", *flagRateLimit)
 	viper.Set("verbose", *flagVerbose)
 
