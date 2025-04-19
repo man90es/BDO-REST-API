@@ -42,6 +42,8 @@ func InitLogger() {
 		fmt.Sprintf("\tCache TTL:\t%v\n", viper.GetDuration("cachettl")) +
 		fmt.Sprintf("\tMaint. TTL:\t%v\n", viper.GetDuration("maintenancettl")) +
 		fmt.Sprintf("\tRate limit:\t%v/min\n", viper.GetInt64("ratelimit")) +
+		fmt.Sprintf("\tTasks/client:\t%v\n", viper.GetInt("maxtasksperclient")) +
+		fmt.Sprintf("\tTask retries:\t%v\n", viper.GetInt("taskretries")) +
 		fmt.Sprintf("\tMongoDB:\t%v", viper.GetString("mongo"))
 
 	Info(fmt.Sprintf("API initialised, configuration loaded:\n%v", configPrintOut))

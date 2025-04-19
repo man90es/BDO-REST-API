@@ -78,8 +78,7 @@ func init() {
 			taskQueue.Pause(time.Duration(60-time.Now().Second()) * time.Second)
 			taskQueue.ConfirmTaskCompletion(taskClient, taskHash)
 
-			// TODO: Make this configurable
-			if taskRetries < 3 {
+			if taskRetries < viper.GetInt("taskretries") {
 				taskQueue.AddTask(taskClient, taskHash, utils.BuildRequest(body.Request.URL.String(), map[string]string{
 					"taskRegion":  taskRegion,
 					"taskRetries": strconv.Itoa(taskRetries + 1),
@@ -133,8 +132,7 @@ func createTask(clientIP, region, taskType string, query map[string]string) (tas
 	crc32.Write([]byte(strings.Join(append(slices.Sorted(maps.Values(query)), region, taskType), "")))
 	hashString := strconv.Itoa(int(crc32.Sum32()))
 
-	// TODO: Make this configurable
-	if taskQueue.CountQueuedTasksForClient(clientIP) >= 5 {
+	if taskQueue.CountQueuedTasksForClient(clientIP) >= viper.GetInt("maxtasksperclient") {
 		return true
 	}
 

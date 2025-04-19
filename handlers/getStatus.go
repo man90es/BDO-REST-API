@@ -28,6 +28,10 @@ func getStatus(w http.ResponseWriter, r *http.Request) {
 				"general":           viper.GetDuration("cachettl").Round(time.Minute).String(),
 				"maintenanceStatus": viper.GetDuration("maintenancettl").Round(time.Minute).String(),
 			},
+			"taskQueue": map[string]int{
+				"maxTasksPerClient": viper.GetInt("maxtasksperclient"),
+				"taskRetries":       viper.GetInt("taskretries"),
+			},
 		},
 		"docs":      docsLink,
 		"proxies":   len(viper.GetStringSlice("proxy")),
