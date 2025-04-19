@@ -6,8 +6,9 @@ import (
 	"time"
 
 	"bdo-rest-api/cache"
-	"bdo-rest-api/config"
 	"bdo-rest-api/scraper"
+
+	"github.com/spf13/viper"
 )
 
 var initTime = time.Now()
@@ -24,13 +25,13 @@ func getStatus(w http.ResponseWriter, r *http.Request) {
 				"/guild/search":      cache.GuildSearch.GetItemCount(),
 			},
 			"ttl": map[string]string{
-				"general":           config.GetCacheTTL().Round(time.Minute).String(),
-				"maintenanceStatus": config.GetMaintenanceStatusTTL().Round(time.Minute).String(),
+				"general":           viper.GetDuration("cachettl").Round(time.Minute).String(),
+				"maintenanceStatus": viper.GetDuration("maintenancettl").Round(time.Minute).String(),
 			},
 		},
 		"docs":      docsLink,
-		"proxies":   len(config.GetProxyList()),
-		"rateLimit": config.GetRateLimit(),
+		"proxies":   len(viper.GetStringSlice("proxy")),
+		"rateLimit": viper.GetInt64("ratelimit"),
 		"uptime":    time.Since(initTime).Round(time.Second).String(),
 		"version":   version,
 	})

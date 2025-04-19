@@ -7,9 +7,10 @@ import (
 	"strings"
 	"time"
 
-	"bdo-rest-api/config"
 	"bdo-rest-api/handlers"
 	"bdo-rest-api/logger"
+
+	"github.com/spf13/viper"
 )
 
 func main() {
@@ -30,23 +31,25 @@ func main() {
 			port = 8001
 		}
 
-		config.SetPort(port)
+		viper.Set("port", port)
 	} else {
-		config.SetPort(*flagPort)
+		viper.Set("port", *flagPort)
 	}
 
 	// Read proxies from flags
 	if len(*flagProxy) > 0 {
-		config.SetProxyList(strings.Fields(*flagProxy))
+		viper.Set("proxy", strings.Fields(*flagProxy))
 	} else {
-		config.SetProxyList(strings.Fields(os.Getenv("PROXY")))
+		viper.Set("proxy", strings.Fields(os.Getenv("PROXY")))
 	}
 
-	config.SetCacheTTL(time.Duration(*flagCacheTTL) * time.Minute)
-	config.SetMaintenanceStatusTTL(time.Duration(*flagMaintenanceTTL) * time.Minute)
-	config.SetMongoDB(*flagMongo)
-	config.SetRateLimit(*flagRateLimit)
-	config.SetVerbosity(*flagVerbose)
+	viper.Set("cachettl", time.Duration(*flagCacheTTL)*time.Minute)
+	viper.Set("maintenancettl", time.Duration(*flagMaintenanceTTL)*time.Minute)
+	viper.Set("mongo", *flagMongo)
+	viper.Set("port", *flagPort)
+	viper.Set("proxy", *flagProxy)
+	viper.Set("ratelimit", *flagRateLimit)
+	viper.Set("verbose", *flagVerbose)
 
 	logger.InitLogger()
 	handlers.ListenAndServe()

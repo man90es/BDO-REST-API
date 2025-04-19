@@ -3,7 +3,7 @@ package scraper
 import (
 	"time"
 
-	"bdo-rest-api/config"
+	"github.com/spf13/viper"
 )
 
 var lastCloseTimes = map[string]time.Time{
@@ -17,7 +17,7 @@ func GetCloseTime(region string) (isCloseTime bool, expires time.Time) {
 		region = "EUNA"
 	}
 
-	expires = lastCloseTimes[region].Add(config.GetMaintenanceStatusTTL())
+	expires = lastCloseTimes[region].Add(viper.GetDuration("maintenancettl"))
 	return time.Now().Before(expires), expires
 }
 

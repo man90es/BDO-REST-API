@@ -10,13 +10,13 @@ import (
 	"strings"
 	"time"
 
-	"bdo-rest-api/config"
 	"bdo-rest-api/logger"
 	"bdo-rest-api/utils"
 
 	colly "github.com/gocolly/colly/v2"
 	"github.com/gocolly/colly/v2/extensions"
 	"github.com/gocolly/colly/v2/proxy"
+	"github.com/spf13/viper"
 )
 
 var taskQueue *TaskQueue
@@ -32,7 +32,7 @@ func init() {
 		RandomDelay: 5 * time.Second,
 	})
 
-	if p, err := proxy.RoundRobinProxySwitcher(config.GetProxyList()...); err == nil {
+	if p, err := proxy.RoundRobinProxySwitcher(viper.GetStringSlice("proxy")...); err == nil {
 		scraper.SetProxyFunc(p)
 	}
 
