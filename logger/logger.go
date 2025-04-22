@@ -7,8 +7,7 @@ import (
 	"os"
 	"time"
 
-	"bdo-rest-api/config"
-
+	"github.com/spf13/viper"
 	"go.mongodb.org/mongo-driver/v2/mongo"
 	"go.mongodb.org/mongo-driver/v2/mongo/options"
 )
@@ -21,7 +20,7 @@ var initialised = false
 var mongoCollection *mongo.Collection
 
 func InitLogger() {
-	mongoURI := config.GetMongoDB()
+	mongoURI := viper.GetString("mongo")
 
 	if len(mongoURI) > 0 {
 		client, err := mongo.Connect(options.Client().ApplyURI(mongoURI))
@@ -37,7 +36,17 @@ func InitLogger() {
 	errorLogger = log.New(os.Stderr, "ERROR: ", log.Ldate|log.Ltime)
 	initialised = true
 
-	Info(fmt.Sprintf("API initialised, configuration loaded:\n%v", config.SprintfConfig()))
+	configPrintOut := fmt.Sprintf("\tPort:\t\t%v\n", viper.GetInt("port")) +
+		fmt.Sprintf("\tProxies:\t%v\n", viper.GetStringSlice("proxy")) +
+		fmt.Sprintf("\tVerbosity:\t%v\n", viper.GetBool("verbose")) +
+		fmt.Sprintf("\tCache TTL:\t%v\n", viper.GetDuration("cachettl")) +
+		fmt.Sprintf("\tMaint. TTL:\t%v\n", viper.GetDuration("maintenancettl")) +
+		fmt.Sprintf("\tRate limit:\t%v/min\n", viper.GetInt64("ratelimit")) +
+		fmt.Sprintf("\tTasks/client:\t%v\n", viper.GetInt("maxtasksperclient")) +
+		fmt.Sprintf("\tTask retries:\t%v\n", viper.GetInt("taskretries")) +
+		fmt.Sprintf("\tMongoDB:\t%v", viper.GetString("mongo"))
+
+	Info(fmt.Sprintf("API initialised, configuration loaded:\n%v", configPrintOut))
 }
 
 func writeToMongo(level, message string) {
@@ -55,7 +64,7 @@ func writeToMongo(level, message string) {
 func Info(message string) {
 	writeToMongo("INFO", message)
 
-	if !config.GetVerbosity() || !initialised {
+	if !viper.GetBool("verbose") || !initialised {
 		return
 	}
 
@@ -65,7 +74,7 @@ func Info(message string) {
 func Error(message string) {
 	writeToMongo("ERROR", message)
 
-	if !config.GetVerbosity() || !initialised {
+	if !viper.GetBool("verbose") || !initialised {
 		return
 	}
 

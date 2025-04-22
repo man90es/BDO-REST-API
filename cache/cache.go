@@ -1,16 +1,14 @@
 package cache
 
 import (
-	"net/http"
 	"strings"
-	"sync"
 	"time"
 
 	goCache "github.com/patrickmn/go-cache"
+	"github.com/spf13/viper"
 	messagebus "github.com/vardius/message-bus"
 	"golang.org/x/exp/maps"
 
-	"bdo-rest-api/config"
 	"bdo-rest-api/models"
 	"bdo-rest-api/utils"
 )
@@ -31,7 +29,7 @@ func joinKeys(keys []string) string {
 }
 
 func newCache[T any]() *cache[T] {
-	cacheTTL := config.GetCacheTTL()
+	cacheTTL := viper.GetDuration("cachettl")
 
 	return &cache[T]{
 		Bus:           messagebus.New(100), // Idk what buffer size is optimal
@@ -40,32 +38,21 @@ func newCache[T any]() *cache[T] {
 }
 
 func (c *cache[T]) AddRecord(keys []string, data T, status int, taskId string) (date string, expires string) {
-	ttl := config.GetCacheTTL()
+	cacheTTL := viper.GetDuration("cachettl")
 	entry := CacheEntry[T]{
 		Data:   data,
 		Date:   time.Now(),
 		Status: status,
 	}
 
-	c.internalCache.Add(joinKeys(keys), entry, ttl)
+	c.internalCache.Add(joinKeys(keys), entry, cacheTTL)
 	c.Bus.Publish(taskId, entry)
 
-	return utils.FormatDateForHeaders(entry.Date), utils.FormatDateForHeaders(entry.Date.Add(ttl))
-}
-
-func (c *cache[T]) SignalBypassCache(status int, taskId string) {
-	var data T
-	entry := CacheEntry[T]{
-		Data:   data,
-		Date:   time.Now(),
-		Status: status,
-	}
-
-	c.Bus.Publish(taskId, entry)
+	return utils.FormatDateForHeaders(entry.Date), utils.FormatDateForHeaders(entry.Date.Add(cacheTTL))
 }
 
 func (c *cache[T]) GetRecord(keys []string) (data T, status int, date string, expires string, found bool) {
-	cacheTTL := config.GetCacheTTL()
+	cacheTTL := viper.GetDuration("cachettl")
 	anyEntry, found := c.internalCache.Get(joinKeys(keys))
 
 	if !found {
@@ -75,30 +62,6 @@ func (c *cache[T]) GetRecord(keys []string) (data T, status int, date string, ex
 	entry := anyEntry.(CacheEntry[T])
 
 	return entry.Data, entry.Status, utils.FormatDateForHeaders(entry.Date), utils.FormatDateForHeaders(entry.Date.Add(cacheTTL)), found
-}
-
-func (c *cache[T]) WaitForRecord(taskId string) (data T, status int, date string, expires string) {
-	var wg sync.WaitGroup
-	wg.Add(1)
-
-	c.Bus.Subscribe(taskId, func(entry CacheEntry[T]) {
-		data = entry.Data
-		status = entry.Status
-		date = utils.FormatDateForHeaders(entry.Date)
-
-		if entry.Status == http.StatusInternalServerError {
-			expires = date
-		} else if entry.Status == http.StatusServiceUnavailable {
-			expires = utils.FormatDateForHeaders(entry.Date.Add(config.GetMaintenanceStatusTTL()))
-		} else {
-			expires = utils.FormatDateForHeaders(entry.Date.Add(config.GetCacheTTL()))
-		}
-
-		wg.Done()
-	})
-
-	wg.Wait()
-	return
 }
 
 func (c *cache[T]) GetItemCount() int {

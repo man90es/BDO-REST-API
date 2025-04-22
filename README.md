@@ -23,20 +23,24 @@ If you host the API yourself, either via Docker or natively, you can control som
 
 Available flags:
 - `-cachettl`
-	- Allows to specify cache TTL in minutes
+	- Specifies cache TTL in minutes
 	- Type: unsigned integer
 	- Default value: `180`
 - `-maintenancettl`
-	- Allows to limit how frequently scraper can check for maintenance end in minutes
+	- Limits how frequently scraper can check for maintenance end in minutes
+	- Type: unsigned integer
+	- Default value: `5`
+- `-maxtasksperclient`
+	- Limits the number of concurrent scraping tasks that can be executed per client
 	- Type: unsigned integer
 	- Default value: `5`
 - `-port`
-	- Allows to specify API server's port
+	- Specifies API server's port
 	- Type: unsigned integer
 	- Default value: `8001`
 	- Also available as `PORT` environment variable (doesn't work in Docker)
 - `-proxy`
-	- Allows to specify a list of proxies to make requests to BDO servers through
+	- Specifies a list of proxies to make requests to BDO servers through
 	- Type: string, space-separated list of IP addresses or URLs
 	- Default value: none, requests are made directly
 	- Also available as `PROXY` environment variable
@@ -44,6 +48,10 @@ Available flags:
 	- Sets the maximum number of requests per minute per IP address
 	- Type: unsigned integer
 	- Default value: 512
+- `taskretries`
+	- Specifies the number of retries for a scraping task
+	- Type: unsigned integer
+	- Default value: `3`
 - `-verbose`
 	- Allows to put the app into verbose mode and print out additional logs to stdout
 	- Default value: none, no additional output is produced

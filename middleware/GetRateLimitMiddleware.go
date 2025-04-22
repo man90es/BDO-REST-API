@@ -7,12 +7,12 @@ import (
 	"github.com/ulule/limiter/v3/drivers/middleware/stdlib"
 	"github.com/ulule/limiter/v3/drivers/store/memory"
 
-	"bdo-rest-api/config"
+	"github.com/spf13/viper"
 )
 
 func GetRateLimitMiddleware() Middleware {
 	var rate = limiter.Rate{
-		Limit:  config.GetRateLimit(),
+		Limit:  viper.GetInt64("ratelimit"),
 		Period: time.Minute,
 	}
 	var store = memory.NewStore()
