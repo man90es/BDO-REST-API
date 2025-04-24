@@ -34,7 +34,7 @@ func scrapeAdventurer(body *colly.HTMLElement, region, profileTarget string) {
 		return false
 	})
 
-	body.ForEachWithBreak(".line_list li:nth-child(1) .desc span", func(_ int, e *colly.HTMLElement) bool {
+	body.ForEachWithBreak(".line_list li:nth-child(2) .desc span", func(_ int, e *colly.HTMLElement) bool {
 		guildStatus := e.Text
 
 		if region != "EU" && region != "NA" {
@@ -42,41 +42,43 @@ func scrapeAdventurer(body *colly.HTMLElement, region, profileTarget string) {
 		}
 
 		if guildStatus == "Private" {
-			profile.Privacy = profile.Privacy | models.PrivateGuild
+			// FIXME: This is a remains of times when privacy had granularity
+			profile.Privacy = 15
 		}
 
 		return false
 	})
 
-	body.ForEachWithBreak(".line_list li:nth-child(2) .desc", func(_ int, e *colly.HTMLElement) bool {
+	body.ForEachWithBreak(".line_list li:nth-child(1) .desc", func(_ int, e *colly.HTMLElement) bool {
 		createdOn := utils.ParseDate(e.Text)
 		profile.CreatedOn = &createdOn
 		return false
 	})
 
-	body.ForEachWithBreak(".line_list li:nth-child(3) .desc", func(_ int, e *colly.HTMLElement) bool {
+	body.ForEachWithBreak(".line_list li:nth-child(5) .desc", func(_ int, e *colly.HTMLElement) bool {
 		if contributionPoints, err := strconv.Atoi(e.Text); err == nil {
 			profile.ContributionPoints = uint16(contributionPoints)
 		} else {
-			profile.Privacy = profile.Privacy | models.PrivateContrib
+			// FIXME: This is a remains of times when privacy had granularity
+			profile.Privacy = 15
 		}
 
 		return false
 	})
 
-	body.ForEachWithBreak(".character_spec:not(.lock)", func(_ int, e *colly.HTMLElement) bool {
+	body.ForEachWithBreak(".character_spec", func(_ int, e *colly.HTMLElement) bool {
 		specLevels := [11]string{}
 
 		e.ForEach(".spec_level", func(ind int, el *colly.HTMLElement) {
 			// "Beginner1" → "Beginner 1"
-			i := regexp.MustCompile(`[0-9]`).FindStringIndex(el.Text)[0]
-			wordLevel := el.Text[:i]
+			lvIndex := regexp.MustCompile("Lv ").FindStringIndex(el.Text)[0]
+			wordLevel := el.Text[:lvIndex]
 
 			if region != "EU" && region != "NA" {
 				translators.TranslateSpecLevel(&wordLevel)
 			}
 
-			specLevels[ind] = wordLevel + " " + el.Text[i:]
+			specLevels[ind] = wordLevel + el.Text[lvIndex+2:]
 		})
 
 		if len(specLevels[0]) > 0 {
@@ -113,10 +115,11 @@ func scrapeAdventurer(body *colly.HTMLElement, region, profileTarget string) {
 			return false
 		})
 
-		if level, err := strconv.Atoi(e.ChildText(".character_info span:nth-child(2) em")); err == nil {
+		if level, err := strconv.Atoi(e.ChildText(".character_info span:nth-child(2) em:not(.lock)")); err == nil {
 			character.Level = uint8(level)
 		} else {
-			profile.Privacy = profile.Privacy | models.PrivateLevel
+			// FIXME: This is a remains of times when privacy had granularity
+			profile.Privacy = 15
 		}
 
 		if name := e.ChildText(".character_name"); true {
@@ -132,12 +135,13 @@ func scrapeAdventurer(body *colly.HTMLElement, region, profileTarget string) {
 		profile.Characters = append(profile.Characters, character)
 	})
 
-	body.ForEachWithBreak(".character_spec.lock", func(_ int, _ *colly.HTMLElement) bool {
-		profile.Privacy = profile.Privacy | models.PrivateSpecs
+	body.ForEachWithBreak(".character_info .lock", func(_ int, _ *colly.HTMLElement) bool {
+		// FIXME: This is a remains of times when privacy had granularity
+		profile.Privacy = 15
 		return false
 	})
 
-	if profile.Privacy&models.PrivateLevel == 0 {
+	if profile.Privacy == 0 {
 		profile.CombatFame = utils.CalculateCombatFame(profile.Characters)
 	}
 
