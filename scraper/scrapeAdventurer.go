@@ -27,43 +27,42 @@ func scrapeAdventurer(body *colly.HTMLElement, region, profileTarget string) {
 		return false
 	})
 
-	body.ForEachWithBreak(".desc.guild a", func(_ int, e *colly.HTMLElement) bool {
-		profile.Guild = &models.GuildProfile{
-			Name: e.Text,
-		}
+	body.ForEachWithBreak(".lock", func(_ int, _ *colly.HTMLElement) bool {
+		// FIXME: This is a remains from granular privacy,
+		// boolean would be more straightforward now
+		profile.Privacy = 15
 		return false
 	})
 
-	body.ForEachWithBreak(".line_list li:nth-child(2) .desc span", func(_ int, e *colly.HTMLElement) bool {
-		guildStatus := e.Text
+	body.ForEachWithBreak("li .desc", func(i int, e *colly.HTMLElement) bool {
+		switch i {
+		case 0:
+			createdOn := utils.ParseDate(e.Text)
+			profile.CreatedOn = &createdOn
+		case 1:
+			text := utils.RemoveExtraSpaces(e.Text)
+			translators.TranslateMisc(&text)
 
-		if region != "EU" && region != "NA" {
-			translators.TranslateMisc(&guildStatus)
+			if text != "Not in a guild" {
+				profile.Guild = &models.GuildProfile{
+					Name: text,
+				}
+			}
+		case 2:
+			if gearScore, err := strconv.Atoi(e.Text); err == nil {
+				profile.GearScore = uint16(gearScore)
+			}
+		case 3:
+			if energy, err := strconv.Atoi(e.Text); err == nil {
+				profile.Energy = uint16(energy)
+			}
+		case 4:
+			if contributionPoints, err := strconv.Atoi(e.Text); err == nil {
+				profile.ContributionPoints = uint16(contributionPoints)
+			}
 		}
 
-		if guildStatus == "Private" {
-			// FIXME: This is a remains of times when privacy had granularity
-			profile.Privacy = 15
-		}
-
-		return false
-	})
-
-	body.ForEachWithBreak(".line_list li:nth-child(1) .desc", func(_ int, e *colly.HTMLElement) bool {
-		createdOn := utils.ParseDate(e.Text)
-		profile.CreatedOn = &createdOn
-		return false
-	})
-
-	body.ForEachWithBreak(".line_list li:nth-child(5) .desc", func(_ int, e *colly.HTMLElement) bool {
-		if contributionPoints, err := strconv.Atoi(e.Text); err == nil {
-			profile.ContributionPoints = uint16(contributionPoints)
-		} else {
-			// FIXME: This is a remains of times when privacy had granularity
-			profile.Privacy = 15
-		}
-
-		return false
+		return profile.Privacy == 0
 	})
 
 	body.ForEachWithBreak(".character_spec", func(_ int, e *colly.HTMLElement) bool {
@@ -133,12 +132,6 @@ func scrapeAdventurer(body *colly.HTMLElement, region, profileTarget string) {
 		}
 
 		profile.Characters = append(profile.Characters, character)
-	})
-
-	body.ForEachWithBreak(".character_info .lock", func(_ int, _ *colly.HTMLElement) bool {
-		// FIXME: This is a remains of times when privacy had granularity
-		profile.Privacy = 15
-		return false
 	})
 
 	if profile.Privacy == 0 {
