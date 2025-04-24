@@ -2,13 +2,6 @@ package models
 
 import "time"
 
-const (
-	PrivateLevel   = 1
-	PrivateGuild   = 2
-	PrivateContrib = 4
-	PrivateSpecs   = 8
-)
-
 type Profile struct {
 	Characters         []Character   `json:"characters,omitempty"`
 	CombatFame         uint32        `json:"combatFame,omitempty"`

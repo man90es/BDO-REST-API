@@ -141,7 +141,7 @@ func scrapeAdventurer(body *colly.HTMLElement, region, profileTarget string) {
 		return false
 	})
 
-	if profile.Privacy&models.PrivateLevel == 0 {
+	if profile.Privacy == 0 {
 		profile.CombatFame = utils.CalculateCombatFame(profile.Characters)
 	}
 
