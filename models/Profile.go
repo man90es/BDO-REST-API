@@ -9,7 +9,7 @@ type Profile struct {
 	CreatedOn          *time.Time    `json:"createdOn,omitempty"`
 	Energy             uint16        `json:"energy,omitempty"`
 	FamilyName         string        `json:"familyName"`
-	GearScore          uint16        `json:"gearScore,omitempty"`
+	GS                 uint16        `json:"gs,omitempty"`
 	Guild              *GuildProfile `json:"guild,omitempty"`
 	LifeFame           uint16        `json:"lifeFame,omitempty"`
 	Privacy            int8          `json:"privacy,omitempty"`

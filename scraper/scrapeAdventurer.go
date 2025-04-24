@@ -34,7 +34,7 @@ func scrapeAdventurer(body *colly.HTMLElement, region, profileTarget string) {
 		return false
 	})
 
-	body.ForEachWithBreak("li .desc", func(i int, e *colly.HTMLElement) bool {
+	body.ForEachWithBreak(".profile_detail .desc", func(i int, e *colly.HTMLElement) bool {
 		switch i {
 		case 0:
 			createdOn := utils.ParseDate(e.Text)
@@ -49,8 +49,8 @@ func scrapeAdventurer(body *colly.HTMLElement, region, profileTarget string) {
 				}
 			}
 		case 2:
-			if gearScore, err := strconv.Atoi(e.Text); err == nil {
-				profile.GearScore = uint16(gearScore)
+			if gs, err := strconv.Atoi(e.Text); err == nil {
+				profile.GS = uint16(gs)
 			}
 		case 3:
 			if energy, err := strconv.Atoi(e.Text); err == nil {
