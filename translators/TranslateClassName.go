@@ -30,6 +30,7 @@ var classNameTranslationMap = map[string]string{
 	"노바":                   "Nova",
 	"닌자":                   "Ninja",
 	"다크나이트":                "Dark Knight",
+	"데드아이":                 "Deadeye",
 	"도사":                   "Dosa",
 	"드라카니아":                "Drakania",
 	"란":                    "Lahn",
