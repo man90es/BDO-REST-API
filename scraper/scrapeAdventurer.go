@@ -73,7 +73,6 @@ func scrapeAdventurer(body *colly.HTMLElement, region, profileTarget string) {
 		switch i {
 		case 0:
 			profile.History = &models.History{}
-
 			if mobs, err := strconv.ParseUint(e.Text, 10, 32); err == nil {
 				profile.History.Mobs = uint(mobs)
 			}
@@ -96,39 +95,48 @@ func scrapeAdventurer(body *colly.HTMLElement, region, profileTarget string) {
 		return true
 	})
 
-	body.ForEachWithBreak(".character_spec", func(_ int, e *colly.HTMLElement) bool {
-		specLevels := [11]string{}
-
-		e.ForEach(".spec_level", func(ind int, el *colly.HTMLElement) {
-			// "Beginner1" → "Beginner 1"
-			lvIndex := regexp.MustCompile("Lv ").FindStringIndex(el.Text)[0]
-			wordLevel := el.Text[:lvIndex]
-
-			if region != "EU" && region != "NA" {
-				translators.TranslateSpecLevel(&wordLevel)
-			}
-
-			specLevels[ind] = wordLevel + el.Text[lvIndex+2:]
-		})
-
-		if len(specLevels[0]) > 0 {
-			profile.SpecLevels = &models.Specs{
-				Gathering:  specLevels[0],
-				Fishing:    specLevels[1],
-				Hunting:    specLevels[2],
-				Cooking:    specLevels[3],
-				Alchemy:    specLevels[4],
-				Processing: specLevels[5],
-				Training:   specLevels[6],
-				Trading:    specLevels[7],
-				Farming:    specLevels[8],
-				Sailing:    specLevels[9],
-				Barter:     specLevels[10],
-			}
-			profile.LifeFame = utils.CalculateLifeFame(specLevels)
+	body.ForEachWithBreak(".spec_level", func(i int, e *colly.HTMLElement) bool {
+		if profile.Privacy > 0 {
+			return false
 		}
 
-		return false
+		// "Beginner1" → "Beginner 1"
+		lvIndex := regexp.MustCompile("Lv ").FindStringIndex(e.Text)[0]
+		wordLevel := e.Text[:lvIndex]
+
+		if region != "EU" && region != "NA" {
+			translators.TranslateSpecLevel(&wordLevel)
+		}
+
+		value := wordLevel + e.Text[lvIndex+2:]
+
+		switch i {
+		case 0:
+			profile.SpecLevels = &models.Specs{}
+			profile.SpecLevels.Gathering = value
+		case 1:
+			profile.SpecLevels.Fishing = value
+		case 2:
+			profile.SpecLevels.Hunting = value
+		case 3:
+			profile.SpecLevels.Cooking = value
+		case 4:
+			profile.SpecLevels.Alchemy = value
+		case 5:
+			profile.SpecLevels.Processing = value
+		case 6:
+			profile.SpecLevels.Training = value
+		case 7:
+			profile.SpecLevels.Trading = value
+		case 8:
+			profile.SpecLevels.Farming = value
+		case 9:
+			profile.SpecLevels.Sailing = value
+		case 10:
+			profile.SpecLevels.Barter = value
+		}
+
+		return true
 	})
 
 	body.ForEach(".character_desc_area", func(_ int, e *colly.HTMLElement) {
