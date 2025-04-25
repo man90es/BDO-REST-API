@@ -11,6 +11,7 @@ type Profile struct {
 	FamilyName         string        `json:"familyName"`
 	GS                 uint16        `json:"gs,omitempty"`
 	Guild              *GuildProfile `json:"guild,omitempty"`
+	History            *History      `json:"history,omitempty"`
 	LifeFame           uint16        `json:"lifeFame,omitempty"`
 	Privacy            int8          `json:"privacy,omitempty"`
 	ProfileTarget      string        `json:"profileTarget"`

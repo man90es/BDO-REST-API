@@ -65,6 +65,37 @@ func scrapeAdventurer(body *colly.HTMLElement, region, profileTarget string) {
 		return profile.Privacy == 0
 	})
 
+	body.ForEachWithBreak(".history_level", func(i int, e *colly.HTMLElement) bool {
+		if profile.Privacy > 0 {
+			return false
+		}
+
+		switch i {
+		case 0:
+			profile.History = &models.History{}
+
+			if mobs, err := strconv.ParseUint(e.Text, 10, 32); err == nil {
+				profile.History.Mobs = uint(mobs)
+			}
+		case 1:
+			if fish, err := strconv.ParseUint(e.Text, 10, 32); err == nil {
+				profile.History.Fish = uint(fish)
+			}
+		case 2:
+			if loot, err := strconv.ParseUint(e.Text, 10, 32); err == nil {
+				profile.History.Loot = uint(loot)
+			}
+		case 3:
+			text := strings.Replace(e.Text[0:len(e.Text)-3], ",", ".", 1)
+
+			if lootWeight, err := strconv.ParseFloat(text, 32); err == nil {
+				profile.History.LootWeight = float32(lootWeight)
+			}
+		}
+
+		return true
+	})
+
 	body.ForEachWithBreak(".character_spec", func(_ int, e *colly.HTMLElement) bool {
 		specLevels := [11]string{}
 
