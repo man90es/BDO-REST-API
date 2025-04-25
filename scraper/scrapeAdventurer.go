@@ -135,6 +135,7 @@ func scrapeAdventurer(body *colly.HTMLElement, region, profileTarget string) {
 			profile.SpecLevels.Sailing = value
 		case 10:
 			profile.SpecLevels.Barter = value
+			profile.LifeFame = utils.CalculateLifeFame(profile.SpecLevels)
 		}
 
 		return true
