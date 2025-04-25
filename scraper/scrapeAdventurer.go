@@ -1,6 +1,7 @@
 package scraper
 
 import (
+	"fmt"
 	"net/http"
 	"regexp"
 	"strconv"
@@ -40,7 +41,7 @@ func scrapeAdventurer(body *colly.HTMLElement, region, profileTarget string) {
 			createdOn := utils.ParseDate(e.Text)
 			profile.CreatedOn = &createdOn
 		case 1:
-			text := utils.RemoveExtraSpaces(e.Text)
+			text := strings.TrimSpace(e.Text)
 			translators.TranslateMisc(&text)
 
 			if text != "Not in a guild" {
@@ -134,6 +135,48 @@ func scrapeAdventurer(body *colly.HTMLElement, region, profileTarget string) {
 			profile.SpecLevels.Sailing = value
 		case 10:
 			profile.SpecLevels.Barter = value
+		}
+
+		return true
+	})
+
+	body.ForEachWithBreak(".spec_stat", func(i int, e *colly.HTMLElement) bool {
+		if profile.Privacy > 0 {
+			return false
+		}
+
+		loot, err := strconv.ParseUint(strings.TrimSpace(e.Text), 10, 16)
+		if err != nil {
+			fmt.Println(err)
+			return false
+		}
+
+		value := uint16(loot)
+
+		switch i {
+		case 0:
+			profile.Mastery = &models.Mastery{}
+			profile.Mastery.Gathering = value
+		case 1:
+			profile.Mastery.Fishing = value
+		case 2:
+			profile.Mastery.Hunting = value
+		case 3:
+			profile.Mastery.Cooking = value
+		case 4:
+			profile.Mastery.Alchemy = value
+		case 5:
+			profile.Mastery.Processing = value
+		case 6:
+			profile.Mastery.Training = value
+		case 7:
+			profile.Mastery.Trading = value
+		case 8:
+			profile.Mastery.Farming = value
+		case 9:
+			profile.Mastery.Sailing = value
+		case 10:
+			profile.Mastery.Barter = value
 		}
 
 		return true

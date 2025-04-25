@@ -13,6 +13,7 @@ type Profile struct {
 	Guild              *GuildProfile `json:"guild,omitempty"`
 	History            *History      `json:"history,omitempty"`
 	LifeFame           uint16        `json:"lifeFame,omitempty"`
+	Mastery            *Mastery      `json:"mastery,omitempty"`
 	Privacy            int8          `json:"privacy,omitempty"`
 	ProfileTarget      string        `json:"profileTarget"`
 	Region             string        `json:"region,omitempty"`
