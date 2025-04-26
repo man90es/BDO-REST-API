@@ -1,12 +1,17 @@
 package utils
 
 import (
+	"bdo-rest-api/models"
+	"reflect"
 	"strconv"
 	"strings"
 )
 
-func CalculateLifeFame(specs [11]string) (lifeFame uint16) {
-	for _, spec := range specs {
+func CalculateLifeFame(specs *models.Specs) (lifeFame uint16) {
+	v := reflect.ValueOf(*specs)
+
+	for i := 0; i < v.NumField(); i++ {
+		spec := v.Field(i).String()
 		spaceI := strings.Index(spec, " ")
 		text := spec[0:spaceI]
 		number, _ := strconv.Atoi(spec[spaceI+1:])
