@@ -29,10 +29,6 @@ func scrapeGuildSearch(body *colly.HTMLElement, region, query string) {
 			CreatedOn: &createdOn,
 		}
 
-		if region != "SA" && region != "KR" {
-			guildProfile.Region = e.ChildText(".region_info")
-		}
-
 		if membersStr := e.ChildText(".member"); true {
 			population, _ := strconv.Atoi(membersStr)
 			guildProfile.Population = uint8(population)

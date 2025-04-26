@@ -8,6 +8,7 @@ import (
 
 var lastCloseTimes = map[string]time.Time{
 	"EUNA": {},
+	"KR":   {},
 	"SA":   {},
 }
 
@@ -31,5 +32,10 @@ func setCloseTime(region string) {
 }
 
 func GetLastCloseTimes() map[string]time.Time {
-	return lastCloseTimes
+	return map[string]time.Time{
+		"EU": lastCloseTimes["EUNA"],
+		"KR": lastCloseTimes["KR"],
+		"NA": lastCloseTimes["EUNA"],
+		"SA": lastCloseTimes["SA"],
+	}
 }
