@@ -19,8 +19,10 @@ func scrapeGuild(body *colly.HTMLElement, region, guildName string) {
 	}
 
 	body.ForEachWithBreak(".guild_name p", func(_ int, e *colly.HTMLElement) bool {
-		guildProfile.Name = e.Text
-		status = http.StatusOK
+		if guildProfile.Name = e.Text; guildProfile.Name != "" {
+			status = http.StatusOK
+		}
+
 		return false
 	})
 
