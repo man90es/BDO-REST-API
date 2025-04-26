@@ -3,7 +3,6 @@ package scraper
 import (
 	"fmt"
 	"net/http"
-	"regexp"
 	"strconv"
 	"strings"
 
@@ -71,24 +70,26 @@ func scrapeAdventurer(body *colly.HTMLElement, region, profileTarget string) {
 			return false
 		}
 
+		numberField := strings.Fields(e.Text)[0]
+
 		switch i {
 		case 0:
 			profile.History = &models.History{}
-			if mobs, err := strconv.ParseUint(e.Text, 10, 32); err == nil {
+			if mobs, err := strconv.ParseUint(numberField, 10, 32); err == nil {
 				profile.History.Mobs = uint(mobs)
 			}
 		case 1:
-			if fish, err := strconv.ParseUint(e.Text, 10, 32); err == nil {
+			if fish, err := strconv.ParseUint(numberField, 10, 32); err == nil {
 				profile.History.Fish = uint(fish)
 			}
 		case 2:
-			if loot, err := strconv.ParseUint(e.Text, 10, 32); err == nil {
+			if loot, err := strconv.ParseUint(numberField, 10, 32); err == nil {
 				profile.History.Loot = uint(loot)
 			}
 		case 3:
-			text := strings.Replace(e.Text[0:len(e.Text)-3], ",", ".", 1)
+			dotSeparated := strings.Replace(numberField, ",", ".", 1)
 
-			if lootWeight, err := strconv.ParseFloat(text, 32); err == nil {
+			if lootWeight, err := strconv.ParseFloat(dotSeparated, 32); err == nil {
 				profile.History.LootWeight = float32(lootWeight)
 			}
 		}
@@ -101,15 +102,14 @@ func scrapeAdventurer(body *colly.HTMLElement, region, profileTarget string) {
 			return false
 		}
 
-		// "Beginner1" → "Beginner 1"
-		lvIndex := regexp.MustCompile("Lv ").FindStringIndex(e.Text)[0]
-		wordLevel := e.Text[:lvIndex]
+		fields := strings.Split(e.Text, "Lv")
+		wordLevel := fields[0]
 
 		if region != "EU" && region != "NA" {
 			translators.TranslateSpecLevel(&wordLevel)
 		}
 
-		value := wordLevel + e.Text[lvIndex+2:]
+		value := wordLevel + fields[1]
 
 		switch i {
 		case 0:
