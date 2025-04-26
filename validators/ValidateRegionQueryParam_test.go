@@ -16,8 +16,8 @@ func TestValidateRegionQueryParameter(t *testing.T) {
 		{input: []string{"na"}, expectedRegion: "NA", expectedOk: true, expectedMessage: ""},
 		{input: []string{"SA"}, expectedRegion: "SA", expectedOk: true, expectedMessage: ""},
 		{input: []string{"EU"}, expectedRegion: "EU", expectedOk: true, expectedMessage: ""},
-		{input: []string{"KR"}, expectedRegion: "KR", expectedOk: false, expectedMessage: "Region KR is not supported"},
-		{input: []string{"NA", "SA"}, expectedRegion: "NA", expectedOk: true, expectedMessage: ""}, // Takes the first region in case of multiple regions
+		{input: []string{"ABC"}, expectedRegion: "ABC", expectedOk: false, expectedMessage: "Region ABC is not supported"},
+		{input: []string{"KR", "SA"}, expectedRegion: "KR", expectedOk: true, expectedMessage: ""}, // Takes the first region in case of multiple regions
 	}
 
 	for _, test := range tests {

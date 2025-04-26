@@ -17,11 +17,11 @@
 			"region": {
 				"name": "region",
 				"in": "query",
-				"description": "Only Eropean, North American and South American servers are supported. If you omit this parameter, it's assumed that you want to search on the European server.",
 				"schema": {
 					"type": "string",
 					"enum": [
 						"EU",
+						"KR",
 						"NA",
 						"SA"
 					],
@@ -69,7 +69,9 @@
 												"lastDetectedMaintenance": {
 													"type": "object",
 													"example": {
-														"EUNA": "0001-01-01T00:00:00Z",
+														"EU": "0001-01-01T00:00:00Z",
+														"KR": "0001-01-01T00:00:00Z",
+														"NA": "0001-01-01T00:00:00Z",
 														"SA": "0001-01-01T00:00:00Z"
 													}
 												},
@@ -163,11 +165,12 @@
 					{
 						"name": "region",
 						"in": "query",
-						"description": "Player's region. Can be omitted for EU or NA.",
+						"description": "Can be omitted for EU or NA. Providing NA as the value can return EU profiles and vice versa.",
 						"schema": {
 							"type": "string",
 							"enum": [
 								"EU",
+								"KR",
 								"NA",
 								"SA"
 							],
@@ -199,6 +202,7 @@
 											"type": "string",
 											"enum": [
 												"EU",
+												"KR",
 												"NA",
 												"SA"
 											]
@@ -542,6 +546,7 @@
 												"type": "string",
 												"enum": [
 													"EU",
+													"KR",
 													"NA",
 													"SA"
 												]
@@ -648,6 +653,7 @@
 											"type": "string",
 											"enum": [
 												"EU",
+												"KR",
 												"NA",
 												"SA"
 											]
@@ -757,6 +763,7 @@
 												"type": "string",
 												"enum": [
 													"EU",
+													"KR",
 													"NA",
 													"SA"
 												]
@@ -836,6 +843,7 @@
 														"type": "string",
 														"enum": [
 															"EU",
+															"KR",
 															"NA",
 															"SA"
 														]
@@ -858,6 +866,7 @@
 														"type": "string",
 														"enum": [
 															"EU",
+															"KR",
 															"NA",
 															"SA"
 														]
@@ -888,6 +897,7 @@
 														"type": "string",
 														"enum": [
 															"EU",
+															"KR",
 															"NA",
 															"SA"
 														]
@@ -910,6 +920,7 @@
 														"type": "string",
 														"enum": [
 															"EU",
+															"KR",
 															"NA",
 															"SA"
 														]

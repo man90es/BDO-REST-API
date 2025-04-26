@@ -18,7 +18,7 @@ func scrapeAdventurer(body *colly.HTMLElement, region, profileTarget string) {
 	status := http.StatusNotFound
 	profile := models.Profile{
 		ProfileTarget: profileTarget,
-		Region:        region,
+		Region:        region, // FIXME: This can potentially be wrong e.g. if client requests a NA profile and gives EU as the region
 	}
 
 	body.ForEachWithBreak(".nick", func(_ int, e *colly.HTMLElement) bool {

@@ -14,7 +14,7 @@ func ValidateRegionQueryParam(query []string) (region string, ok bool, errorMess
 	region = strings.ToUpper(query[0])
 
 	// TODO: Add KR region once the translations are ready
-	if !slices.Contains([]string{"EU", "NA", "SA"}, region) {
+	if !slices.Contains([]string{"EU", "NA", "SA", "KR"}, region) {
 		return region, false, fmt.Sprintf("Region %v is not supported", region)
 	}
 
