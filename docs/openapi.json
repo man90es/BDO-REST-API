@@ -95,11 +95,11 @@
 													"properties": {
 														"general": {
 															"type": "string",
-															"example": "3h0m0s"
+															"default": "3h0m0s"
 														},
 														"maintenanceStatus": {
 															"type": "string",
-															"example": "5m0s"
+															"default": "5m0s"
 														}
 													}
 												}
@@ -107,14 +107,27 @@
 										},
 										"docs": {
 											"type": "string",
-											"example": "https://man90es.github.io/BDO-REST-API"
+											"default": "https://man90es.github.io/BDO-REST-API"
 										},
 										"proxies": {
 											"type": "number"
 										},
 										"rateLimit": {
 											"type": "number",
-											"example": 512
+											"default": 512
+										},
+										"taskQueue": {
+											"type": "object",
+											"properties": {
+												"maxTasksPerClient": {
+													"type": "number",
+													"default": 5
+												},
+												"taskRetries": {
+													"type": "number",
+													"default": 3
+												}
+											}
 										},
 										"uptime": {
 											"type": "string",
@@ -135,7 +148,7 @@
 		"/v1/adventurer": {
 			"get": {
 				"summary": "Retrieve player's profile.",
-				"description": "Retrieve the full profile of a single player by his or her profileTarget. Watch out for the \"privacy\" attribute that is added to the response when the player whose profile is requested turned on at least one of the privacy options BDO website has. It is a single number that you can decode using bitmasks. `0b0001` for private character levels, `0b0010` for private guild, `0b0100` for private contribution points and `0b1000` for private lifeskill levels. If the attribute is equal to `0b1111` then everything is set to private.\n\n<b>Important!</b> Property \"specLevels\" used to be on a character level, but BDO has changed it so that all characters have shared profession levels. This API will continue to return \"specLevels\" on the character level alongside with \"specLevels\" on the profile level for compatibility reasons until 1 September 2024.",
+				"description": "Retrieve the full profile of a single player by his or her profileTarget.",
 				"operationId": "getAdventurer",
 				"parameters": [
 					{
@@ -150,7 +163,7 @@
 					{
 						"name": "region",
 						"in": "query",
-						"description": "Only Eropean, North American and South American servers are supported. You may omit this parameter for the European and North American servers.",
+						"description": "Player's region. Can be omitted for EU or NA.",
 						"schema": {
 							"type": "string",
 							"enum": [
@@ -201,17 +214,22 @@
 											}
 										},
 										"contributionPoints": {
+											"description": "Contribution points",
 											"nullable": true,
-											"type": "number",
-											"example": 100
+											"type": "integer",
+											"example": 100,
+											"minimum": 0
 										},
 										"createdOn": {
+											"description": "Account creation date",
 											"nullable": false,
 											"type": "string",
 											"example": "2020-02-23T00:00:00Z"
 										},
 										"characters": {
+											"description": "Player's characters",
 											"type": "array",
+											"nullable": false,
 											"items": {
 												"type": "object",
 												"properties": {
@@ -232,13 +250,15 @@
 													},
 													"level": {
 														"nullable": true,
-														"type": "number",
-														"example": 56
+														"type": "integer",
+														"example": 56,
+														"minimum": 0
 													}
 												}
 											}
 										},
 										"specLevels": {
+											"description": "Levels of different life skills",
 											"nullable": true,
 											"properties": {
 												"gathering": {
@@ -299,14 +319,144 @@
 											}
 										},
 										"lifeFame": {
+											"description": "Life fame",
 											"example": 907,
 											"nullable": true,
-											"type": "number"
+											"type": "integer",
+											"minimum": 0
 										},
 										"combatFame": {
+											"description": "Combat fame",
 											"example": 1136,
 											"nullable": true,
-											"type": "number"
+											"type": "integer",
+											"minimum": 0
+										},
+										"energy": {
+											"description": "Energy",
+											"example": 400,
+											"nullable": true,
+											"type": "integer",
+											"minimum": 0
+										},
+										"gs": {
+											"description": "The higher value between AP+DP or AAP+DP.",
+											"example": 600,
+											"nullable": true,
+											"type": "integer",
+											"minimum": 0
+										},
+										"history": {
+											"description": "30-day history of the adventurer's activity",
+											"nullable": true,
+											"type": "object",
+											"properties": {
+												"fish": {
+													"description": "Fished items",
+													"nullable": false,
+													"type": "integer",
+													"example": 100,
+													"minimum": 0
+												},
+												"loot": {
+													"description": "Obtained loot",
+													"nullable": false,
+													"type": "integer",
+													"example": 200,
+													"minimum": 0
+												},
+												"lootWeight": {
+													"description": "Obtained loot weight",
+													"nullable": false,
+													"type": "integer",
+													"example": 300,
+													"minimum": 0
+												},
+												"mobs": {
+													"description": "Monsters defeated",
+													"nullable": false,
+													"type": "number",
+													"example": 400,
+													"minimum": 0
+												}
+											}
+										},
+										"mastery": {
+											"description": "Mastery of different life skills",
+											"nullable": true,
+											"properties": {
+												"gathering": {
+													"nullable": false,
+													"type": "integer",
+													"example": 1000,
+													"minimum": 0
+												},
+												"fishing": {
+													"nullable": false,
+													"type": "integer",
+													"example": 1000,
+													"minimum": 0
+												},
+												"hunting": {
+													"nullable": false,
+													"type": "integer",
+													"example": 1000,
+													"minimum": 0
+												},
+												"cooking": {
+													"nullable": false,
+													"type": "integer",
+													"example": 1000,
+													"minimum": 0
+												},
+												"alchemy": {
+													"nullable": false,
+													"type": "integer",
+													"example": 1000,
+													"minimum": 0
+												},
+												"processing": {
+													"nullable": false,
+													"type": "integer",
+													"example": 1000,
+													"minimum": 0
+												},
+												"training": {
+													"nullable": false,
+													"type": "integer",
+													"example": 1000,
+													"minimum": 0
+												},
+												"trading": {
+													"nullable": false,
+													"type": "integer",
+													"example": 1000,
+													"minimum": 0
+												},
+												"farming": {
+													"nullable": false,
+													"type": "integer",
+													"example": 1000,
+													"minimum": 0
+												},
+												"sailing": {
+													"nullable": false,
+													"type": "integer",
+													"example": 1000,
+													"minimum": 0
+												},
+												"barter": {
+													"nullable": false,
+													"type": "integer",
+													"example": 1000,
+													"minimum": 0
+												}
+											}
+										},
+										"privacy": {
+											"description": "Player's privacy level. Can be either 0 for public or 15 for private.",
+											"nullable": true,
+											"type": "integer"
 										}
 									}
 								}
