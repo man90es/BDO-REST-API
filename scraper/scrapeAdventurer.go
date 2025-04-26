@@ -197,11 +197,10 @@ func scrapeAdventurer(body *colly.HTMLElement, region, profileTarget string) {
 			return false
 		})
 
-		if level, err := strconv.Atoi(e.ChildText(".character_info span:nth-child(2) em:not(.lock)")); err == nil {
-			character.Level = uint8(level)
-		} else {
-			// FIXME: This is a remains of times when privacy had granularity
-			profile.Privacy = 15
+		if profile.Privacy == 0 {
+			if level, err := strconv.Atoi(e.ChildText(".character_info span:last-child em")); err == nil {
+				character.Level = uint8(level)
+			}
 		}
 
 		if name := e.ChildText(".character_name"); true {
