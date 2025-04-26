@@ -1,8 +1,8 @@
 package scraper
 
 import (
+	"fmt"
 	"net/http"
-	"regexp"
 	"strconv"
 	"strings"
 
@@ -27,78 +27,160 @@ func scrapeAdventurer(body *colly.HTMLElement, region, profileTarget string) {
 		return false
 	})
 
-	body.ForEachWithBreak(".desc.guild a", func(_ int, e *colly.HTMLElement) bool {
-		profile.Guild = &models.GuildProfile{
-			Name: e.Text,
-		}
+	body.ForEachWithBreak(".lock", func(_ int, _ *colly.HTMLElement) bool {
+		// FIXME: This is a remains from granular privacy,
+		// boolean would be more straightforward now
+		profile.Privacy = 15
 		return false
 	})
 
-	body.ForEachWithBreak(".line_list li:nth-child(2) .desc span", func(_ int, e *colly.HTMLElement) bool {
-		guildStatus := e.Text
+	body.ForEachWithBreak(".profile_detail .desc", func(i int, e *colly.HTMLElement) bool {
+		switch i {
+		case 0:
+			createdOn := utils.ParseDate(e.Text)
+			profile.CreatedOn = &createdOn
+		case 1:
+			text := strings.TrimSpace(e.Text)
+			translators.TranslateMisc(&text)
+
+			if text != "Not in a guild" {
+				profile.Guild = &models.GuildProfile{
+					Name: text,
+				}
+			}
+		case 2:
+			if gs, err := strconv.Atoi(e.Text); err == nil {
+				profile.GS = uint16(gs)
+			}
+		case 3:
+			if energy, err := strconv.Atoi(e.Text); err == nil {
+				profile.Energy = uint16(energy)
+			}
+		case 4:
+			if contributionPoints, err := strconv.Atoi(e.Text); err == nil {
+				profile.ContributionPoints = uint16(contributionPoints)
+			}
+		}
+
+		return profile.Privacy == 0
+	})
+
+	body.ForEachWithBreak(".history_level", func(i int, e *colly.HTMLElement) bool {
+		if profile.Privacy > 0 {
+			return false
+		}
+
+		numberField := strings.Fields(e.Text)[0]
+
+		switch i {
+		case 0:
+			profile.History = &models.History{}
+			if mobs, err := strconv.ParseUint(numberField, 10, 32); err == nil {
+				profile.History.Mobs = uint(mobs)
+			}
+		case 1:
+			if fish, err := strconv.ParseUint(numberField, 10, 32); err == nil {
+				profile.History.Fish = uint(fish)
+			}
+		case 2:
+			if loot, err := strconv.ParseUint(numberField, 10, 32); err == nil {
+				profile.History.Loot = uint(loot)
+			}
+		case 3:
+			dotSeparated := strings.Replace(numberField, ",", ".", 1)
+
+			if lootWeight, err := strconv.ParseFloat(dotSeparated, 32); err == nil {
+				profile.History.LootWeight = float32(lootWeight)
+			}
+		}
+
+		return true
+	})
+
+	body.ForEachWithBreak(".spec_level", func(i int, e *colly.HTMLElement) bool {
+		if profile.Privacy > 0 {
+			return false
+		}
+
+		fields := strings.Split(e.Text, "Lv")
+		wordLevel := fields[0]
 
 		if region != "EU" && region != "NA" {
-			translators.TranslateMisc(&guildStatus)
+			translators.TranslateSpecLevel(&wordLevel)
 		}
 
-		if guildStatus == "Private" {
-			// FIXME: This is a remains of times when privacy had granularity
-			profile.Privacy = 15
+		value := wordLevel + fields[1]
+
+		switch i {
+		case 0:
+			profile.SpecLevels = &models.Specs{}
+			profile.SpecLevels.Gathering = value
+		case 1:
+			profile.SpecLevels.Fishing = value
+		case 2:
+			profile.SpecLevels.Hunting = value
+		case 3:
+			profile.SpecLevels.Cooking = value
+		case 4:
+			profile.SpecLevels.Alchemy = value
+		case 5:
+			profile.SpecLevels.Processing = value
+		case 6:
+			profile.SpecLevels.Training = value
+		case 7:
+			profile.SpecLevels.Trading = value
+		case 8:
+			profile.SpecLevels.Farming = value
+		case 9:
+			profile.SpecLevels.Sailing = value
+		case 10:
+			profile.SpecLevels.Barter = value
+			profile.LifeFame = utils.CalculateLifeFame(profile.SpecLevels)
 		}
 
-		return false
+		return true
 	})
 
-	body.ForEachWithBreak(".line_list li:nth-child(1) .desc", func(_ int, e *colly.HTMLElement) bool {
-		createdOn := utils.ParseDate(e.Text)
-		profile.CreatedOn = &createdOn
-		return false
-	})
-
-	body.ForEachWithBreak(".line_list li:nth-child(5) .desc", func(_ int, e *colly.HTMLElement) bool {
-		if contributionPoints, err := strconv.Atoi(e.Text); err == nil {
-			profile.ContributionPoints = uint16(contributionPoints)
-		} else {
-			// FIXME: This is a remains of times when privacy had granularity
-			profile.Privacy = 15
+	body.ForEachWithBreak(".spec_stat", func(i int, e *colly.HTMLElement) bool {
+		if profile.Privacy > 0 {
+			return false
 		}
 
-		return false
-	})
-
-	body.ForEachWithBreak(".character_spec", func(_ int, e *colly.HTMLElement) bool {
-		specLevels := [11]string{}
-
-		e.ForEach(".spec_level", func(ind int, el *colly.HTMLElement) {
-			// "Beginner1" → "Beginner 1"
-			lvIndex := regexp.MustCompile("Lv ").FindStringIndex(el.Text)[0]
-			wordLevel := el.Text[:lvIndex]
-
-			if region != "EU" && region != "NA" {
-				translators.TranslateSpecLevel(&wordLevel)
-			}
-
-			specLevels[ind] = wordLevel + el.Text[lvIndex+2:]
-		})
-
-		if len(specLevels[0]) > 0 {
-			profile.SpecLevels = &models.Specs{
-				Gathering:  specLevels[0],
-				Fishing:    specLevels[1],
-				Hunting:    specLevels[2],
-				Cooking:    specLevels[3],
-				Alchemy:    specLevels[4],
-				Processing: specLevels[5],
-				Training:   specLevels[6],
-				Trading:    specLevels[7],
-				Farming:    specLevels[8],
-				Sailing:    specLevels[9],
-				Barter:     specLevels[10],
-			}
-			profile.LifeFame = utils.CalculateLifeFame(specLevels)
+		loot, err := strconv.ParseUint(strings.TrimSpace(e.Text), 10, 16)
+		if err != nil {
+			fmt.Println(err)
+			return false
 		}
 
-		return false
+		value := uint16(loot)
+
+		switch i {
+		case 0:
+			profile.Mastery = &models.Mastery{}
+			profile.Mastery.Gathering = value
+		case 1:
+			profile.Mastery.Fishing = value
+		case 2:
+			profile.Mastery.Hunting = value
+		case 3:
+			profile.Mastery.Cooking = value
+		case 4:
+			profile.Mastery.Alchemy = value
+		case 5:
+			profile.Mastery.Processing = value
+		case 6:
+			profile.Mastery.Training = value
+		case 7:
+			profile.Mastery.Trading = value
+		case 8:
+			profile.Mastery.Farming = value
+		case 9:
+			profile.Mastery.Sailing = value
+		case 10:
+			profile.Mastery.Barter = value
+		}
+
+		return true
 	})
 
 	body.ForEach(".character_desc_area", func(_ int, e *colly.HTMLElement) {
@@ -115,11 +197,10 @@ func scrapeAdventurer(body *colly.HTMLElement, region, profileTarget string) {
 			return false
 		})
 
-		if level, err := strconv.Atoi(e.ChildText(".character_info span:nth-child(2) em:not(.lock)")); err == nil {
-			character.Level = uint8(level)
-		} else {
-			// FIXME: This is a remains of times when privacy had granularity
-			profile.Privacy = 15
+		if profile.Privacy == 0 {
+			if level, err := strconv.Atoi(e.ChildText(".character_info span:last-child em")); err == nil {
+				character.Level = uint8(level)
+			}
 		}
 
 		if name := e.ChildText(".character_name"); true {
@@ -133,12 +214,6 @@ func scrapeAdventurer(body *colly.HTMLElement, region, profileTarget string) {
 		}
 
 		profile.Characters = append(profile.Characters, character)
-	})
-
-	body.ForEachWithBreak(".character_info .lock", func(_ int, _ *colly.HTMLElement) bool {
-		// FIXME: This is a remains of times when privacy had granularity
-		profile.Privacy = 15
-		return false
 	})
 
 	if profile.Privacy == 0 {

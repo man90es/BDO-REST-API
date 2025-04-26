@@ -18,7 +18,7 @@ func ParseDate(text string) time.Time {
 		format = "Jan 2, 2006 (UTC)"
 	}
 
-	if parsed, err := time.Parse(format, RemoveExtraSpaces(text)); nil == err {
+	if parsed, err := time.Parse(format, strings.TrimSpace(text)); nil == err {
 		return parsed
 	}
 

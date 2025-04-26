@@ -3,6 +3,7 @@ package scraper
 import (
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/gocolly/colly/v2"
 
@@ -44,7 +45,7 @@ func scrapeGuild(body *colly.HTMLElement, region, guildName string) {
 	})
 
 	body.ForEachWithBreak(".line_list:not(.mob_none) li:last-child .desc", func(_ int, e *colly.HTMLElement) bool {
-		text := utils.RemoveExtraSpaces(e.Text)
+		text := strings.TrimSpace(e.Text)
 		if text != "None" && text != "N/A" && text != "없음" {
 			guildProfile.Occupying = text
 		}
