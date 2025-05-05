@@ -3,11 +3,9 @@ package handlers
 import (
 	"encoding/json"
 	"net/http"
-	"time"
 
 	"bdo-rest-api/cache"
 	"bdo-rest-api/scraper"
-	"bdo-rest-api/utils"
 	"bdo-rest-api/validators"
 )
 
@@ -25,7 +23,6 @@ func getGuild(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if data, status, date, expires, ok := cache.GuildProfiles.GetRecord([]string{region, name}); ok {
-		w.Header().Set("Date", utils.FormatDateForHeaders(time.Now()))
 		w.Header().Set("Expires", expires)
 		w.Header().Set("Last-Modified", date)
 
