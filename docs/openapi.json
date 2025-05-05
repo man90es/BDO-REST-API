@@ -58,6 +58,36 @@
 				"responses": {
 					"200": {
 						"description": "OK.",
+						"headers": {
+							"Date": {
+								"description": "Date and time of when the request was processed.",
+								"schema": {
+									"type": "string",
+									"example": "Thu, 01 Jan 1970 00:00:00 GMT"
+								}
+							},
+							"X-Ratelimit-Limit": {
+								"description": "Maximum number of requests per minute per IP address.",
+								"schema": {
+									"type": "integer",
+									"example": 512
+								}
+							},
+							"X-Ratelimit-Remaining": {
+								"description": "Number of requests left for your IP address for the current minute.",
+								"schema": {
+									"type": "integer",
+									"example": 256
+								}
+							},
+							"X-Ratelimit-Reset": {
+								"description": "Timestamp of the next minute, when rate limit resets.",
+								"schema": {
+									"type": "integer",
+									"example": 1746433664
+								}
+							}
+						},
 						"content": {
 							"application/json": {
 								"schema": {
@@ -181,6 +211,50 @@
 				"responses": {
 					"200": {
 						"description": "OK.",
+						"headers": {
+							"Date": {
+								"description": "Date and time of when the request was processed.",
+								"schema": {
+									"type": "string",
+									"example": "Thu, 01 Jan 1970 00:00:00 GMT"
+								}
+							},
+							"Expires": {
+								"description": "Date and time of when cache for this response will expire, and the scraper will be ready to refetch the data with the next request.",
+								"schema": {
+									"type": "string",
+									"example": "Thu, 01 Jan 1970 03:00:00 GMT"
+								}
+							},
+							"Last-Modified": {
+								"description": "Date and time when the scraper fetched the data.",
+								"schema": {
+									"type": "string",
+									"example": "Thu, 01 Jan 1970 00:00:00 GMT"
+								}
+							},
+							"X-Ratelimit-Limit": {
+								"description": "Maximum number of requests per minute per IP address.",
+								"schema": {
+									"type": "integer",
+									"example": 512
+								}
+							},
+							"X-Ratelimit-Remaining": {
+								"description": "Number of requests left for your IP address for the current minute.",
+								"schema": {
+									"type": "integer",
+									"example": 256
+								}
+							},
+							"X-Ratelimit-Reset": {
+								"description": "Timestamp of the next minute, when rate limit resets.",
+								"schema": {
+									"type": "integer",
+									"example": 1746433664
+								}
+							}
+						},
 						"content": {
 							"application/json": {
 								"schema": {
@@ -523,6 +597,50 @@
 				"responses": {
 					"200": {
 						"description": "OK.",
+						"headers": {
+							"Date": {
+								"description": "Date and time of when the request was processed.",
+								"schema": {
+									"type": "string",
+									"example": "Thu, 01 Jan 1970 00:00:00 GMT"
+								}
+							},
+							"Expires": {
+								"description": "Date and time of when cache for this response will expire, and the scraper will be ready to refetch the data with the next request.",
+								"schema": {
+									"type": "string",
+									"example": "Thu, 01 Jan 1970 03:00:00 GMT"
+								}
+							},
+							"Last-Modified": {
+								"description": "Date and time when the scraper fetched the data.",
+								"schema": {
+									"type": "string",
+									"example": "Thu, 01 Jan 1970 00:00:00 GMT"
+								}
+							},
+							"X-Ratelimit-Limit": {
+								"description": "Maximum number of requests per minute per IP address.",
+								"schema": {
+									"type": "integer",
+									"example": 512
+								}
+							},
+							"X-Ratelimit-Remaining": {
+								"description": "Number of requests left for your IP address for the current minute.",
+								"schema": {
+									"type": "integer",
+									"example": 256
+								}
+							},
+							"X-Ratelimit-Reset": {
+								"description": "Timestamp of the next minute, when rate limit resets.",
+								"schema": {
+									"type": "integer",
+									"example": 1746433664
+								}
+							}
+						},
 						"content": {
 							"application/json": {
 								"schema": {
@@ -639,6 +757,50 @@
 				"responses": {
 					"200": {
 						"description": "OK.",
+						"headers": {
+							"Date": {
+								"description": "Date and time of when the request was processed.",
+								"schema": {
+									"type": "string",
+									"example": "Thu, 01 Jan 1970 00:00:00 GMT"
+								}
+							},
+							"Expires": {
+								"description": "Date and time of when cache for this response will expire, and the scraper will be ready to refetch the data with the next request.",
+								"schema": {
+									"type": "string",
+									"example": "Thu, 01 Jan 1970 03:00:00 GMT"
+								}
+							},
+							"Last-Modified": {
+								"description": "Date and time when the scraper fetched the data.",
+								"schema": {
+									"type": "string",
+									"example": "Thu, 01 Jan 1970 00:00:00 GMT"
+								}
+							},
+							"X-Ratelimit-Limit": {
+								"description": "Maximum number of requests per minute per IP address.",
+								"schema": {
+									"type": "integer",
+									"example": 512
+								}
+							},
+							"X-Ratelimit-Remaining": {
+								"description": "Number of requests left for your IP address for the current minute.",
+								"schema": {
+									"type": "integer",
+									"example": 256
+								}
+							},
+							"X-Ratelimit-Reset": {
+								"description": "Timestamp of the next minute, when rate limit resets.",
+								"schema": {
+									"type": "integer",
+									"example": 1746433664
+								}
+							}
+						},
 						"content": {
 							"application/json": {
 								"schema": {
@@ -747,6 +909,50 @@
 				"responses": {
 					"200": {
 						"description": "OK.",
+						"headers": {
+							"Date": {
+								"description": "Date and time of when the request was processed.",
+								"schema": {
+									"type": "string",
+									"example": "Thu, 01 Jan 1970 00:00:00 GMT"
+								}
+							},
+							"Expires": {
+								"description": "Date and time of when cache for this response will expire, and the scraper will be ready to refetch the data with the next request.",
+								"schema": {
+									"type": "string",
+									"example": "Thu, 01 Jan 1970 03:00:00 GMT"
+								}
+							},
+							"Last-Modified": {
+								"description": "Date and time when the scraper fetched the data.",
+								"schema": {
+									"type": "string",
+									"example": "Thu, 01 Jan 1970 00:00:00 GMT"
+								}
+							},
+							"X-Ratelimit-Limit": {
+								"description": "Maximum number of requests per minute per IP address.",
+								"schema": {
+									"type": "integer",
+									"example": 512
+								}
+							},
+							"X-Ratelimit-Remaining": {
+								"description": "Number of requests left for your IP address for the current minute.",
+								"schema": {
+									"type": "integer",
+									"example": 256
+								}
+							},
+							"X-Ratelimit-Reset": {
+								"description": "Timestamp of the next minute, when rate limit resets.",
+								"schema": {
+									"type": "integer",
+									"example": 1746433664
+								}
+							}
+						},
 						"content": {
 							"application/json": {
 								"schema": {
@@ -823,6 +1029,36 @@
 				"responses": {
 					"200": {
 						"description": "OK.",
+						"headers": {
+							"Date": {
+								"description": "Date and time of when the request was processed.",
+								"schema": {
+									"type": "string",
+									"example": "Thu, 01 Jan 1970 00:00:00 GMT"
+								}
+							},
+							"X-Ratelimit-Limit": {
+								"description": "Maximum number of requests per minute per IP address.",
+								"schema": {
+									"type": "integer",
+									"example": 512
+								}
+							},
+							"X-Ratelimit-Remaining": {
+								"description": "Number of requests left for your IP address for the current minute.",
+								"schema": {
+									"type": "integer",
+									"example": 256
+								}
+							},
+							"X-Ratelimit-Reset": {
+								"description": "Timestamp of the next minute, when rate limit resets.",
+								"schema": {
+									"type": "integer",
+									"example": 1746433664
+								}
+							}
+						},
 						"content": {
 							"application/json": {
 								"schema": {

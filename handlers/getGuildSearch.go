@@ -23,8 +23,8 @@ func getGuildSearch(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if data, status, date, expires, ok := cache.GuildSearch.GetRecord([]string{region, name}); ok {
-		w.Header().Set("Date", date)
 		w.Header().Set("Expires", expires)
+		w.Header().Set("Last-Modified", date)
 
 		if status == http.StatusOK {
 			json.NewEncoder(w).Encode(data)

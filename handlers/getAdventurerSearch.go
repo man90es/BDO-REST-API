@@ -26,8 +26,8 @@ func getAdventurerSearch(w http.ResponseWriter, r *http.Request) {
 	searchType := validators.ValidateSearchTypeQueryParam(searchTypeQueryParam)
 
 	if data, status, date, expires, ok := cache.ProfileSearch.GetRecord([]string{region, query, searchType}); ok {
-		w.Header().Set("Date", date)
 		w.Header().Set("Expires", expires)
+		w.Header().Set("Last-Modified", date)
 
 		if status == http.StatusOK {
 			json.NewEncoder(w).Encode(data)
