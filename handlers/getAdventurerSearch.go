@@ -16,14 +16,14 @@ func getAdventurerSearch(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	query, queryOk, queryValidationMessage := validators.ValidateAdventurerNameQueryParam(r.URL.Query()["query"], region)
+	searchTypeQueryParam := r.URL.Query()["searchType"]
+	searchType := validators.ValidateSearchTypeQueryParam(searchTypeQueryParam)
+
+	query, queryOk, queryValidationMessage := validators.ValidateAdventurerNameQueryParam(r.URL.Query()["query"], region, searchType)
 	if !queryOk {
 		giveBadRequestResponse(w, queryValidationMessage)
 		return
 	}
-
-	searchTypeQueryParam := r.URL.Query()["searchType"]
-	searchType := validators.ValidateSearchTypeQueryParam(searchTypeQueryParam)
 
 	if data, status, date, expires, ok := cache.ProfileSearch.GetRecord([]string{region, query, searchType}); ok {
 		w.Header().Set("Expires", expires)

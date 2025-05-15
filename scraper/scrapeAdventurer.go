@@ -3,6 +3,7 @@ package scraper
 import (
 	"fmt"
 	"net/http"
+	"regexp"
 	"strconv"
 	"strings"
 
@@ -102,14 +103,14 @@ func scrapeAdventurer(body *colly.HTMLElement, region, profileTarget string) {
 			return false
 		}
 
-		fields := strings.Split(e.Text, "Lv")
-		wordLevel := fields[0]
+		fields := regexp.MustCompile(`(\D+)([0-9]+)`).FindStringSubmatch(e.Text)
+		wordLevel := strings.Replace(strings.Replace(fields[1], "Lv. ", "", 1), "Nv. ", "", 1)
 
 		if region != "EU" && region != "NA" {
 			translators.TranslateSpecLevel(&wordLevel)
 		}
 
-		value := wordLevel + fields[1]
+		value := wordLevel + " " + fields[2]
 
 		switch i {
 		case 0:
