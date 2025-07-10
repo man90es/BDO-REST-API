@@ -20,8 +20,14 @@ import (
 )
 
 var taskQueue *TaskQueue
+var scraperInitialised = false
 
-func init() {
+func InitScraper() {
+	if scraperInitialised {
+		return
+	}
+	scraperInitialised = true
+
 	scraper := colly.NewCollector()
 	extensions.RandomUserAgent(scraper)
 	scraper.AllowURLRevisit = true
@@ -32,7 +38,8 @@ func init() {
 		RandomDelay: 5 * time.Second,
 	})
 
-	if p, err := proxy.RoundRobinProxySwitcher(viper.GetStringSlice("proxy")...); err == nil {
+	proxies := viper.GetStringSlice("proxy")
+	if p, err := proxy.RoundRobinProxySwitcher(proxies...); err == nil {
 		scraper.SetProxyFunc(p)
 	}
 
