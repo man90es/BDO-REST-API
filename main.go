@@ -9,6 +9,7 @@ import (
 
 	"bdo-rest-api/handlers"
 	"bdo-rest-api/logger"
+	"bdo-rest-api/scraper"
 
 	"github.com/spf13/viper"
 )
@@ -54,5 +55,6 @@ func main() {
 	viper.Set("verbose", *flagVerbose)
 
 	logger.InitLogger()
+	scraper.InitScraper()
 	handlers.ListenAndServe()
 }
