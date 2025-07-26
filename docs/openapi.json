@@ -6,7 +6,7 @@
 	},
 	"servers": [
 		{
-			"url": "https://bdo.hemlo.cc/communityapi"
+			"url": "https://community-api.cutepap.us"
 		},
 		{
 			"url": "http://localhost:8001"
