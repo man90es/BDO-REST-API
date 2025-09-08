@@ -2,7 +2,7 @@
 Scraper for Black Desert Online community data with a built-in API server. It currently supports EU, NA, SA and KR regions. Support for other regions might be added in the future.
 
 ## Projects using this API
-- ~~BDO Leaderboards ([Website](https://bdo.hemlo.cc/leaderboards), [sources](https://github.com/man90es/BDO-Leaderboards)): web-based leaderboards for Black Desert Online.~~
+- ~~BDO Leaderboards ([Sources](https://github.com/man90es/BDO-Leaderboards)): web-based leaderboards for Black Desert Online.~~
 - Ikusa ([Website](https://ikusa.site), [sources](https://github.com/sch-28/ikusa_api)): powerful tool that allows you to analyze your game logs and gain valuable insights into your combat performance.
 - GuildYapper ([Discord server](https://discord.gg/x2nKYuu2Z2)): Discord bot with various features for BDO guilds such as guild and player history logging, and automatic trial Discord management (more features TBA).
 - BDO Guild Bosses - Alliance [EU] ([Discord server](https://discord.gg/735bYrQWKr)): Discord bot for organising events in a guild bosses alliance.
@@ -21,6 +21,10 @@ API documentation can be viewed [here](https://man90es.github.io/BDO-REST-API/).
 If you host the API yourself, either via Docker or natively, you can control some of its features by executing it with flags.
 
 Available flags:
+- `-admintoken`
+	- Specifies an admin token that gives access to certain endpoints
+	- Type: string
+	- Default value: none
 - `-cachettl`
 	- Specifies cache TTL in minutes
 	- Type: unsigned integer
