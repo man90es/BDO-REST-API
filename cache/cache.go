@@ -14,9 +14,9 @@ import (
 )
 
 type CacheEntry[T any] struct {
-	Data   T
-	Date   time.Time
-	Status int
+	Data   T         `json:"data"`
+	Date   time.Time `json:"date"`
+	Status int       `json:"status"`
 }
 
 type cache[T any] struct {
@@ -70,6 +70,17 @@ func (c *cache[T]) GetItemCount() int {
 
 func (c *cache[T]) GetKeys() []string {
 	return maps.Keys(c.internalCache.Items())
+}
+
+func (c *cache[T]) GetValues() []CacheEntry[T] {
+	items := c.internalCache.Items()
+	result := make([]CacheEntry[T], 0, len(items))
+
+	for _, item := range items {
+		result = append(result, item.Object.(CacheEntry[T]))
+	}
+
+	return result
 }
 
 var GuildProfiles = newCache[models.GuildProfile]()

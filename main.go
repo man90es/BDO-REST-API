@@ -15,6 +15,7 @@ import (
 )
 
 func main() {
+	flagAdminToken := flag.String("admintoken", "", "Admin token to allow certain endpoints")
 	flagCacheTTL := flag.Uint("cachettl", 180, "Cache TTL in minutes")
 	flagMaintenanceTTL := flag.Uint("maintenancettl", 5, "Allows to limit how frequently scraper can check for maintenance end in minutes")
 	flagMongo := flag.String("mongo", "", "MongoDB connection string for loggig")
@@ -46,6 +47,7 @@ func main() {
 		viper.Set("proxy", strings.Fields(os.Getenv("PROXY")))
 	}
 
+	viper.Set("admintoken", *flagAdminToken)
 	viper.Set("cachettl", time.Duration(*flagCacheTTL)*time.Minute)
 	viper.Set("maintenancettl", time.Duration(*flagMaintenanceTTL)*time.Minute)
 	viper.Set("maxtasksperclient", int(*flagMaxTasksPerClient))
