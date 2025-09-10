@@ -707,6 +707,11 @@
 														}
 													}
 												}
+											},
+											"privacy": {
+												"description": "Player's privacy level. Can be either 0 for public or 15 for private.",
+												"nullable": true,
+												"type": "integer"
 											}
 										}
 									}
