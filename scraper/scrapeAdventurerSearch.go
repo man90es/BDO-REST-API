@@ -43,6 +43,8 @@ func scrapeAdventurerSearch(body *colly.HTMLElement, region, query, searchType s
 
 			if level, err := strconv.Atoi(e.ChildText(".level")[3:]); err == nil {
 				profile.Characters[0].Level = uint8(level)
+			} else {
+				profile.Privacy = 15
 			}
 		}
 
