@@ -82,7 +82,12 @@ func InitScraper() {
 		if imperva {
 			taskRetries, _ := strconv.Atoi(body.Request.Ctx.Get("taskRetries"))
 			logger.Error(fmt.Sprintf("Hit Imperva while loading %v, retries: %v", body.Request.URL.String(), taskRetries))
-			taskQueue.Pause(time.Duration(60-time.Now().Second()) * time.Second)
+			if proxyReloadWebhook := viper.GetString("proxyreloadwebhook"); proxyReloadWebhook != "" {
+				utils.SendDummyRequest(proxyReloadWebhook)
+				taskQueue.Pause(time.Second * 5)
+			} else {
+				taskQueue.Pause(time.Duration(60-time.Now().Second()) * time.Second)
+			}
 			taskQueue.ConfirmTaskCompletion(taskClient, taskHash)
 
 			if taskRetries < viper.GetInt("taskretries") {
