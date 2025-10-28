@@ -15,11 +15,12 @@ func TestValidateGuildNameQueryParam(t *testing.T) {
 		{input: []string{"MyGuild"}, expectedName: "myguild", expectedOk: true, expectedMessage: ""},
 		{input: []string{"고대신"}, expectedName: "고대신", expectedOk: true, expectedMessage: ""}, // Guild name with Korean characters
 
-		{input: []string{""}, expectedName: "", expectedOk: false, expectedMessage: "Guild name can't be shorter than 2 symbols"},
-		{input: []string{"A Guild With Spaces"}, expectedName: "a guild with spaces", expectedOk: false, expectedMessage: "Guild name contains a forbidden symbol at position 2: ' '"},
+		{input: []string{""}, expectedName: "", expectedOk: false, expectedMessage: "Guild name can't be shorter than 3 symbols"},
+		{input: []string{"With Spaces"}, expectedName: "with spaces", expectedOk: false, expectedMessage: "Guild name contains a forbidden symbol at position 5: ' '"},
 		{input: []string{"Some$"}, expectedName: "some$", expectedOk: false, expectedMessage: "Guild name contains a forbidden symbol at position 5: '$'"},
-		{input: []string{"x"}, expectedName: "x", expectedOk: false, expectedMessage: "Guild name can't be shorter than 2 symbols"},
+		{input: []string{"x"}, expectedName: "x", expectedOk: false, expectedMessage: "Guild name can't be shorter than 3 symbols"},
 		{input: []string{}, expectedName: "", expectedOk: false, expectedMessage: "Guild name is missing from request"},
+		{input: []string{"GuildNameThatIsWayTooLong"}, expectedName: "guildnamethatiswaytoolong", expectedOk: false, expectedMessage: "Guild name can't be longer than 16 symbols"},
 	}
 
 	for _, test := range tests {

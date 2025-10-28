@@ -16,8 +16,12 @@ func ValidateGuildNameQueryParam(query []string) (guildName string, ok bool, err
 
 	guildName = strings.ToLower(query[0])
 
-	if len(guildName) < 2 {
-		return guildName, false, "Guild name can't be shorter than 2 symbols"
+	if len(guildName) < 3 {
+		return guildName, false, "Guild name can't be shorter than 3 symbols"
+	}
+
+	if len(guildName) > 16 {
+		return guildName, false, "Guild name can't be longer than 16 symbols"
 	}
 
 	// Returns false for allowed characters
