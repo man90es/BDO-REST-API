@@ -139,13 +139,13 @@ func InitScraper() {
 	})
 }
 
-func createTask(clientIP, region, taskType string, query map[string]string) (tasksQuantityExceeded bool) {
+func createTask(clientIP, region, taskType string, query map[string]string) (taskAdded, tasksQuantityExceeded bool) {
 	crc32 := crc32.NewIEEE()
 	crc32.Write([]byte(strings.Join(append(slices.Sorted(maps.Values(query)), region, taskType), "")))
 	hashString := strconv.Itoa(int(crc32.Sum32()))
 
 	if taskQueue.CountQueuedTasksForClient(clientIP) >= viper.GetInt("maxtasksperclient") {
-		return true
+		return false, true
 	}
 
 	url := fmt.Sprintf(
@@ -170,17 +170,17 @@ func createTask(clientIP, region, taskType string, query map[string]string) (tas
 		"taskType":    taskType,
 	})
 
-	taskQueue.AddTask(clientIP, hashString, utils.BuildRequest(url, query))
-	return false
+	added := taskQueue.AddTask(clientIP, hashString, utils.BuildRequest(url, query))
+	return added, false
 }
 
-func EnqueueAdventurer(clientIP, region, profileTarget string) (tasksQuantityExceeded bool) {
+func EnqueueAdventurer(clientIP, region, profileTarget string) (taskAdded, tasksQuantityExceeded bool) {
 	return createTask(clientIP, region, "player", map[string]string{
 		"profileTarget": profileTarget,
 	})
 }
 
-func EnqueueAdventurerSearch(clientIP, region, query, searchType string) (tasksQuantityExceeded bool) {
+func EnqueueAdventurerSearch(clientIP, region, query, searchType string) (taskAdded, tasksQuantityExceeded bool) {
 	return createTask(clientIP, region, "playerSearch", map[string]string{
 		"Page":          "1",
 		"region":        region,
@@ -189,14 +189,14 @@ func EnqueueAdventurerSearch(clientIP, region, query, searchType string) (tasksQ
 	})
 }
 
-func EnqueueGuild(clientIP, region, name string) (tasksQuantityExceeded bool) {
+func EnqueueGuild(clientIP, region, name string) (taskAdded, tasksQuantityExceeded bool) {
 	return createTask(clientIP, region, "guild", map[string]string{
 		"guildName": name,
 		"region":    region,
 	})
 }
 
-func EnqueueGuildSearch(clientIP, region, query string) (tasksQuantityExceeded bool) {
+func EnqueueGuildSearch(clientIP, region, query string) (taskAdded, tasksQuantityExceeded bool) {
 	return createTask(clientIP, region, "guildSearch", map[string]string{
 		"page":       "1",
 		"region":     region,

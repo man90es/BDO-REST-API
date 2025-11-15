@@ -39,17 +39,20 @@ func getGuildSearch(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if tasksQuantityExceeded := scraper.EnqueueGuildSearch(r.Header.Get("CF-Connecting-IP"), region, name); tasksQuantityExceeded {
+	if taskAdded, tasksQuantityExceeded := scraper.EnqueueGuildSearch(r.Header.Get("CF-Connecting-IP"), region, name); tasksQuantityExceeded {
 		w.WriteHeader(http.StatusTooManyRequests)
 		json.NewEncoder(w).Encode(map[string]string{
 			"message": "You have exceeded the maximum number of concurrent tasks.",
+			"status":  "rejected",
 		})
-
-		return
+	} else {
+		w.WriteHeader(http.StatusAccepted)
+		json.NewEncoder(w).Encode(map[string]string{
+			"message": "Guild search is being fetched. Please try again later.",
+			"status": map[bool]string{
+				true:  "started",
+				false: "pending",
+			}[taskAdded],
+		})
 	}
-
-	w.WriteHeader(http.StatusAccepted)
-	json.NewEncoder(w).Encode(map[string]string{
-		"message": "Guild search is being fetched. Please try again later.",
-	})
 }

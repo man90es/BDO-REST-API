@@ -32,7 +32,7 @@ func NewTaskQueue(bufferSize int) *TaskQueue {
 	return queue
 }
 
-func (q *TaskQueue) AddTask(clientIP, hash, url string) {
+func (q *TaskQueue) AddTask(clientIP, hash, url string) (added bool) {
 	fullURL := utils.BuildRequest(url, map[string]string{
 		"taskClient": clientIP,
 		"taskHash":   hash,
@@ -41,7 +41,7 @@ func (q *TaskQueue) AddTask(clientIP, hash, url string) {
 	q.mutex.Lock()
 	if duplicate := slices.Contains(q.hashes, hash); duplicate {
 		q.mutex.Unlock()
-		return
+		return false
 	}
 	q.clientIPs[clientIP]++
 	q.hashes = append(q.hashes, hash)
@@ -52,6 +52,8 @@ func (q *TaskQueue) AddTask(clientIP, hash, url string) {
 		Hash:     hash,
 		URL:      fullURL,
 	}
+
+	return true
 }
 
 func (q *TaskQueue) run() {

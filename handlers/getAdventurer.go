@@ -39,17 +39,20 @@ func getAdventurer(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if tasksQuantityExceeded := scraper.EnqueueAdventurer(r.Header.Get("CF-Connecting-IP"), region, profileTarget); tasksQuantityExceeded {
+	if taskAdded, tasksQuantityExceeded := scraper.EnqueueAdventurer(r.Header.Get("CF-Connecting-IP"), region, profileTarget); tasksQuantityExceeded {
 		w.WriteHeader(http.StatusTooManyRequests)
 		json.NewEncoder(w).Encode(map[string]string{
 			"message": "You have exceeded the maximum number of concurrent tasks.",
+			"status":  "rejected",
 		})
-
-		return
+	} else {
+		w.WriteHeader(http.StatusAccepted)
+		json.NewEncoder(w).Encode(map[string]string{
+			"message": "Player profile is being fetched. Please try again later.",
+			"status": map[bool]string{
+				true:  "started",
+				false: "pending",
+			}[taskAdded],
+		})
 	}
-
-	w.WriteHeader(http.StatusAccepted)
-	json.NewEncoder(w).Encode(map[string]string{
-		"message": "Player profile is being fetched. Please try again later.",
-	})
 }
