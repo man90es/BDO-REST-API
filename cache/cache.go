@@ -67,7 +67,7 @@ func (c *cache[T]) GetRecord(keys []string) (data T, status int, date string, ex
 
 	entry := anyEntry.(CacheEntry[T])
 
-	return entry.Data, entry.Status, utils.FormatDateForHeaders(entry.Date), utils.FormatDateForHeaders(entry.Date.Add(cacheTTL)), found
+	return entry.Data, entry.Status, utils.FormatDateForHeaders(entry.Date), utils.FormatDateForHeaders(entry.Date.Add(cacheTTL)), true
 }
 
 func (c *cache[T]) GetItemCount() int {
@@ -129,9 +129,7 @@ func (c *redisCache[T]) GetRecord(keys []string) (data T, status int, date strin
 		return
 	}
 
-	return entry.Data, entry.Status,
-		utils.FormatDateForHeaders(entry.Date),
-		utils.FormatDateForHeaders(entry.Date.Add(cacheTTL)), true
+	return entry.Data, entry.Status, utils.FormatDateForHeaders(entry.Date), utils.FormatDateForHeaders(entry.Date.Add(cacheTTL)), true
 }
 
 func (c *redisCache[T]) GetItemCount() int {
