@@ -7,16 +7,18 @@ import (
 
 var redisClient *redis.Client
 
-func initRedisClient(addr string) {
-	redisClient = redis.NewClient(&redis.Options{
-		Addr:     addr,
-		DB:       0,
-		Password: "",
+func initRedisClient(url string) {
+	opts, err := redis.ParseURL(url)
 
-		// Explicitly disable maintenance notifications
-		// This prevents the client from sending CLIENT MAINT_NOTIFICATIONS ON
-		MaintNotificationsConfig: &maintnotifications.Config{
-			Mode: maintnotifications.ModeDisabled,
-		},
-	})
+	if err != nil {
+		panic(err)
+	}
+
+	// Explicitly disable maintenance notifications
+	// This prevents the client from sending CLIENT MAINT_NOTIFICATIONS ON
+	opts.MaintNotificationsConfig = &maintnotifications.Config{
+		Mode: maintnotifications.ModeDisabled,
+	}
+
+	redisClient = redis.NewClient(opts)
 }
