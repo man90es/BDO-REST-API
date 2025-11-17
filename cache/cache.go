@@ -44,7 +44,7 @@ func newMemoryCache[T any]() *cache[T] {
 	}
 }
 
-func (c *cache[T]) AddRecord(keys []string, data T, status int, taskId string) (date string, expires string) {
+func (c *cache[T]) AddRecord(keys []string, data T, status int, taskId string) (date, expires string) {
 	cacheTTL := viper.GetDuration("cachettl")
 	entry := CacheEntry[T]{
 		Data:   data,
@@ -57,9 +57,8 @@ func (c *cache[T]) AddRecord(keys []string, data T, status int, taskId string) (
 	return utils.FormatDateForHeaders(entry.Date), utils.FormatDateForHeaders(entry.Date.Add(cacheTTL))
 }
 
-func (c *cache[T]) GetRecord(keys []string) (data T, status int, date string, expires string, found bool) {
-	cacheTTL := viper.GetDuration("cachettl")
-	anyEntry, found := c.internalCache.Get(joinKeys(keys))
+func (c *cache[T]) GetRecord(keys []string) (data T, status int, date, expires string, found bool) {
+	anyEntry, exp, found := c.internalCache.GetWithExpiration(joinKeys(keys))
 
 	if !found {
 		return
@@ -67,7 +66,7 @@ func (c *cache[T]) GetRecord(keys []string) (data T, status int, date string, ex
 
 	entry := anyEntry.(CacheEntry[T])
 
-	return entry.Data, entry.Status, utils.FormatDateForHeaders(entry.Date), utils.FormatDateForHeaders(entry.Date.Add(cacheTTL)), true
+	return entry.Data, entry.Status, utils.FormatDateForHeaders(entry.Date), utils.FormatDateForHeaders(exp), true
 }
 
 func (c *cache[T]) GetItemCount() int {
@@ -101,7 +100,7 @@ func newRedisCache[T any](namespace string) *redisCache[T] {
 	}
 }
 
-func (c *redisCache[T]) AddRecord(keys []string, data T, status int, taskId string) (string, string) {
+func (c *redisCache[T]) AddRecord(keys []string, data T, status int, taskId string) (date, expires string) {
 	cacheTTL := viper.GetDuration("cachettl")
 
 	entry := CacheEntry[T]{
@@ -117,8 +116,6 @@ func (c *redisCache[T]) AddRecord(keys []string, data T, status int, taskId stri
 }
 
 func (c *redisCache[T]) GetRecord(keys []string) (data T, status int, date string, expires string, found bool) {
-	cacheTTL := viper.GetDuration("cachettl")
-
 	val, err := redisClient.Get(c.ctx, c.namespace+joinKeys(keys)).Bytes()
 	if err != nil {
 		return
@@ -129,7 +126,9 @@ func (c *redisCache[T]) GetRecord(keys []string) (data T, status int, date strin
 		return
 	}
 
-	return entry.Data, entry.Status, utils.FormatDateForHeaders(entry.Date), utils.FormatDateForHeaders(entry.Date.Add(cacheTTL)), true
+	ttl := redisClient.TTL(c.ctx, c.namespace+joinKeys(keys)).Val()
+
+	return entry.Data, entry.Status, utils.FormatDateForHeaders(entry.Date), utils.FormatDateForHeaders(time.Now().Add(ttl)), true
 }
 
 func (c *redisCache[T]) GetItemCount() int {
