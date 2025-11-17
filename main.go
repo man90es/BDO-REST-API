@@ -7,6 +7,7 @@ import (
 	"strings"
 	"time"
 
+	"bdo-rest-api/cache"
 	"bdo-rest-api/handlers"
 	"bdo-rest-api/logger"
 	"bdo-rest-api/scraper"
@@ -24,6 +25,7 @@ func main() {
 	flagProxy := flag.String("proxy", "", "Open proxy address to make requests to BDO servers")
 	flagProxyReloadWebhook := flag.String("proxyreloadwebhook", "", "Webhook address to request proxy reload")
 	flagRateLimit := flag.Uint64("ratelimit", 512, "Maximum number of requests per minute per IP")
+	flagRedis := flag.String("redis", "", "Redis connection string")
 	flagTaskRetries := flag.Uint("taskretries", 3, "Number of retries for a scraping task")
 	flagVerbose := flag.Bool("verbose", false, "Print out additional logs into stdout")
 	flag.Parse()
@@ -55,9 +57,11 @@ func main() {
 	viper.Set("mongo", *flagMongo)
 	viper.Set("proxyreloadwebhook", *flagProxyReloadWebhook)
 	viper.Set("ratelimit", int64(*flagRateLimit))
+	viper.Set("redis", *flagRedis)
 	viper.Set("taskretries", int(*flagTaskRetries))
 	viper.Set("verbose", *flagVerbose)
 
+	cache.InitCache()
 	logger.InitLogger()
 	scraper.InitScraper()
 	handlers.ListenAndServe()
