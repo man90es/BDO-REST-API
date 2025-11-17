@@ -8,7 +8,6 @@ import (
 
 	goCache "github.com/patrickmn/go-cache"
 	"github.com/spf13/viper"
-	messagebus "github.com/vardius/message-bus"
 	"golang.org/x/exp/maps"
 
 	"bdo-rest-api/models"
@@ -27,7 +26,6 @@ type Cache[T any] interface {
 	GetItemCount() int
 	GetKeys() []string
 	GetValues() []CacheEntry[T]
-	BusChannel() messagebus.MessageBus
 }
 
 func joinKeys(keys []string) string {
@@ -35,7 +33,6 @@ func joinKeys(keys []string) string {
 }
 
 type cache[T any] struct {
-	Bus           messagebus.MessageBus
 	internalCache *goCache.Cache
 }
 
@@ -43,7 +40,6 @@ func newMemoryCache[T any]() *cache[T] {
 	cacheTTL := viper.GetDuration("cachettl")
 
 	return &cache[T]{
-		Bus:           messagebus.New(1000),
 		internalCache: goCache.New(cacheTTL, min(time.Hour, cacheTTL)),
 	}
 }
@@ -57,7 +53,6 @@ func (c *cache[T]) AddRecord(keys []string, data T, status int, taskId string) (
 	}
 
 	c.internalCache.Add(joinKeys(keys), entry, cacheTTL)
-	c.Bus.Publish(taskId, entry)
 
 	return utils.FormatDateForHeaders(entry.Date), utils.FormatDateForHeaders(entry.Date.Add(cacheTTL))
 }
@@ -94,17 +89,13 @@ func (c *cache[T]) GetValues() []CacheEntry[T] {
 	return result
 }
 
-func (c *cache[T]) BusChannel() messagebus.MessageBus { return c.Bus }
-
 type redisCache[T any] struct {
-	Bus       messagebus.MessageBus
 	ctx       context.Context
 	namespace string
 }
 
 func newRedisCache[T any](namespace string) *redisCache[T] {
 	return &redisCache[T]{
-		Bus:       messagebus.New(1000),
 		ctx:       context.Background(),
 		namespace: namespace + ":",
 	}
@@ -121,8 +112,6 @@ func (c *redisCache[T]) AddRecord(keys []string, data T, status int, taskId stri
 
 	b, _ := json.Marshal(entry)
 	redisClient.Set(c.ctx, c.namespace+joinKeys(keys), b, cacheTTL)
-
-	c.Bus.Publish(taskId, entry)
 
 	return utils.FormatDateForHeaders(entry.Date), utils.FormatDateForHeaders(entry.Date.Add(cacheTTL))
 }
@@ -183,8 +172,6 @@ func (c *redisCache[T]) GetValues() []CacheEntry[T] {
 
 	return result
 }
-
-func (c *redisCache[T]) BusChannel() messagebus.MessageBus { return c.Bus }
 
 var GuildProfiles Cache[models.GuildProfile]
 var GuildSearch Cache[[]models.GuildProfile]
