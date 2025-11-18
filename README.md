@@ -58,6 +58,10 @@ Available flags:
 - `-verbose`
 	- Allows to put the app into verbose mode and print out additional logs to stdout
 	- Default value: none, no additional output is produced
+- `-redis`
+	- Specifies Redis server's address
+	- Type: string
+	- Default value: none
 
 You can use them like this:
 ```bash
