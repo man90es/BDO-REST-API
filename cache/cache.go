@@ -33,32 +33,33 @@ func joinKeys(keys []string) string {
 	return strings.Join(keys, ",")
 }
 
-type cache[T any] struct {
+type memoryCache[T any] struct {
 	internalCache *goCache.Cache
+	ttl           time.Duration
 }
 
-func newMemoryCache[T any]() *cache[T] {
-	cacheTTL := viper.GetDuration("cachettl")
+func newMemoryCache[T any]() *memoryCache[T] {
+	ttl := viper.GetDuration("cachettl")
 
-	return &cache[T]{
-		internalCache: goCache.New(cacheTTL, min(time.Hour, cacheTTL)),
+	return &memoryCache[T]{
+		internalCache: goCache.New(ttl, min(time.Hour, ttl)),
+		ttl:           ttl,
 	}
 }
 
-func (c *cache[T]) AddRecord(keys []string, data T, status int, taskId string) (date, expires string) {
-	cacheTTL := viper.GetDuration("cachettl")
+func (c *memoryCache[T]) AddRecord(keys []string, data T, status int, taskId string) (date, expires string) {
 	entry := CacheEntry[T]{
 		Data:   data,
 		Date:   time.Now(),
 		Status: status,
 	}
 
-	c.internalCache.Add(joinKeys(keys), entry, cacheTTL)
+	c.internalCache.Add(joinKeys(keys), entry, c.ttl)
 
-	return utils.FormatDateForHeaders(entry.Date), utils.FormatDateForHeaders(entry.Date.Add(cacheTTL))
+	return utils.FormatDateForHeaders(entry.Date), utils.FormatDateForHeaders(entry.Date.Add(c.ttl))
 }
 
-func (c *cache[T]) GetRecord(keys []string) (data T, status int, date, expires string, found bool) {
+func (c *memoryCache[T]) GetRecord(keys []string) (data T, status int, date, expires string, found bool) {
 	anyEntry, exp, found := c.internalCache.GetWithExpiration(joinKeys(keys))
 
 	if !found {
@@ -70,15 +71,15 @@ func (c *cache[T]) GetRecord(keys []string) (data T, status int, date, expires s
 	return entry.Data, entry.Status, utils.FormatDateForHeaders(entry.Date), utils.FormatDateForHeaders(exp), true
 }
 
-func (c *cache[T]) GetItemCount() int {
+func (c *memoryCache[T]) GetItemCount() int {
 	return c.internalCache.ItemCount()
 }
 
-func (c *cache[T]) GetKeys() []string {
+func (c *memoryCache[T]) GetKeys() []string {
 	return maps.Keys(c.internalCache.Items())
 }
 
-func (c *cache[T]) GetValues() []CacheEntry[T] {
+func (c *memoryCache[T]) GetValues() []CacheEntry[T] {
 	items := c.internalCache.Items()
 	result := make([]CacheEntry[T], 0, len(items))
 
@@ -93,6 +94,7 @@ type redisCache[T any] struct {
 	client    *redis.Client
 	ctx       context.Context
 	namespace string
+	ttl       time.Duration
 }
 
 func newRedisCache[T any](client *redis.Client, namespace string) *redisCache[T] {
@@ -100,12 +102,11 @@ func newRedisCache[T any](client *redis.Client, namespace string) *redisCache[T]
 		client:    client,
 		ctx:       context.Background(),
 		namespace: namespace + ":",
+		ttl:       viper.GetDuration("cachettl"),
 	}
 }
 
 func (c *redisCache[T]) AddRecord(keys []string, data T, status int, taskId string) (date, expires string) {
-	cacheTTL := viper.GetDuration("cachettl")
-
 	entry := CacheEntry[T]{
 		Data:   data,
 		Date:   time.Now(),
@@ -113,9 +114,9 @@ func (c *redisCache[T]) AddRecord(keys []string, data T, status int, taskId stri
 	}
 
 	b, _ := json.Marshal(entry)
-	c.client.Set(c.ctx, c.namespace+joinKeys(keys), b, cacheTTL)
+	c.client.Set(c.ctx, c.namespace+joinKeys(keys), b, c.ttl)
 
-	return utils.FormatDateForHeaders(entry.Date), utils.FormatDateForHeaders(entry.Date.Add(cacheTTL))
+	return utils.FormatDateForHeaders(entry.Date), utils.FormatDateForHeaders(entry.Date.Add(c.ttl))
 }
 
 func (c *redisCache[T]) GetRecord(keys []string) (data T, status int, date string, expires string, found bool) {
@@ -173,10 +174,12 @@ func (c *redisCache[T]) GetValues() []CacheEntry[T] {
 	return result
 }
 
-var GuildProfiles Cache[models.GuildProfile]
-var GuildSearch Cache[[]models.GuildProfile]
-var Profiles Cache[models.Profile]
-var ProfileSearch Cache[[]models.Profile]
+var (
+	GuildProfiles Cache[models.GuildProfile]
+	GuildSearch   Cache[[]models.GuildProfile]
+	Profiles      Cache[models.Profile]
+	ProfileSearch Cache[[]models.Profile]
+)
 
 func InitCache() {
 	if redisClient, err := newRedisClient(viper.GetString("redis")); err == nil {
