@@ -5,13 +5,11 @@ import (
 	"github.com/redis/go-redis/v9/maintnotifications"
 )
 
-var redisClient *redis.Client
-
-func initRedisClient(url string) {
+func newRedisClient(url string) (*redis.Client, error) {
 	opts, err := redis.ParseURL(url)
 
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 
 	// Explicitly disable maintenance notifications
@@ -20,5 +18,5 @@ func initRedisClient(url string) {
 		Mode: maintnotifications.ModeDisabled,
 	}
 
-	redisClient = redis.NewClient(opts)
+	return redis.NewClient(opts), nil
 }

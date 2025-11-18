@@ -7,6 +7,7 @@ import (
 	"time"
 
 	goCache "github.com/patrickmn/go-cache"
+	"github.com/redis/go-redis/v9"
 	"github.com/spf13/viper"
 	"golang.org/x/exp/maps"
 
@@ -89,12 +90,14 @@ func (c *cache[T]) GetValues() []CacheEntry[T] {
 }
 
 type redisCache[T any] struct {
+	client    *redis.Client
 	ctx       context.Context
 	namespace string
 }
 
-func newRedisCache[T any](namespace string) *redisCache[T] {
+func newRedisCache[T any](client *redis.Client, namespace string) *redisCache[T] {
 	return &redisCache[T]{
+		client:    client,
 		ctx:       context.Background(),
 		namespace: namespace + ":",
 	}
@@ -110,13 +113,13 @@ func (c *redisCache[T]) AddRecord(keys []string, data T, status int, taskId stri
 	}
 
 	b, _ := json.Marshal(entry)
-	redisClient.Set(c.ctx, c.namespace+joinKeys(keys), b, cacheTTL)
+	c.client.Set(c.ctx, c.namespace+joinKeys(keys), b, cacheTTL)
 
 	return utils.FormatDateForHeaders(entry.Date), utils.FormatDateForHeaders(entry.Date.Add(cacheTTL))
 }
 
 func (c *redisCache[T]) GetRecord(keys []string) (data T, status int, date string, expires string, found bool) {
-	val, err := redisClient.Get(c.ctx, c.namespace+joinKeys(keys)).Bytes()
+	val, err := c.client.Get(c.ctx, c.namespace+joinKeys(keys)).Bytes()
 	if err != nil {
 		return
 	}
@@ -126,13 +129,13 @@ func (c *redisCache[T]) GetRecord(keys []string) (data T, status int, date strin
 		return
 	}
 
-	ttl := redisClient.TTL(c.ctx, c.namespace+joinKeys(keys)).Val()
+	ttl := c.client.TTL(c.ctx, c.namespace+joinKeys(keys)).Val()
 
 	return entry.Data, entry.Status, utils.FormatDateForHeaders(entry.Date), utils.FormatDateForHeaders(time.Now().Add(ttl)), true
 }
 
 func (c *redisCache[T]) GetItemCount() int {
-	keys, err := redisClient.Keys(c.ctx, c.namespace+"*").Result()
+	keys, err := c.client.Keys(c.ctx, c.namespace+"*").Result()
 	if err != nil {
 		return 0
 	}
@@ -140,7 +143,7 @@ func (c *redisCache[T]) GetItemCount() int {
 }
 
 func (c *redisCache[T]) GetKeys() []string {
-	keys, _ := redisClient.Keys(c.ctx, c.namespace+"*").Result()
+	keys, _ := c.client.Keys(c.ctx, c.namespace+"*").Result()
 
 	// Remove namespace from keys
 	for i, k := range keys {
@@ -151,11 +154,11 @@ func (c *redisCache[T]) GetKeys() []string {
 }
 
 func (c *redisCache[T]) GetValues() []CacheEntry[T] {
-	keys, _ := redisClient.Keys(c.ctx, c.namespace+"*").Result()
+	keys, _ := c.client.Keys(c.ctx, c.namespace+"*").Result()
 	result := make([]CacheEntry[T], 0, len(keys))
 
 	for _, k := range keys {
-		val, err := redisClient.Get(c.ctx, k).Bytes()
+		val, err := c.client.Get(c.ctx, k).Bytes()
 		if err != nil {
 			continue
 		}
@@ -176,13 +179,11 @@ var Profiles Cache[models.Profile]
 var ProfileSearch Cache[[]models.Profile]
 
 func InitCache() {
-	if redisURI := viper.GetString("redis"); redisURI != "" {
-		initRedisClient(redisURI)
-
-		GuildProfiles = newRedisCache[models.GuildProfile]("gpc")
-		GuildSearch = newRedisCache[[]models.GuildProfile]("gsc")
-		Profiles = newRedisCache[models.Profile]("pc")
-		ProfileSearch = newRedisCache[[]models.Profile]("psc")
+	if redisClient, err := newRedisClient(viper.GetString("redis")); err == nil {
+		GuildProfiles = newRedisCache[models.GuildProfile](redisClient, "gpc")
+		GuildSearch = newRedisCache[[]models.GuildProfile](redisClient, "gsc")
+		Profiles = newRedisCache[models.Profile](redisClient, "pc")
+		ProfileSearch = newRedisCache[[]models.Profile](redisClient, "psc")
 	} else {
 		GuildProfiles = newMemoryCache[models.GuildProfile]()
 		GuildSearch = newMemoryCache[[]models.GuildProfile]()
