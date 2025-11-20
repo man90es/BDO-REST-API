@@ -1,21 +1,17 @@
 package handlers
 
 import (
-	"bdo-rest-api/cache"
 	"encoding/json"
 	"net/http"
 
-	"github.com/spf13/viper"
+	"bdo-rest-api/cache"
+	"bdo-rest-api/utils"
 )
 
 func getCache(w http.ResponseWriter, r *http.Request) {
-	if token := viper.GetString("admintoken"); len(token) > 0 {
-		providedToken := r.Header.Get("Authorization")
-
-		if providedToken != "Bearer "+token {
-			w.WriteHeader(http.StatusUnauthorized)
-			return
-		}
+	if !utils.CheckAdminToken(r) {
+		w.WriteHeader(http.StatusUnauthorized)
+		return
 	}
 
 	cacheType := r.PathValue("cacheType")
