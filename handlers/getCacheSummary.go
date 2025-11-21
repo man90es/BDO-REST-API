@@ -1,13 +1,14 @@
 package handlers
 
 import (
-	"bdo-rest-api/cache"
 	"encoding/json"
 	"net/http"
 	"strings"
 
+	"bdo-rest-api/cache"
+	"bdo-rest-api/utils"
+
 	sf "github.com/sa-/slicefunk"
-	"github.com/spf13/viper"
 )
 
 func getParseCacheKey(cacheType string) func(string) map[string]interface{} {
@@ -44,13 +45,9 @@ func getParseCacheKey(cacheType string) func(string) map[string]interface{} {
 }
 
 func getCacheSummary(w http.ResponseWriter, r *http.Request) {
-	if token := viper.GetString("admintoken"); len(token) > 0 {
-		providedToken := r.Header.Get("Authorization")
-
-		if providedToken != "Bearer "+token {
-			w.WriteHeader(http.StatusUnauthorized)
-			return
-		}
+	if !utils.CheckAdminToken(r) {
+		w.WriteHeader(http.StatusUnauthorized)
+		return
 	}
 
 	json.NewEncoder(w).Encode(map[string]interface{}{

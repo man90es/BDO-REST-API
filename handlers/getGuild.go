@@ -6,6 +6,7 @@ import (
 
 	"bdo-rest-api/cache"
 	"bdo-rest-api/scraper"
+	"bdo-rest-api/utils"
 	"bdo-rest-api/validators"
 )
 
@@ -22,17 +23,20 @@ func getGuild(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if data, status, date, expires, ok := cache.GuildProfiles.GetRecord([]string{region, name}); ok {
-		w.Header().Set("Expires", expires)
-		w.Header().Set("Last-Modified", date)
+	bypassCache := validators.ValidateBypassCacheQueryParam(r.URL.Query()["bypassCache"])
+	if !bypassCache || !utils.CheckAdminToken(r) {
+		if data, status, date, expires, ok := cache.GuildProfiles.GetRecord([]string{region, name}); !bypassCache && ok {
+			w.Header().Set("Expires", expires)
+			w.Header().Set("Last-Modified", date)
 
-		if status == http.StatusOK {
-			json.NewEncoder(w).Encode(data)
-		} else {
-			w.WriteHeader(status)
+			if status == http.StatusOK {
+				json.NewEncoder(w).Encode(data)
+			} else {
+				w.WriteHeader(status)
+			}
+
+			return
 		}
-
-		return
 	}
 
 	if ok := giveMaintenanceResponse(w, region); ok {
