@@ -2,7 +2,6 @@ package scraper
 
 import (
 	"bdo-rest-api/utils"
-	"slices"
 	"sync"
 	"time"
 )
@@ -15,7 +14,8 @@ type Task struct {
 
 type TaskQueue struct {
 	clientIPs   map[string]int
-	hashes      []string
+	cond        *sync.Cond
+	hashSet     map[string]struct{}
 	mutex       sync.Mutex
 	paused      bool
 	processFunc func(Task)
@@ -25,9 +25,11 @@ type TaskQueue struct {
 func NewTaskQueue(bufferSize int) *TaskQueue {
 	queue := &TaskQueue{
 		clientIPs: make(map[string]int),
-		paused:    false,
+		hashSet:   make(map[string]struct{}),
 		tasks:     make(chan Task, bufferSize),
 	}
+	queue.cond = sync.NewCond(&queue.mutex)
+
 	go queue.run()
 	return queue
 }
@@ -39,12 +41,13 @@ func (q *TaskQueue) AddTask(clientIP, hash, url string) (added bool) {
 	})
 
 	q.mutex.Lock()
-	if duplicate := slices.Contains(q.hashes, hash); duplicate {
+	if _, exists := q.hashSet[hash]; exists {
 		q.mutex.Unlock()
 		return false
 	}
+
+	q.hashSet[hash] = struct{}{}
 	q.clientIPs[clientIP]++
-	q.hashes = append(q.hashes, hash)
 	q.mutex.Unlock()
 
 	q.tasks <- Task{
@@ -52,7 +55,6 @@ func (q *TaskQueue) AddTask(clientIP, hash, url string) (added bool) {
 		Hash:     hash,
 		URL:      fullURL,
 	}
-
 	return true
 }
 
@@ -60,14 +62,14 @@ func (q *TaskQueue) run() {
 	for task := range q.tasks {
 		q.mutex.Lock()
 		for q.paused {
-			q.mutex.Unlock()
-			// FIXME: This is probably inefficient af
-			time.Sleep(time.Second)
-			q.mutex.Lock()
+			q.cond.Wait()
 		}
+		process := q.processFunc
 		q.mutex.Unlock()
 
-		q.processFunc(task)
+		if process != nil {
+			process(task)
+		}
 	}
 }
 
@@ -87,6 +89,8 @@ func (q *TaskQueue) Pause(t time.Duration) {
 	q.mutex.Lock()
 	q.paused = false
 	q.mutex.Unlock()
+
+	q.cond.Broadcast()
 }
 
 func (q *TaskQueue) CountQueuedTasksForClient(clientIP string) (count int) {
@@ -99,9 +103,9 @@ func (q *TaskQueue) CountQueuedTasksForClient(clientIP string) (count int) {
 
 func (q *TaskQueue) ConfirmTaskCompletion(clientIP string, hash string) {
 	q.mutex.Lock()
-	q.clientIPs[clientIP] = max(0, q.clientIPs[clientIP]-1)
-	for i := slices.Index(q.hashes, hash); i != -1; i = slices.Index(q.hashes, hash) {
-		q.hashes = slices.Delete(q.hashes, i, i+1)
+	if q.clientIPs[clientIP] > 0 {
+		q.clientIPs[clientIP]--
 	}
+	delete(q.hashSet, hash)
 	q.mutex.Unlock()
 }
