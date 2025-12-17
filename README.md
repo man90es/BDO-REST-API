@@ -62,6 +62,10 @@ Available flags:
 	- Specifies Redis server's address
 	- Type: string
 	- Default value: none
+- `-scraperfailurepause`
+	- Amount of time in seconds to wait after a failed task to idle (0 for immediate retry, negative for pause until end of minute)
+	- Type: integer
+	- Default value: `-1`
 
 You can use them like this:
 ```bash

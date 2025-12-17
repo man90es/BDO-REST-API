@@ -58,8 +58,7 @@ func InitScraper() {
 	})
 
 	scraper.OnError(func(r *colly.Response, err error) {
-		logger.Error(fmt.Sprintf("Error occured while loading %v: %v", r.Request.URL, err))
-		taskQueue.ConfirmTaskCompletion(r.Ctx.Get("taskClient"), r.Ctx.Get("taskHash"))
+		handleTaskError(r.Request, false, err)
 	})
 
 	scraper.OnResponse(func(r *colly.Response) {
@@ -80,24 +79,7 @@ func InitScraper() {
 		})
 
 		if imperva {
-			taskRetries, _ := strconv.Atoi(body.Request.Ctx.Get("taskRetries"))
-			logger.Error(fmt.Sprintf("Hit Imperva while loading %v, retries: %v", body.Request.URL.String(), taskRetries))
-			if proxyReloadWebhook := viper.GetString("proxyreloadwebhook"); proxyReloadWebhook != "" {
-				utils.SendDummyRequest(proxyReloadWebhook)
-				taskQueue.Pause(time.Second * 5)
-			} else {
-				taskQueue.Pause(time.Duration(60-time.Now().Second()) * time.Second)
-			}
-			taskQueue.ConfirmTaskCompletion(taskClient, taskHash)
-
-			if taskRetries < viper.GetInt("taskretries") {
-				taskQueue.AddTask(taskClient, taskHash, utils.BuildRequest(body.Request.URL.String(), map[string]string{
-					"taskRegion":  taskRegion,
-					"taskRetries": strconv.Itoa(taskRetries + 1),
-					"taskType":    taskType,
-				}))
-			}
-
+			handleTaskError(body.Request, true, nil)
 			return
 		}
 
