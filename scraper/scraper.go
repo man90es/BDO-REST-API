@@ -33,11 +33,6 @@ func InitScraper() {
 	scraper.AllowURLRevisit = true
 	scraper.SetRequestTimeout(time.Minute / 2)
 
-	scraper.Limit(&colly.LimitRule{
-		Delay:       time.Second,
-		RandomDelay: 5 * time.Second,
-	})
-
 	proxies := viper.GetStringSlice("proxy")
 	if p, err := proxy.RoundRobinProxySwitcher(proxies...); err == nil {
 		scraper.SetProxyFunc(p)
