@@ -24,7 +24,7 @@ func handleTaskError(r *colly.Request, imperva bool, err error) {
 		// and it doesn't seem to be recoverable, so just exit the program and let Docker restart it
 		// Maybe in the future there will be a way to avoid/handle this
 		logger.Critical(fmt.Sprintf("Error occured: %v", err))
-		os.Exit(0)
+		os.Exit(1)
 	} else {
 		logger.Error(fmt.Sprintf("Error occured while loading %v: %v, retries: %v", r.URL, err, taskRetries))
 	}
