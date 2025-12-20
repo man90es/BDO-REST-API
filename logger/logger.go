@@ -13,8 +13,9 @@ import (
 )
 
 var (
-	infoLogger  *log.Logger
-	errorLogger *log.Logger
+	infoLogger     *log.Logger
+	errorLogger    *log.Logger
+	criticalLogger *log.Logger
 )
 var initialised = false
 var mongoCollection *mongo.Collection
@@ -34,6 +35,7 @@ func InitLogger() {
 
 	infoLogger = log.New(os.Stdout, "INFO: ", log.Ldate|log.Ltime)
 	errorLogger = log.New(os.Stderr, "ERROR: ", log.Ldate|log.Ltime)
+	criticalLogger = log.New(os.Stderr, "CRITICAL: ", log.Ldate|log.Ltime)
 	initialised = true
 
 	configPrintOut := fmt.Sprintf("\tPort:\t\t%v\n", viper.GetInt("port")) +
@@ -79,4 +81,14 @@ func Error(message string) {
 	}
 
 	errorLogger.Println(message)
+}
+
+func Critical(message string) {
+	writeToMongo("CRITICAL", message)
+
+	if !viper.GetBool("verbose") || !initialised {
+		return
+	}
+
+	criticalLogger.Println(message)
 }

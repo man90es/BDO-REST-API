@@ -1,14 +1,17 @@
 package scraper
 
 import (
-	"bdo-rest-api/logger"
-	"bdo-rest-api/utils"
 	"fmt"
+	"os"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/gocolly/colly/v2"
 	"github.com/spf13/viper"
+
+	"bdo-rest-api/logger"
+	"bdo-rest-api/utils"
 )
 
 func handleTaskError(r *colly.Request, imperva bool, err error) {
@@ -16,6 +19,12 @@ func handleTaskError(r *colly.Request, imperva bool, err error) {
 
 	if imperva {
 		logger.Error(fmt.Sprintf("Hit Imperva while loading %v, retries: %v", r.URL, taskRetries))
+	} else if strings.Contains(err.Error(), "http2: Transport received GOAWAY from server ErrCode:INTERNAL_ERROR") {
+		// This is an error that I don't know how to avoid, it clogs up all future requests
+		// and it doesn't seem to be recoverable, so just exit the program and let Docker restart it
+		// Maybe in the future there will be a way to avoid/handle this
+		logger.Critical(fmt.Sprintf("Error occured: %v", err))
+		os.Exit(0)
 	} else {
 		logger.Error(fmt.Sprintf("Error occured while loading %v: %v, retries: %v", r.URL, err, taskRetries))
 	}
