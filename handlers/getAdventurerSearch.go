@@ -3,6 +3,7 @@ package handlers
 import (
 	"encoding/json"
 	"net/http"
+	"strconv"
 
 	"bdo-rest-api/cache"
 	"bdo-rest-api/scraper"
@@ -46,7 +47,9 @@ func getAdventurerSearch(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if taskAdded, tasksQuantityExceeded := scraper.EnqueueAdventurerSearch(r.Header.Get("CF-Connecting-IP"), region, query, searchType); tasksQuantityExceeded {
+	ok, tasksExceeded, tasksNumber := scraper.EnqueueAdventurerSearch(r.Header.Get("CF-Connecting-IP"), region, query, searchType)
+	w.Header().Set("X-Tasks-Number", strconv.Itoa(tasksNumber))
+	if tasksExceeded {
 		w.WriteHeader(http.StatusTooManyRequests)
 		json.NewEncoder(w).Encode(map[string]string{
 			"message": "You have exceeded the maximum number of concurrent tasks.",
@@ -59,7 +62,7 @@ func getAdventurerSearch(w http.ResponseWriter, r *http.Request) {
 			"status": map[bool]string{
 				true:  "started",
 				false: "pending",
-			}[taskAdded],
+			}[ok],
 		})
 	}
 }

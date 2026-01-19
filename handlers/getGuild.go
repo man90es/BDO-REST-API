@@ -3,6 +3,7 @@ package handlers
 import (
 	"encoding/json"
 	"net/http"
+	"strconv"
 
 	"bdo-rest-api/cache"
 	"bdo-rest-api/scraper"
@@ -43,7 +44,9 @@ func getGuild(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if taskAdded, tasksQuantityExceeded := scraper.EnqueueGuild(r.Header.Get("CF-Connecting-IP"), region, name); tasksQuantityExceeded {
+	ok, tasksExceeded, tasksNumber := scraper.EnqueueGuild(r.Header.Get("CF-Connecting-IP"), region, name)
+	w.Header().Set("X-Tasks-Number", strconv.Itoa(tasksNumber))
+	if tasksExceeded {
 		w.WriteHeader(http.StatusTooManyRequests)
 		json.NewEncoder(w).Encode(map[string]string{
 			"message": "You have exceeded the maximum number of concurrent tasks.",
@@ -56,7 +59,7 @@ func getGuild(w http.ResponseWriter, r *http.Request) {
 			"status": map[bool]string{
 				true:  "started",
 				false: "pending",
-			}[taskAdded],
+			}[ok],
 		})
 	}
 }
