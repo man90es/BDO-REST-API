@@ -7,6 +7,7 @@ import (
 )
 
 type Task struct {
+	AddedAt  time.Time
 	ClientIP string
 	Hash     string
 	URL      string
@@ -36,8 +37,9 @@ func NewTaskQueue(bufferSize int) *TaskQueue {
 
 func (q *TaskQueue) AddTask(clientIP, hash, url string) (added bool) {
 	fullURL := utils.BuildRequest(url, map[string]string{
-		"taskClient": clientIP,
-		"taskHash":   hash,
+		"taskAddedAt": time.Now().Format(time.RFC3339),
+		"taskClient":  clientIP,
+		"taskHash":    hash,
 	})
 
 	q.mutex.Lock()

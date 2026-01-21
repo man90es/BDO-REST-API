@@ -45,7 +45,7 @@ func InitScraper() {
 
 	scraper.OnRequest(func(r *colly.Request) {
 		query := r.URL.Query()
-		for _, key := range []string{"taskHash", "taskType", "taskRegion", "taskRetries", "taskClient"} {
+		for _, key := range []string{"taskHash", "taskType", "taskRegion", "taskRetries", "taskClient", "taskAddedAt"} {
 			r.Ctx.Put(key, query.Get(key))
 			query.Del(key)
 		}
@@ -57,7 +57,9 @@ func InitScraper() {
 	})
 
 	scraper.OnResponse(func(r *colly.Response) {
-		logger.Info(fmt.Sprintf("Loaded %v", r.Request.URL))
+		parsedStartTime, _ := time.Parse(time.RFC3339, r.Request.Ctx.Get("taskAddedAt"))
+		elapsed := time.Since(parsedStartTime)
+		logger.Info(fmt.Sprintf("Loaded %v in %v", r.Request.URL, elapsed))
 	})
 
 	scraper.OnHTML("body", func(body *colly.HTMLElement) {
