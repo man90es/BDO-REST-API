@@ -56,7 +56,7 @@ func writeToMongo(level, message string) {
 		return
 	}
 
-	mongoCollection.InsertOne(context.TODO(), Log{
+	go mongoCollection.InsertOne(context.TODO(), Log{
 		CreatedAt: time.Now(),
 		Level:     level,
 		Message:   message,
