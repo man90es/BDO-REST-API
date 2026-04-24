@@ -19,12 +19,27 @@ func scrapeAdventurer(body *colly.HTMLElement, region, profileTarget string) {
 	status := http.StatusNotFound
 	profile := models.Profile{
 		ProfileTarget: profileTarget,
-		Region:        region, // FIXME: This can potentially be wrong e.g. if client requests a NA profile and gives EU as the region
+		Region:        region,
 	}
+
+	body.ForEachWithBreak(".region_info", func(_ int, e *colly.HTMLElement) bool {
+		if e.Text == region {
+			status = http.StatusOK
+		}
+		return false
+	})
 
 	body.ForEachWithBreak(".nick", func(_ int, e *colly.HTMLElement) bool {
 		profile.FamilyName = e.Text
-		status = http.StatusOK
+
+		// The indicator of profile being found on EU and NA is that they have a matching region in profile
+		// because client can specify the wrong region in the request and the official website
+		// is still going to find it by profileTarget; On regions other than EU and NA the region indicator
+		// isn't present, so found nickname is an indicator of found profiles for those regionss
+		if region != "EU" && region != "NA" {
+			status = http.StatusOK
+		}
+
 		return false
 	})
 
