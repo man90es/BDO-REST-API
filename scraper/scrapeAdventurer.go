@@ -44,8 +44,6 @@ func scrapeAdventurer(body *colly.HTMLElement, region, profileTarget string) {
 	})
 
 	body.ForEachWithBreak(".lock", func(_ int, _ *colly.HTMLElement) bool {
-		// FIXME: This is a remains from granular privacy,
-		// boolean would be more straightforward now
 		profile.Privacy = 15
 		return false
 	})
