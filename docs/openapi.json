@@ -6,7 +6,7 @@
 	},
 	"servers": [
 		{
-			"url": "https://community-api.cutepap.us"
+			"url": "https://api.cutepap.us/community"
 		},
 		{
 			"url": "http://localhost:8001"
@@ -53,7 +53,7 @@
 	"paths": {
 		"/v1": {
 			"get": {
-				"summary": "Retrieve instance's status",
+				"summary": "Retrieve instance status",
 				"operationId": "getMeta",
 				"responses": {
 					"200": {
@@ -179,7 +179,7 @@
 		},
 		"/v1/adventurer": {
 			"get": {
-				"summary": "Retrieve player's profile.",
+				"summary": "Retrieve player profile.",
 				"description": "Retrieve the full profile of a single player by his or her profileTarget.",
 				"operationId": "getAdventurer",
 				"parameters": [
@@ -193,19 +193,7 @@
 						}
 					},
 					{
-						"name": "region",
-						"in": "query",
-						"description": "Can be omitted for EU or NA. Providing NA as the value can return EU profiles and vice versa.",
-						"schema": {
-							"type": "string",
-							"enum": [
-								"EU",
-								"KR",
-								"NA",
-								"SA"
-							],
-							"default": "EU"
-						}
+						"$ref": "#/components/parameters/region"
 					}
 				],
 				"responses": {
@@ -425,7 +413,7 @@
 											"minimum": 0
 										},
 										"history": {
-											"description": "30-day history of the adventurer's activity",
+											"description": "30-day history of the adventurer's activity.",
 											"nullable": true,
 											"type": "object",
 											"properties": {
@@ -571,7 +559,7 @@
 					{
 						"name": "query",
 						"in": "query",
-						"description": "Only exact matches work for this search. The length of this parameter should be between 3 and 16 characters, and you can only use symbols A-Z, a-z, 0-9, _.",
+						"description": "Only exact matches work.",
 						"required": true,
 						"schema": {
 							"type": "string"
@@ -583,14 +571,13 @@
 					{
 						"name": "searchType",
 						"in": "query",
-						"description": "Switch between filtering by family name and character name. If you omit this parameter, it's assumed that you want to filter by family name.",
 						"schema": {
 							"type": "string",
 							"enum": [
 								"familyName",
 								"characterName"
 							],
-							"example": "familyName"
+							"default": "familyName"
 						}
 					}
 				],
@@ -749,7 +736,6 @@
 					{
 						"name": "guildName",
 						"in": "query",
-						"description": "Guild's name. It should be at least 2 characters long and can only contain A-Z, a-z, 0-9, _ characters.",
 						"required": true,
 						"schema": {
 							"type": "string"
@@ -901,7 +887,7 @@
 					{
 						"name": "query",
 						"in": "query",
-						"description": "The query string should be at least 2 characters long and can only contain A-Z, a-z, 0-9, _ characters.",
+						"description": "Only exact matches work.",
 						"required": true,
 						"schema": {
 							"type": "string"
