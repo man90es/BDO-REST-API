@@ -4,9 +4,10 @@ Scraper for Black Desert Online community data with a built-in API server. It cu
 ## Projects using this API
 - ~~BDO Leaderboards ([Sources](https://github.com/man90es/BDO-Leaderboards)): web-based leaderboards for Black Desert Online.~~
 - Ikusa ([Website](https://ikusa.site), [sources](https://github.com/sch-28/ikusa_api)): powerful tool that allows you to analyze your game logs and gain valuable insights into your combat performance.
-- GuildYapper ([Discord server](https://discord.gg/x2nKYuu2Z2)): Discord bot with various features for BDO guilds such as guild and player history logging, and automatic trial Discord management (more features TBA).
-- BDO Guild Bosses - Alliance [EU] ([Discord server](https://discord.gg/735bYrQWKr)): Discord bot for organising events in a guild bosses alliance.
+- GuildYapper ([Website](https://guildyapper.com)): The ultimate Discord bot for Black Desert guilds. Manage Node Wars, track members, and dominate the battlefield with advanced automation and real-time insights.
+- Agris - Black Desert PvE Hub ([Discord server](https://discord.gg/735bYrQWKr)): Black Desert Online PvE community with a party finder and manager bot.
 - Cute Papus! ([Website](https://cutepap.us)): A collection of various BDO-related tools in a single web app.
+- NODEWAR.GG ([Website](https://nodewar.gg)): Your ultimate competitive hub for Black Desert Online. Track alliances, guilds, territory control, and dominate the battlefield with real-time intel.
 
 ## How to start using it
 There are two ways to use this scraper for your needs:
