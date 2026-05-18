@@ -2,6 +2,7 @@ package scraper
 
 import (
 	"net/http"
+	"slices"
 	"strconv"
 	"strings"
 
@@ -62,6 +63,16 @@ func scrapeGuild(body *colly.HTMLElement, region, guildName string) {
 
 		guildProfile.Members = append(guildProfile.Members, member)
 	})
+
+	// Link to master's profile at the top of the page has a different profile target than the one
+	// in the members list, so replacing it with the one from the members list helps with consistency and cache hits
+	if guildProfile.Master != nil {
+		if i := slices.IndexFunc(guildProfile.Members, func(m models.Profile) bool {
+			return m.FamilyName == guildProfile.Master.FamilyName
+		}); i != -1 {
+			guildProfile.Master.ProfileTarget = guildProfile.Members[i].ProfileTarget
+		}
+	}
 
 	cache.GuildProfiles.AddRecord([]string{region, guildName}, guildProfile, status, body.Request.Ctx.Get("taskId"))
 }
