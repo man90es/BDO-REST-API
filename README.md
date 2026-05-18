@@ -11,7 +11,7 @@ Scraper for Black Desert Online community data with a built-in API server. It cu
 
 ## How to start using it
 There are two ways to use this scraper for your needs:
-* By querying https://community-api.cutepap.us/v1 — this is the "official" instance hosted by me.
+* By querying https://api.cutepap.us/community/v1 — this is the "official" instance hosted by the developer of this scraper.
 * If you want to have more control over the API, host the scraper yourself using one of the following methods:
   - As a Docker container: the image is available on [DockerHub](https://hub.docker.com/r/man90/bdo-rest-api).
   - Natively: build the binary from source as described in [this guide](docs/buildingFromSource.md).
