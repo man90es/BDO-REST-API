@@ -14,8 +14,8 @@ import (
 	"bdo-rest-api/utils"
 
 	colly "github.com/gocolly/colly/v2"
-	"github.com/gocolly/colly/v2/extensions"
 	"github.com/gocolly/colly/v2/proxy"
+	ua "github.com/nzrsky/useragent-generator/pkg/useragent"
 	"github.com/spf13/viper"
 )
 
@@ -29,7 +29,6 @@ func InitScraper() {
 	scraperInitialised = true
 
 	scraper := colly.NewCollector()
-	extensions.RandomUserAgent(scraper)
 	scraper.AllowURLRevisit = true
 	scraper.SetRequestTimeout(time.Minute / 2)
 
@@ -50,6 +49,9 @@ func InitScraper() {
 			query.Del(key)
 		}
 		r.URL.RawQuery = query.Encode()
+
+		r.Headers.Set("Referer", fmt.Sprintf("https://%v/%v/Main/Index", r.URL.Host, r.URL.Path[1:6]))
+		r.Headers.Set("User-Agent", ua.Random())
 	})
 
 	scraper.OnError(func(r *colly.Response, err error) {
