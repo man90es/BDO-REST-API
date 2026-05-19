@@ -30,6 +30,10 @@ Available flags:
 	- Specifies cache TTL in minutes
 	- Type: unsigned integer
 	- Default value: `180`
+- `-clientid`
+	- Client ID to identify this instance
+	- Type: string
+	- Default value: bdo
 - `-maintenancettl`
 	- Limits how frequently scraper can check for maintenance end in minutes
 	- Type: unsigned integer
@@ -62,7 +66,7 @@ Available flags:
 - `-redis`
 	- Specifies Redis server's address
 	- Type: string
-	- Default value: none
+	- Default value: redis://localhost:6379/0
 - `-scraperfailurepause`
 	- Amount of time in seconds to wait after a failed task to idle (0 for immediate retry, negative for pause until end of minute)
 	- Type: integer

@@ -18,6 +18,7 @@ import (
 func main() {
 	flagAdminToken := flag.String("admintoken", "", "Admin token to allow certain endpoints")
 	flagCacheTTL := flag.Uint("cachettl", 180, "Cache TTL in minutes")
+	flagInstanceID := flag.String("instanceid", "bdo", "ID to identify this instance")
 	flagMaintenanceTTL := flag.Uint("maintenancettl", 5, "Allows to limit how frequently scraper can check for maintenance end in minutes")
 	flagMaxTasksPerClient := flag.Uint("maxtasksperclient", 5, "Maximum number of scraping tasks per client")
 	flagMongo := flag.String("mongo", "", "MongoDB connection string for loggig")
@@ -25,7 +26,7 @@ func main() {
 	flagProxy := flag.String("proxy", "", "Open proxy address to make requests to BDO servers")
 	flagProxyReloadWebhook := flag.String("proxyreloadwebhook", "", "Webhook address to request proxy reload")
 	flagRateLimit := flag.Uint64("ratelimit", 512, "Maximum number of requests per minute per IP")
-	flagRedis := flag.String("redis", "", "Redis connection string")
+	flagRedis := flag.String("redis", "redis://localhost:6379/0", "Redis connection string")
 	flagScraperFailurePause := flag.Int("scraperfailurepause", -1, "Amount of time in seconds to wait after a failed task to idle")
 	flagTaskRetries := flag.Uint("taskretries", 3, "Number of retries for a scraping task")
 	flagVerbose := flag.Bool("verbose", false, "Print out additional logs into stdout")
@@ -53,6 +54,7 @@ func main() {
 
 	viper.Set("admintoken", *flagAdminToken)
 	viper.Set("cachettl", time.Duration(*flagCacheTTL)*time.Minute)
+	viper.Set("instanceid", *flagInstanceID)
 	viper.Set("maintenancettl", time.Duration(*flagMaintenanceTTL)*time.Minute)
 	viper.Set("maxtasksperclient", int(*flagMaxTasksPerClient))
 	viper.Set("mongo", *flagMongo)
