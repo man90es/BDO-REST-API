@@ -3,6 +3,7 @@ package scraper
 import (
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/gocolly/colly/v2"
 
@@ -51,5 +52,7 @@ func scrapeAdventurerSearch(body *colly.HTMLElement, region, query, searchType s
 		profiles = append(profiles, profile)
 	})
 
-	cache.ProfileSearch.AddRecord([]string{region, query, searchType}, profiles, status, body.Request.Ctx.Get("taskId"))
+	parsedStartTime, _ := time.Parse(time.RFC3339, body.Request.Ctx.Get("taskAddedAt"))
+	elapsed := time.Since(parsedStartTime)
+	cache.ProfileSearch.AddRecord([]string{region, query, searchType}, profiles, status, body.Request.Ctx.Get("taskId"), body.Request.Ctx.Get("taskClient"), elapsed)
 }

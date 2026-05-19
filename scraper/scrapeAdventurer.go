@@ -6,6 +6,7 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/gocolly/colly/v2"
 
@@ -234,5 +235,7 @@ func scrapeAdventurer(body *colly.HTMLElement, region, profileTarget string) {
 		profile.CombatFame = utils.CalculateCombatFame(profile.Characters)
 	}
 
-	cache.Profiles.AddRecord([]string{region, profileTarget}, profile, status, body.Request.Ctx.Get("taskId"))
+	parsedStartTime, _ := time.Parse(time.RFC3339, body.Request.Ctx.Get("taskAddedAt"))
+	elapsed := time.Since(parsedStartTime)
+	cache.Profiles.AddRecord([]string{region, profileTarget}, profile, status, body.Request.Ctx.Get("taskId"), body.Request.Ctx.Get("taskClient"), elapsed)
 }
