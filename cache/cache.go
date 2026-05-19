@@ -6,10 +6,8 @@ import (
 	"strings"
 	"time"
 
-	goCache "github.com/patrickmn/go-cache"
 	"github.com/redis/go-redis/v9"
 	"github.com/spf13/viper"
-	"golang.org/x/exp/maps"
 
 	"bdo-rest-api/models"
 	"bdo-rest-api/utils"
@@ -31,63 +29,6 @@ type Cache[T any] interface {
 
 func joinKeys(keys []string) string {
 	return strings.Join(keys, ",")
-}
-
-type memoryCache[T any] struct {
-	internalCache *goCache.Cache
-	ttl           time.Duration
-}
-
-func newMemoryCache[T any]() *memoryCache[T] {
-	ttl := viper.GetDuration("cachettl")
-
-	return &memoryCache[T]{
-		internalCache: goCache.New(ttl, min(time.Hour, ttl)),
-		ttl:           ttl,
-	}
-}
-
-func (c *memoryCache[T]) AddRecord(keys []string, data T, status int, taskId string) (date, expires string) {
-	entry := CacheEntry[T]{
-		Data:   data,
-		Date:   time.Now(),
-		Status: status,
-	}
-
-	c.internalCache.Add(joinKeys(keys), entry, c.ttl)
-
-	return utils.FormatDateForHeaders(entry.Date), utils.FormatDateForHeaders(entry.Date.Add(c.ttl))
-}
-
-func (c *memoryCache[T]) GetRecord(keys []string) (data T, status int, date, expires string, found bool) {
-	anyEntry, exp, found := c.internalCache.GetWithExpiration(joinKeys(keys))
-
-	if !found {
-		return
-	}
-
-	entry := anyEntry.(CacheEntry[T])
-
-	return entry.Data, entry.Status, utils.FormatDateForHeaders(entry.Date), utils.FormatDateForHeaders(exp), true
-}
-
-func (c *memoryCache[T]) GetItemCount() int {
-	return c.internalCache.ItemCount()
-}
-
-func (c *memoryCache[T]) GetKeys() []string {
-	return maps.Keys(c.internalCache.Items())
-}
-
-func (c *memoryCache[T]) GetValues() []CacheEntry[T] {
-	items := c.internalCache.Items()
-	result := make([]CacheEntry[T], 0, len(items))
-
-	for _, item := range items {
-		result = append(result, item.Object.(CacheEntry[T]))
-	}
-
-	return result
 }
 
 type redisCache[T any] struct {
@@ -182,15 +123,13 @@ var (
 )
 
 func InitCache() {
-	if redisClient, err := newRedisClient(viper.GetString("redis")); err == nil {
-		GuildProfiles = newRedisCache[models.GuildProfile](redisClient, "gpc")
-		GuildSearch = newRedisCache[[]models.GuildProfile](redisClient, "gsc")
-		Profiles = newRedisCache[models.Profile](redisClient, "pc")
-		ProfileSearch = newRedisCache[[]models.Profile](redisClient, "psc")
-	} else {
-		GuildProfiles = newMemoryCache[models.GuildProfile]()
-		GuildSearch = newMemoryCache[[]models.GuildProfile]()
-		Profiles = newMemoryCache[models.Profile]()
-		ProfileSearch = newMemoryCache[[]models.Profile]()
+	redisClient, err := newRedisClient(viper.GetString("redis"))
+	if err != nil {
+		panic(err)
 	}
+
+	GuildProfiles = newRedisCache[models.GuildProfile](redisClient, "gpc")
+	GuildSearch = newRedisCache[[]models.GuildProfile](redisClient, "gsc")
+	Profiles = newRedisCache[models.Profile](redisClient, "pc")
+	ProfileSearch = newRedisCache[[]models.Profile](redisClient, "psc")
 }
