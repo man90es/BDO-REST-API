@@ -1,6 +1,7 @@
 package cache
 
 import (
+	"context"
 	"testing"
 	"time"
 
@@ -15,6 +16,19 @@ type testStruct struct {
 func init() {
 	// Ensure TTL is something predictable
 	viper.Set("cachettl", time.Second*10)
+	viper.Set("redis", "redis://localhost:6379/0")
+}
+
+func getTestRedisCache[T any](t *testing.T, namespace string) *redisCache[T] {
+	client, err := newRedisClient(viper.GetString("redis"))
+	if err != nil {
+		t.Skip("Skipping test: Redis client could not be created")
+	}
+	if err := client.Ping(context.Background()).Err(); err != nil {
+		t.Skip("Skipping test: Redis server not reachable")
+	}
+	client.FlushDB(context.Background())
+	return newRedisCache[T](client, namespace)
 }
 
 func TestJoinKeys(t *testing.T) {
@@ -26,8 +40,8 @@ func TestJoinKeys(t *testing.T) {
 	}
 }
 
-func TestMemoryCacheAddAndGetRecord(t *testing.T) {
-	c := newMemoryCache[testStruct]()
+func TestRedisCacheAddAndGetRecord(t *testing.T) {
+	c := getTestRedisCache[testStruct](t, "test_add_get")
 
 	data := testStruct{Value: "hello"}
 	keys := []string{"key1", "key2"}
@@ -49,8 +63,8 @@ func TestMemoryCacheAddAndGetRecord(t *testing.T) {
 	}
 }
 
-func TestMemoryCacheMissingRecord(t *testing.T) {
-	c := newMemoryCache[testStruct]()
+func TestRedisCacheMissingRecord(t *testing.T) {
+	c := getTestRedisCache[testStruct](t, "test_missing")
 
 	_, _, _, _, found := c.GetRecord([]string{"does", "not", "exist"})
 	if found {
@@ -58,8 +72,8 @@ func TestMemoryCacheMissingRecord(t *testing.T) {
 	}
 }
 
-func TestMemoryCacheItemCount(t *testing.T) {
-	c := newMemoryCache[testStruct]()
+func TestRedisCacheItemCount(t *testing.T) {
+	c := getTestRedisCache[testStruct](t, "test_count")
 
 	if c.GetItemCount() != 0 {
 		t.Fatal("Expected empty cache")
@@ -73,8 +87,8 @@ func TestMemoryCacheItemCount(t *testing.T) {
 	}
 }
 
-func TestMemoryCacheGetKeys(t *testing.T) {
-	c := newMemoryCache[testStruct]()
+func TestRedisCacheGetKeys(t *testing.T) {
+	c := getTestRedisCache[testStruct](t, "test_keys")
 
 	c.AddRecord([]string{"k1"}, testStruct{"v1"}, 200, "task1")
 	c.AddRecord([]string{"k2"}, testStruct{"v2"}, 200, "task2")
@@ -101,8 +115,8 @@ func TestMemoryCacheGetKeys(t *testing.T) {
 	}
 }
 
-func TestMemoryCacheGetValues(t *testing.T) {
-	c := newMemoryCache[testStruct]()
+func TestRedisCacheGetValues(t *testing.T) {
+	c := getTestRedisCache[testStruct](t, "test_values")
 
 	c.AddRecord([]string{"a"}, testStruct{"aaa"}, 200, "task1")
 	c.AddRecord([]string{"b"}, testStruct{"bbb"}, 200, "task2")

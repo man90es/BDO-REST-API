@@ -4,13 +4,12 @@ go 1.24.0
 
 require (
 	github.com/gocolly/colly/v2 v2.3.0
-	github.com/patrickmn/go-cache v2.1.0+incompatible
+	github.com/nzrsky/useragent-generator v1.0.0
 	github.com/redis/go-redis/v9 v9.17.2
 	github.com/sa-/slicefunk v0.1.4
 	github.com/spf13/viper v1.21.0
 	github.com/ulule/limiter/v3 v3.11.2
 	go.mongodb.org/mongo-driver/v2 v2.4.1
-	golang.org/x/exp v0.0.0-20251219203646-944ab1f22d93
 )
 
 require (
@@ -34,7 +33,6 @@ require (
 	github.com/kennygrant/sanitize v1.2.4 // indirect
 	github.com/klauspost/compress v1.18.2 // indirect
 	github.com/nlnwa/whatwg-url v0.6.2 // indirect
-	github.com/nzrsky/useragent-generator v1.0.0 // indirect
 	github.com/pelletier/go-toml/v2 v2.2.4 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/sagikazarmark/locafero v0.12.0 // indirect
