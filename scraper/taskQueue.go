@@ -80,7 +80,7 @@ func NewTaskQueue(bufferSize int) *TaskQueue {
 	return queue
 }
 
-func (q *TaskQueue) Enqueue(taskClient, hash, url string, addedAt time.Time, front bool) bool {
+func (q *TaskQueue) AddTask(taskClient, hash, url string, addedAt time.Time, front bool) bool {
 	task := Task{
 		AddedAt:    addedAt,
 		TaskClient: taskClient,

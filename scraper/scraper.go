@@ -152,7 +152,7 @@ func createTask(taskClient, region, taskType string, query map[string]string) (o
 		"taskType":    taskType,
 	})
 
-	ok = taskQueue.Enqueue(
+	ok = taskQueue.AddTask(
 		taskClient,
 		hashString,
 		utils.BuildRequest(url, query),

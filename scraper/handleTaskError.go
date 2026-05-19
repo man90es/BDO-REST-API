@@ -45,7 +45,7 @@ func handleTaskError(r *colly.Request, imperva bool, err error) {
 		addedAt, _ := time.Parse(time.RFC3339, r.Ctx.Get("taskAddedAt"))
 		taskRegion := r.Ctx.Get("taskRegion")
 		taskType := r.Ctx.Get("taskType")
-		taskQueue.Enqueue(
+		taskQueue.AddTask(
 			r.Ctx.Get("taskClient"),
 			r.Ctx.Get("taskHash"),
 			utils.BuildRequest(r.URL.String(), map[string]string{
