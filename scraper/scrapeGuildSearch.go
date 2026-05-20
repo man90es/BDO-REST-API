@@ -38,7 +38,6 @@ func scrapeGuildSearch(body *colly.HTMLElement, region, query string) {
 		guildProfiles = append(guildProfiles, guildProfile)
 	})
 
-	parsedStartTime, _ := time.Parse(time.RFC3339, body.Request.Ctx.Get("taskAddedAt"))
-	elapsed := time.Since(parsedStartTime)
-	cache.GuildSearch.AddRecord([]string{region, query}, guildProfiles, status, body.Request.Ctx.Get("taskId"), body.Request.Ctx.Get("taskClient"), elapsed)
+	startTime, _ := time.Parse(time.RFC3339, body.Request.Ctx.Get("taskAddedAt"))
+	cache.GuildSearch.AddRecord([]string{region, query}, guildProfiles, status, body.Request.Ctx.Get("taskId"), body.Request.Ctx.Get("taskClient"), startTime)
 }
