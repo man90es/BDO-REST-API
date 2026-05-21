@@ -236,5 +236,5 @@ func scrapeAdventurer(body *colly.HTMLElement, region, profileTarget string) {
 	}
 
 	startTime, _ := time.Parse(time.RFC3339, body.Request.Ctx.Get("taskAddedAt"))
-	cache.Profiles.AddRecord([]string{region, profileTarget}, profile, status, body.Request.Ctx.Get("taskId"), body.Request.Ctx.Get("taskClient"), startTime)
+	cache.Profiles.AddRecord([]string{region, profileTarget}, profile, status, body.Request.Ctx.Get("taskClient"), startTime)
 }

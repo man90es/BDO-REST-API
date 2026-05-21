@@ -47,7 +47,7 @@ func TestRedisCacheAddAndGetRecord(t *testing.T) {
 	keys := []string{"key1", "key2"}
 	status := 200
 
-	_, _ = c.AddRecord(keys, data, status, "task123", "client456", time.Now().Add(-time.Second*10))
+	_, _ = c.AddRecord(keys, data, status, "client456", time.Now().Add(-time.Second*10))
 
 	gotData, gotStatus, _, _, found := c.GetRecord(keys)
 	if !found {
@@ -79,8 +79,8 @@ func TestRedisCacheItemCount(t *testing.T) {
 		t.Fatal("Expected empty cache")
 	}
 
-	c.AddRecord([]string{"a"}, testStruct{"x"}, 200, "task1", "client1", time.Now().Add(-time.Second*10))
-	c.AddRecord([]string{"b"}, testStruct{"y"}, 200, "task2", "client2", time.Now().Add(-time.Second*10))
+	c.AddRecord([]string{"a"}, testStruct{"x"}, 200, "client1", time.Now().Add(-time.Second*10))
+	c.AddRecord([]string{"b"}, testStruct{"y"}, 200, "client2", time.Now().Add(-time.Second*10))
 
 	if c.GetItemCount() != 2 {
 		t.Fatalf("Expected 2 items, got %d", c.GetItemCount())
@@ -90,8 +90,8 @@ func TestRedisCacheItemCount(t *testing.T) {
 func TestRedisCacheGetKeys(t *testing.T) {
 	c := getTestRedisCache[testStruct](t, "test_keys")
 
-	c.AddRecord([]string{"k1"}, testStruct{"v1"}, 200, "task1", "client1", time.Now().Add(-time.Second*10))
-	c.AddRecord([]string{"k2"}, testStruct{"v2"}, 200, "task2", "client2", time.Now().Add(-time.Second*10))
+	c.AddRecord([]string{"k1"}, testStruct{"v1"}, 200, "client1", time.Now().Add(-time.Second*10))
+	c.AddRecord([]string{"k2"}, testStruct{"v2"}, 200, "client2", time.Now().Add(-time.Second*10))
 
 	keys := c.GetKeys()
 
@@ -118,8 +118,8 @@ func TestRedisCacheGetKeys(t *testing.T) {
 func TestRedisCacheGetValues(t *testing.T) {
 	c := getTestRedisCache[testStruct](t, "test_values")
 
-	c.AddRecord([]string{"a"}, testStruct{"aaa"}, 200, "task1", "client1", time.Now().Add(-time.Second*10))
-	c.AddRecord([]string{"b"}, testStruct{"bbb"}, 200, "task2", "client2", time.Now().Add(-time.Second*10))
+	c.AddRecord([]string{"a"}, testStruct{"aaa"}, 200, "client1", time.Now().Add(-time.Second*10))
+	c.AddRecord([]string{"b"}, testStruct{"bbb"}, 200, "client2", time.Now().Add(-time.Second*10))
 
 	values := c.GetValues()
 
