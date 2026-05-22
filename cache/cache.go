@@ -14,12 +14,12 @@ import (
 )
 
 type CacheEntry[T any] struct {
-	ClientID    string        `json:"clientId,omitempty"`
-	Data        T             `json:"data"`
-	Date        time.Time     `json:"date"`
-	InstanceID  string        `json:"instanceId,omitempty"`
-	Status      int           `json:"status"`
-	TimeElapsed time.Duration `json:"timeElapsed,omitempty"`
+	ClientID    string    `json:"clientId,omitempty"`
+	Data        T         `json:"data"`
+	Date        time.Time `json:"date"`
+	InstanceID  string    `json:"instanceId,omitempty"`
+	Status      int       `json:"status"`
+	TimeElapsed int       `json:"timeElapsed,omitempty"`
 }
 
 type Cache[T any] interface {
@@ -57,7 +57,7 @@ func (c *redisCache[T]) AddRecord(keys []string, data T, status int, clientID st
 		Date:        time.Now(),
 		InstanceID:  viper.GetString("instanceid"),
 		Status:      status,
-		TimeElapsed: time.Since(startTime),
+		TimeElapsed: int(time.Since(startTime) / time.Millisecond),
 	}
 
 	b, _ := json.Marshal(entry)
