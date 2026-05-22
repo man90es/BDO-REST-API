@@ -30,8 +30,8 @@ Available flags:
 	- Specifies cache TTL in minutes
 	- Type: unsigned integer
 	- Default value: `180`
-- `-clientid`
-	- Client ID to identify this instance
+- `-instanceid`
+	- ID to identify this instance
 	- Type: string
 	- Default value: bdo
 - `-maintenancettl`
