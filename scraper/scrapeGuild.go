@@ -5,6 +5,7 @@ import (
 	"slices"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/gocolly/colly/v2"
 
@@ -74,5 +75,6 @@ func scrapeGuild(body *colly.HTMLElement, region, guildName string) {
 		}
 	}
 
-	cache.GuildProfiles.AddRecord([]string{region, guildName}, guildProfile, status, body.Request.Ctx.Get("taskId"))
+	startTime, _ := time.Parse(time.RFC3339, body.Request.Ctx.Get("taskAddedAt"))
+	cache.GuildProfiles.AddRecord([]string{region, guildName}, guildProfile, status, body.Request.Ctx.Get("taskClient"), startTime)
 }

@@ -14,13 +14,16 @@ import (
 )
 
 type CacheEntry[T any] struct {
-	Data   T         `json:"data"`
-	Date   time.Time `json:"date"`
-	Status int       `json:"status"`
+	ClientID    string    `json:"clientId,omitempty"`
+	Data        T         `json:"data"`
+	Date        time.Time `json:"date"`
+	InstanceID  string    `json:"instanceId,omitempty"`
+	Status      int       `json:"status"`
+	TimeElapsed int       `json:"timeElapsed,omitempty"`
 }
 
 type Cache[T any] interface {
-	AddRecord(keys []string, data T, status int, taskId string) (date string, expires string)
+	AddRecord(keys []string, data T, status int, clientID string, startTime time.Time) (date string, expires string)
 	GetRecord(keys []string) (data T, status int, date string, expires string, found bool)
 	GetItemCount() int
 	GetKeys() []string
@@ -47,11 +50,14 @@ func newRedisCache[T any](client *redis.Client, namespace string) *redisCache[T]
 	}
 }
 
-func (c *redisCache[T]) AddRecord(keys []string, data T, status int, taskId string) (date, expires string) {
+func (c *redisCache[T]) AddRecord(keys []string, data T, status int, clientID string, startTime time.Time) (date, expires string) {
 	entry := CacheEntry[T]{
-		Data:   data,
-		Date:   time.Now(),
-		Status: status,
+		ClientID:    clientID,
+		Data:        data,
+		Date:        time.Now(),
+		InstanceID:  viper.GetString("instanceid"),
+		Status:      status,
+		TimeElapsed: int(time.Since(startTime) / time.Millisecond),
 	}
 
 	b, _ := json.Marshal(entry)
