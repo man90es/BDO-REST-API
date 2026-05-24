@@ -23,6 +23,13 @@ import (
 var taskQueue *TaskQueue
 var scraperInitialised = false
 
+const metadataTaskAddedAt = "taskAddedAt"
+const metadataTaskClient = "taskClient"
+const metadataTaskHash = "taskHash"
+const metadataTaskRegion = "taskRegion"
+const metadataTaskRetries = "taskRetries"
+const metadataTaskType = "taskType"
+
 func InitScraper() {
 	if scraperInitialised {
 		return
@@ -75,12 +82,12 @@ func InitScraper() {
 	scraper.OnHTML("body", func(body *colly.HTMLElement) {
 		imperva := false
 		queryString, _ := url.ParseQuery(body.Request.URL.RawQuery)
-		taskClient := body.Request.Ctx.Get("taskClient")
-		taskHash := body.Request.Ctx.Get("taskHash")
-		taskRegion := body.Request.Ctx.Get("taskRegion")
-		taskType := body.Request.Ctx.Get("taskType")
+		taskClient := body.Request.Ctx.Get(metadataTaskClient)
+		taskHash := body.Request.Ctx.Get(metadataTaskHash)
+		taskRegion := body.Request.Ctx.Get(metadataTaskRegion)
+		taskType := body.Request.Ctx.Get(metadataTaskType)
 
-		parsedStartTime, _ := time.Parse(time.RFC3339, body.Request.Ctx.Get("taskAddedAt"))
+		parsedStartTime, _ := time.Parse(time.RFC3339, body.Request.Ctx.Get(metadataTaskAddedAt))
 		elapsed := time.Since(parsedStartTime)
 		logger.Info(fmt.Sprintf("Loaded %v in %v", body.Request.URL, elapsed))
 
@@ -164,12 +171,12 @@ func createTask(taskClient, region, taskType string, query map[string]string) (o
 		utils.BuildRequest(url, query),
 		false,
 		map[string]string{
-			"taskAddedAt": time.Now().Format(time.RFC3339),
-			"taskClient":  taskClient,
-			"taskHash":    hashString,
-			"taskRegion":  region,
-			"taskRetries": "0",
-			"taskType":    taskType,
+			metadataTaskAddedAt: time.Now().Format(time.RFC3339),
+			metadataTaskClient:  taskClient,
+			metadataTaskHash:    hashString,
+			metadataTaskRegion:  region,
+			metadataTaskRetries: "0",
+			metadataTaskType:    taskType,
 		},
 	)
 

@@ -52,6 +52,6 @@ func scrapeAdventurerSearch(body *colly.HTMLElement, region, query, searchType s
 		profiles = append(profiles, profile)
 	})
 
-	startTime, _ := time.Parse(time.RFC3339, body.Request.Ctx.Get("taskAddedAt"))
-	cache.ProfileSearch.AddRecord([]string{region, query, searchType}, profiles, status, body.Request.Ctx.Get("taskClient"), startTime)
+	startTime, _ := time.Parse(time.RFC3339, body.Request.Ctx.Get(metadataTaskAddedAt))
+	cache.ProfileSearch.AddRecord([]string{region, query, searchType}, profiles, status, body.Request.Ctx.Get(metadataTaskClient), startTime)
 }

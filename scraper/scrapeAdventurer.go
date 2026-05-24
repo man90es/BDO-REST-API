@@ -235,6 +235,6 @@ func scrapeAdventurer(body *colly.HTMLElement, region, profileTarget string) {
 		profile.CombatFame = utils.CalculateCombatFame(profile.Characters)
 	}
 
-	startTime, _ := time.Parse(time.RFC3339, body.Request.Ctx.Get("taskAddedAt"))
-	cache.Profiles.AddRecord([]string{region, profileTarget}, profile, status, body.Request.Ctx.Get("taskClient"), startTime)
+	startTime, _ := time.Parse(time.RFC3339, body.Request.Ctx.Get(metadataTaskAddedAt))
+	cache.Profiles.AddRecord([]string{region, profileTarget}, profile, status, body.Request.Ctx.Get(metadataTaskClient), startTime)
 }

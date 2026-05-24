@@ -15,9 +15,9 @@ import (
 )
 
 func handleTaskError(r *colly.Request, imperva bool, err error) {
-	taskRetries, _ := strconv.Atoi(r.Ctx.Get("taskRetries"))
-	taskClient := r.Ctx.Get("taskClient")
-	taskHash := r.Ctx.Get("taskHash")
+	taskRetries, _ := strconv.Atoi(r.Ctx.Get(metadataTaskRetries))
+	taskClient := r.Ctx.Get(metadataTaskClient)
+	taskHash := r.Ctx.Get(metadataTaskHash)
 
 	if imperva {
 		logger.Error(fmt.Sprintf("Hit Imperva while loading %v, retries: %v", r.URL, taskRetries))
@@ -43,19 +43,19 @@ func handleTaskError(r *colly.Request, imperva bool, err error) {
 
 	taskQueue.ConfirmTaskCompletion(taskClient, taskHash)
 
-	if taskRetries < viper.GetInt("taskretries") {
+	if taskRetries < viper.GetInt(metadataTaskRetries) {
 		taskQueue.AddTask(
 			taskClient,
 			taskHash,
 			r.URL.String(),
 			true,
 			map[string]string{
-				"taskAddedAt": r.Ctx.Get("taskAddedAt"),
-				"taskClient":  r.Ctx.Get("taskClient"),
-				"taskHash":    r.Ctx.Get("taskHash"),
-				"taskRegion":  r.Ctx.Get("taskRegion"),
-				"taskRetries": strconv.Itoa(taskRetries + 1),
-				"taskType":    r.Ctx.Get("taskType"),
+				metadataTaskAddedAt: r.Ctx.Get(metadataTaskAddedAt),
+				metadataTaskClient:  r.Ctx.Get(metadataTaskClient),
+				metadataTaskHash:    r.Ctx.Get(metadataTaskHash),
+				metadataTaskRegion:  r.Ctx.Get(metadataTaskRegion),
+				metadataTaskRetries: strconv.Itoa(taskRetries + 1),
+				metadataTaskType:    r.Ctx.Get(metadataTaskType),
 			},
 		)
 	}
