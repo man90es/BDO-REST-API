@@ -16,6 +16,8 @@ import (
 
 func handleTaskError(r *colly.Request, imperva bool, err error) {
 	taskRetries, _ := strconv.Atoi(r.Ctx.Get("taskRetries"))
+	taskClient := r.Ctx.Get("taskClient")
+	taskHash := r.Ctx.Get("taskHash")
 
 	if imperva {
 		logger.Error(fmt.Sprintf("Hit Imperva while loading %v, retries: %v", r.URL, taskRetries))
@@ -39,22 +41,22 @@ func handleTaskError(r *colly.Request, imperva bool, err error) {
 		taskQueue.Pause(time.Duration(60-time.Now().Second()) * time.Second)
 	}
 
-	taskQueue.ConfirmTaskCompletion(r.Ctx.Get("taskClient"), r.Ctx.Get("taskHash"))
+	taskQueue.ConfirmTaskCompletion(taskClient, taskHash)
 
 	if taskRetries < viper.GetInt("taskretries") {
-		addedAt, _ := time.Parse(time.RFC3339, r.Ctx.Get("taskAddedAt"))
-		taskRegion := r.Ctx.Get("taskRegion")
-		taskType := r.Ctx.Get("taskType")
 		taskQueue.AddTask(
-			r.Ctx.Get("taskClient"),
-			r.Ctx.Get("taskHash"),
-			utils.BuildRequest(r.URL.String(), map[string]string{
-				"taskRegion":  taskRegion,
-				"taskRetries": strconv.Itoa(taskRetries + 1),
-				"taskType":    taskType,
-			}),
-			addedAt,
+			taskClient,
+			taskHash,
+			r.URL.String(),
 			true,
+			map[string]string{
+				"taskAddedAt": r.Ctx.Get("taskAddedAt"),
+				"taskClient":  r.Ctx.Get("taskClient"),
+				"taskHash":    r.Ctx.Get("taskHash"),
+				"taskRegion":  r.Ctx.Get("taskRegion"),
+				"taskRetries": strconv.Itoa(taskRetries + 1),
+				"taskType":    r.Ctx.Get("taskType"),
+			},
 		)
 	}
 }
