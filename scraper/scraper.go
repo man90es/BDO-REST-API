@@ -80,26 +80,25 @@ func InitScraper() {
 	})
 
 	scraper.OnHTML("body", func(body *colly.HTMLElement) {
-		imperva := false
 		queryString, _ := url.ParseQuery(body.Request.URL.RawQuery)
 		taskClient := body.Request.Ctx.Get(metadataTaskClient)
 		taskHash := body.Request.Ctx.Get(metadataTaskHash)
 		taskRegion := body.Request.Ctx.Get(metadataTaskRegion)
 		taskType := body.Request.Ctx.Get(metadataTaskType)
 
-		parsedStartTime, _ := time.Parse(time.RFC3339, body.Request.Ctx.Get(metadataTaskAddedAt))
-		elapsed := time.Since(parsedStartTime)
-		logger.Info(fmt.Sprintf("Loaded %v in %v", body.Request.URL, elapsed))
-
+		blocked := false
 		body.ForEachWithBreak("iframe", func(_ int, e *colly.HTMLElement) bool {
-			imperva = true
+			blocked = true
 			return false
 		})
-
-		if imperva {
+		if blocked {
 			handleTaskError(body.Request, true, nil)
 			return
 		}
+
+		parsedStartTime, _ := time.Parse(time.RFC3339, body.Request.Ctx.Get(metadataTaskAddedAt))
+		elapsed := time.Since(parsedStartTime)
+		logger.Info(fmt.Sprintf("Loaded %v in %v", body.Request.URL, elapsed))
 
 		body.ForEachWithBreak(".type_3", func(_ int, e *colly.HTMLElement) bool {
 			// Request gets redirected to https://www.naeu.playblackdesert.com/en-US/shutdown/closetime?shutDownType=0
