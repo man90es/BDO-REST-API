@@ -43,7 +43,7 @@ func handleTaskError(r *colly.Request, imperva bool, err error) {
 
 	taskQueue.ConfirmTaskCompletion(taskClient, taskHash)
 
-	if taskRetries < viper.GetInt(metadataTaskRetries) {
+	if taskRetries < viper.GetInt("taskretries") {
 		taskQueue.AddTask(
 			taskClient,
 			taskHash,
