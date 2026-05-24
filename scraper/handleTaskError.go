@@ -51,8 +51,8 @@ func handleTaskError(r *colly.Request, imperva bool, err error) {
 			true,
 			map[string]string{
 				metadataTaskAddedAt: r.Ctx.Get(metadataTaskAddedAt),
-				metadataTaskClient:  r.Ctx.Get(metadataTaskClient),
-				metadataTaskHash:    r.Ctx.Get(metadataTaskHash),
+				metadataTaskClient:  taskClient,
+				metadataTaskHash:    taskHash,
 				metadataTaskRegion:  r.Ctx.Get(metadataTaskRegion),
 				metadataTaskRetries: strconv.Itoa(taskRetries + 1),
 				metadataTaskType:    r.Ctx.Get(metadataTaskType),
