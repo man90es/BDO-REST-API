@@ -14,12 +14,12 @@ import (
 	"bdo-rest-api/utils"
 )
 
-func handleTaskError(r *colly.Request, imperva bool, err error) {
+func handleTaskError(r *colly.Request, blocked bool, err error) {
 	taskRetries, _ := strconv.Atoi(r.Ctx.Get(metadataTaskRetries))
 	taskClient := r.Ctx.Get(metadataTaskClient)
 	taskHash := r.Ctx.Get(metadataTaskHash)
 
-	if imperva {
+	if blocked {
 		logger.Error(fmt.Sprintf("Hit Imperva while loading %v, retries: %v", r.URL, taskRetries))
 	} else if strings.Contains(err.Error(), "http2: Transport received GOAWAY from server ErrCode:INTERNAL_ERROR") {
 		// This is an error that I don't know how to avoid, it clogs up all future requests
