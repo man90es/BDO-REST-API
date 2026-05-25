@@ -28,6 +28,15 @@ var enqueueScript = redis.NewScript(`
 	return 1
 `)
 
+var confirmCompletionScript = redis.NewScript(`
+	local clientsKey, hashesKey = KEYS[1], KEYS[2]
+	local taskClient, hash = ARGV[1], ARGV[2]
+
+	redis.call("HINCRBY", clientsKey, taskClient, -1)
+	redis.call("SREM", hashesKey, hash)
+	return 1
+`)
+
 type Task struct {
 	Hash       string
 	Metadata   map[string]string
@@ -198,8 +207,5 @@ func (q *TaskQueue) CountQueuedTasksForClient(taskClient string) (count int) {
 }
 
 func (q *TaskQueue) ConfirmTaskCompletion(taskClient string, hash string) {
-	pipe := q.rdb.Pipeline()
-	pipe.HIncrBy(q.ctx, q.clientsKey, taskClient, -1)
-	pipe.SRem(q.ctx, q.hashesKey, hash)
-	_, _ = pipe.Exec(q.ctx)
+	_, _ = confirmCompletionScript.Run(q.ctx, q.rdb, []string{q.clientsKey, q.hashesKey}, taskClient, hash).Result()
 }
