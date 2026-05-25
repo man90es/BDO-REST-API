@@ -48,7 +48,7 @@ func handleTaskError(r *colly.Request, blocked bool, err error) {
 			taskClient,
 			taskHash,
 			r.URL.String(),
-			true,
+			viper.GetBool("taskretryfront"),
 			map[string]string{
 				metadataTaskAddedAt: r.Ctx.Get(metadataTaskAddedAt),
 				metadataTaskClient:  taskClient,
