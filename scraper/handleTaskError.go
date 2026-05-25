@@ -19,6 +19,24 @@ func handleTaskError(r *colly.Request, blocked bool, err error) {
 	taskClient := r.Ctx.Get(metadataTaskClient)
 	taskHash := r.Ctx.Get(metadataTaskHash)
 
+	taskQueue.ConfirmTaskCompletion(taskClient, taskHash)
+	if taskRetries < viper.GetInt("taskretries") {
+		taskQueue.AddTask(
+			taskClient,
+			taskHash,
+			r.URL.String(),
+			viper.GetBool("taskretryfront"),
+			map[string]string{
+				metadataTaskAddedAt: r.Ctx.Get(metadataTaskAddedAt),
+				metadataTaskClient:  taskClient,
+				metadataTaskHash:    taskHash,
+				metadataTaskRegion:  r.Ctx.Get(metadataTaskRegion),
+				metadataTaskRetries: strconv.Itoa(taskRetries + 1),
+				metadataTaskType:    r.Ctx.Get(metadataTaskType),
+			},
+		)
+	}
+
 	if blocked {
 		logger.Error(fmt.Sprintf("Hit Imperva while loading %v, retries: %v", r.URL, taskRetries))
 	} else if strings.Contains(err.Error(), "http2: Transport received GOAWAY from server ErrCode:INTERNAL_ERROR") {
@@ -39,24 +57,5 @@ func handleTaskError(r *colly.Request, blocked bool, err error) {
 		taskQueue.Pause(scraperFailurePause)
 	} else {
 		taskQueue.Pause(time.Duration(60-time.Now().Second()) * time.Second)
-	}
-
-	taskQueue.ConfirmTaskCompletion(taskClient, taskHash)
-
-	if taskRetries < viper.GetInt("taskretries") {
-		taskQueue.AddTask(
-			taskClient,
-			taskHash,
-			r.URL.String(),
-			viper.GetBool("taskretryfront"),
-			map[string]string{
-				metadataTaskAddedAt: r.Ctx.Get(metadataTaskAddedAt),
-				metadataTaskClient:  taskClient,
-				metadataTaskHash:    taskHash,
-				metadataTaskRegion:  r.Ctx.Get(metadataTaskRegion),
-				metadataTaskRetries: strconv.Itoa(taskRetries + 1),
-				metadataTaskType:    r.Ctx.Get(metadataTaskType),
-			},
-		)
 	}
 }
