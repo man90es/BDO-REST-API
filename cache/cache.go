@@ -24,7 +24,7 @@ type CacheEntry[T any] struct {
 }
 
 type Cache[T any] interface {
-	AddRecord(keys []string, data T, status, retries int, clientID string, startTime time.Time) (date string, expires string)
+	AddRecord(keys []string, data T, status int, clientID string, startTime time.Time) (date string, expires string)
 	GetRecord(keys []string) (data T, status int, date string, expires string, found bool)
 	GetItemCount() int
 	GetKeys() []string
@@ -51,13 +51,12 @@ func newRedisCache[T any](client *redis.Client, namespace string) *redisCache[T]
 	}
 }
 
-func (c *redisCache[T]) AddRecord(keys []string, data T, status, retries int, clientID string, startTime time.Time) (date, expires string) {
+func (c *redisCache[T]) AddRecord(keys []string, data T, status int, clientID string, startTime time.Time) (date, expires string) {
 	entry := CacheEntry[T]{
 		ClientID:    clientID,
 		Data:        data,
 		Date:        time.Now(),
 		InstanceID:  viper.GetString("instanceid"),
-		Retries:     retries,
 		Status:      status,
 		TimeElapsed: int(time.Since(startTime) / time.Millisecond),
 	}

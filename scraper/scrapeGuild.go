@@ -77,6 +77,5 @@ func scrapeGuild(body *colly.HTMLElement, region, guildName string) {
 
 	startTime, _ := time.Parse(time.RFC3339, body.Request.Ctx.Get(metadataTaskAddedAt))
 	taskClient := body.Request.Ctx.Get(metadataTaskClient)
-	taskRetries, _ := strconv.Atoi(body.Request.Ctx.Get(metadataTaskRetries))
-	cache.GuildProfiles.AddRecord([]string{region, guildName}, guildProfile, status, taskRetries, taskClient, startTime)
+	cache.GuildProfiles.AddRecord([]string{region, guildName}, guildProfile, status, taskClient, startTime)
 }
