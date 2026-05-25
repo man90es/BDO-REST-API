@@ -71,6 +71,10 @@ Available flags:
 	- Amount of time in seconds to wait after a failed task to idle (0 for immediate retry, negative for pause until end of minute)
 	- Type: integer
 	- Default value: `-1`
+- `-scraperthrottle`
+	- Maximum number of requests scraper sends per 30 seconds. 0 disables throttling.
+	- Type: integer
+	- Default value: `20`
 
 You can use them like this:
 ```bash

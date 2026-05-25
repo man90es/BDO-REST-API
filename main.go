@@ -28,6 +28,7 @@ func main() {
 	flagRateLimit := flag.Uint64("ratelimit", 512, "Maximum number of requests per minute per IP")
 	flagRedis := flag.String("redis", "redis://localhost:6379/0", "Redis connection string")
 	flagScraperFailurePause := flag.Int("scraperfailurepause", -1, "Amount of time in seconds to wait after a failed task to idle")
+	flagScraperThrottle := flag.Uint("scraperthrottle", 20, "Maximum number of requests scraper sends per 30 seconds")
 	flagTaskRetries := flag.Uint("taskretries", 3, "Number of retries for a scraping task")
 	flagVerbose := flag.Bool("verbose", false, "Print out additional logs into stdout")
 	flag.Parse()
@@ -62,6 +63,7 @@ func main() {
 	viper.Set("ratelimit", int64(*flagRateLimit))
 	viper.Set("redis", *flagRedis)
 	viper.Set("scraperfailurepause", time.Duration(*flagScraperFailurePause)*time.Second)
+	viper.Set("scraperthrottle", int(*flagScraperThrottle))
 	viper.Set("taskretries", int(*flagTaskRetries))
 	viper.Set("verbose", *flagVerbose)
 
