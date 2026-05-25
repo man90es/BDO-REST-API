@@ -6,8 +6,6 @@ import (
 	"sync"
 	"time"
 
-	"bdo-rest-api/utils"
-
 	"github.com/redis/go-redis/v9"
 	"github.com/redis/go-redis/v9/maintnotifications"
 	"github.com/spf13/viper"
@@ -31,9 +29,9 @@ var enqueueScript = redis.NewScript(`
 `)
 
 type Task struct {
-	AddedAt    time.Time
-	TaskClient string
 	Hash       string
+	Metadata   map[string]string
+	TaskClient string
 	URL        string
 }
 
@@ -80,16 +78,12 @@ func NewTaskQueue(bufferSize int) *TaskQueue {
 	return queue
 }
 
-func (q *TaskQueue) AddTask(taskClient, hash, url string, addedAt time.Time, front bool) bool {
+func (q *TaskQueue) AddTask(taskClient, hash, url string, front bool, metadata map[string]string) bool {
 	task := Task{
-		AddedAt:    addedAt,
-		TaskClient: taskClient,
 		Hash:       hash,
-		URL: utils.BuildRequest(url, map[string]string{
-			"taskAddedAt": addedAt.Format(time.RFC3339),
-			"taskClient":  taskClient,
-			"taskHash":    hash,
-		}),
+		Metadata:   metadata,
+		TaskClient: taskClient,
+		URL:        url,
 	}
 
 	taskJSON, err := json.Marshal(task)

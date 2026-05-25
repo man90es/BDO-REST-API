@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"hash/crc32"
 	"maps"
+	"net/http"
 	"net/url"
 	"slices"
 	"strconv"
@@ -22,6 +23,13 @@ import (
 var taskQueue *TaskQueue
 var scraperInitialised = false
 
+const metadataTaskAddedAt = "taskAddedAt"
+const metadataTaskClient = "taskClient"
+const metadataTaskHash = "taskHash"
+const metadataTaskRegion = "taskRegion"
+const metadataTaskRetries = "taskRetries"
+const metadataTaskType = "taskType"
+
 func InitScraper() {
 	if scraperInitialised {
 		return
@@ -39,48 +47,58 @@ func InitScraper() {
 
 	taskQueue = NewTaskQueue(10000)
 	taskQueue.SetProcessFunc(func(t Task) {
-		scraper.Visit(t.URL)
-	})
-
-	scraper.OnRequest(func(r *colly.Request) {
-		query := r.URL.Query()
-		for _, key := range []string{"taskHash", "taskType", "taskRegion", "taskRetries", "taskClient", "taskAddedAt"} {
-			r.Ctx.Put(key, query.Get(key))
-			query.Del(key)
+		ctx := colly.NewContext()
+		for k, v := range t.Metadata {
+			ctx.Put(k, v)
 		}
-		r.URL.RawQuery = query.Encode()
 
-		r.Headers.Set("Referer", fmt.Sprintf("https://%v/%v/Main/Index", r.URL.Host, r.URL.Path[1:6]))
-		r.Headers.Set("User-Agent", ua.Random())
+		u, _ := url.Parse(t.URL)
+		useragent := ua.Random()
+		secUa, secMobile, secPlatform := utils.GenSec(useragent)
+		hdr := make(http.Header)
+		hdr.Set("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7")
+		hdr.Set("Accept-Encoding", "gzip, deflate, br, zstd")
+		hdr.Set("Accept-Language", "en-US,en;q=0.9")
+		hdr.Set("Cache-Control", "max-age=0")
+		hdr.Set("Priority", "u=0, i")
+		hdr.Set("Referer", fmt.Sprintf("https://%v/%v/Main/Index", u.Host, u.Path[1:6]))
+		hdr.Set("Sec-Ch-Ua", secUa)
+		hdr.Set("Sec-Ch-Ua-Mobile", secMobile)
+		hdr.Set("Sec-Ch-Ua-Platform", secPlatform)
+		hdr.Set("Sec-Fetch-Dest", "document")
+		hdr.Set("Sec-Fetch-Mode", "navigate")
+		hdr.Set("Sec-Fetch-Site", "same-origin")
+		hdr.Set("Sec-Fetch-User", "?1")
+		hdr.Set("Upgrade-Insecure-Requests", "1")
+		hdr.Set("User-Agent", useragent)
+
+		scraper.Request("GET", t.URL, nil, ctx, hdr)
 	})
 
 	scraper.OnError(func(r *colly.Response, err error) {
 		handleTaskError(r.Request, false, err)
 	})
 
-	scraper.OnResponse(func(r *colly.Response) {
-		parsedStartTime, _ := time.Parse(time.RFC3339, r.Request.Ctx.Get("taskAddedAt"))
-		elapsed := time.Since(parsedStartTime)
-		logger.Info(fmt.Sprintf("Loaded %v in %v", r.Request.URL, elapsed))
-	})
-
 	scraper.OnHTML("body", func(body *colly.HTMLElement) {
-		imperva := false
 		queryString, _ := url.ParseQuery(body.Request.URL.RawQuery)
-		taskClient := body.Request.Ctx.Get("taskClient")
-		taskHash := body.Request.Ctx.Get("taskHash")
-		taskRegion := body.Request.Ctx.Get("taskRegion")
-		taskType := body.Request.Ctx.Get("taskType")
+		taskClient := body.Request.Ctx.Get(metadataTaskClient)
+		taskHash := body.Request.Ctx.Get(metadataTaskHash)
+		taskRegion := body.Request.Ctx.Get(metadataTaskRegion)
+		taskType := body.Request.Ctx.Get(metadataTaskType)
 
+		blocked := false
 		body.ForEachWithBreak("iframe", func(_ int, e *colly.HTMLElement) bool {
-			imperva = true
+			blocked = true
 			return false
 		})
-
-		if imperva {
+		if blocked {
 			handleTaskError(body.Request, true, nil)
 			return
 		}
+
+		parsedStartTime, _ := time.Parse(time.RFC3339, body.Request.Ctx.Get(metadataTaskAddedAt))
+		elapsed := time.Since(parsedStartTime)
+		logger.Info(fmt.Sprintf("Loaded %v in %v", body.Request.URL, elapsed))
 
 		body.ForEachWithBreak(".type_3", func(_ int, e *colly.HTMLElement) bool {
 			// Request gets redirected to https://www.naeu.playblackdesert.com/en-US/shutdown/closetime?shutDownType=0
@@ -146,19 +164,21 @@ func createTask(taskClient, region, taskType string, query map[string]string) (o
 		}[taskType],
 	)
 
-	maps.Copy(query, map[string]string{
-		"taskRegion":  region,
-		"taskRetries": "0",
-		"taskType":    taskType,
-	})
-
 	ok = taskQueue.AddTask(
 		taskClient,
 		hashString,
 		utils.BuildRequest(url, query),
-		time.Now(),
 		false,
+		map[string]string{
+			metadataTaskAddedAt: time.Now().Format(time.RFC3339),
+			metadataTaskClient:  taskClient,
+			metadataTaskHash:    hashString,
+			metadataTaskRegion:  region,
+			metadataTaskRetries: "0",
+			metadataTaskType:    taskType,
+		},
 	)
+
 	return ok, false, map[bool]int{true: tasksN + 1, false: tasksN}[ok]
 }
 

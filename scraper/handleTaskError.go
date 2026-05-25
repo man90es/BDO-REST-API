@@ -14,10 +14,12 @@ import (
 	"bdo-rest-api/utils"
 )
 
-func handleTaskError(r *colly.Request, imperva bool, err error) {
-	taskRetries, _ := strconv.Atoi(r.Ctx.Get("taskRetries"))
+func handleTaskError(r *colly.Request, blocked bool, err error) {
+	taskRetries, _ := strconv.Atoi(r.Ctx.Get(metadataTaskRetries))
+	taskClient := r.Ctx.Get(metadataTaskClient)
+	taskHash := r.Ctx.Get(metadataTaskHash)
 
-	if imperva {
+	if blocked {
 		logger.Error(fmt.Sprintf("Hit Imperva while loading %v, retries: %v", r.URL, taskRetries))
 	} else if strings.Contains(err.Error(), "http2: Transport received GOAWAY from server ErrCode:INTERNAL_ERROR") {
 		// This is an error that I don't know how to avoid, it clogs up all future requests
@@ -39,22 +41,22 @@ func handleTaskError(r *colly.Request, imperva bool, err error) {
 		taskQueue.Pause(time.Duration(60-time.Now().Second()) * time.Second)
 	}
 
-	taskQueue.ConfirmTaskCompletion(r.Ctx.Get("taskClient"), r.Ctx.Get("taskHash"))
+	taskQueue.ConfirmTaskCompletion(taskClient, taskHash)
 
 	if taskRetries < viper.GetInt("taskretries") {
-		addedAt, _ := time.Parse(time.RFC3339, r.Ctx.Get("taskAddedAt"))
-		taskRegion := r.Ctx.Get("taskRegion")
-		taskType := r.Ctx.Get("taskType")
 		taskQueue.AddTask(
-			r.Ctx.Get("taskClient"),
-			r.Ctx.Get("taskHash"),
-			utils.BuildRequest(r.URL.String(), map[string]string{
-				"taskRegion":  taskRegion,
-				"taskRetries": strconv.Itoa(taskRetries + 1),
-				"taskType":    taskType,
-			}),
-			addedAt,
+			taskClient,
+			taskHash,
+			r.URL.String(),
 			true,
+			map[string]string{
+				metadataTaskAddedAt: r.Ctx.Get(metadataTaskAddedAt),
+				metadataTaskClient:  taskClient,
+				metadataTaskHash:    taskHash,
+				metadataTaskRegion:  r.Ctx.Get(metadataTaskRegion),
+				metadataTaskRetries: strconv.Itoa(taskRetries + 1),
+				metadataTaskType:    r.Ctx.Get(metadataTaskType),
+			},
 		)
 	}
 }
