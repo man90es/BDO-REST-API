@@ -18,7 +18,6 @@ type CacheEntry[T any] struct {
 	Data        T         `json:"data"`
 	Date        time.Time `json:"date"`
 	InstanceID  string    `json:"instanceId,omitempty"`
-	Retries     int       `json:"retries,omitempty"`
 	Status      int       `json:"status"`
 	TimeElapsed int       `json:"timeElapsed,omitempty"`
 }
