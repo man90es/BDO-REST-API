@@ -112,7 +112,7 @@ func (q *TaskQueue) run() {
 			continue
 		}
 
-		limit := viper.GetInt("scraperratelimit")
+		limit := viper.GetInt("scraperthrottle")
 		if limit > 0 {
 			requestTimestamps = q.throttle(requestTimestamps, limit, window)
 			if len(requestTimestamps) >= limit {
