@@ -60,6 +60,10 @@ Available flags:
 	- Specifies the number of retries for a scraping task
 	- Type: unsigned integer
 	- Default value: `3`
+- `-taskretryfront`
+	- Prepend failed tasks to the front of the queue. If false, failed tasks go to the back of the queue
+	- Type: boolean
+	- Default value: `false`
 - `-verbose`
 	- Allows to put the app into verbose mode and print out additional logs to stdout
 	- Default value: none, no additional output is produced

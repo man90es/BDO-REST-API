@@ -30,6 +30,7 @@ func main() {
 	flagScraperFailurePause := flag.Int("scraperfailurepause", -1, "Amount of time in seconds to wait after a failed task to idle")
 	flagScraperThrottle := flag.Uint("scraperthrottle", 20, "Maximum number of requests scraper sends per 30 seconds")
 	flagTaskRetries := flag.Uint("taskretries", 3, "Number of retries for a scraping task")
+	flagTaskRetryFront := flag.Bool("taskretryfront", false, "Prepend failed tasks to the front of the queue")
 	flagVerbose := flag.Bool("verbose", false, "Print out additional logs into stdout")
 	flag.Parse()
 
@@ -65,6 +66,7 @@ func main() {
 	viper.Set("scraperfailurepause", time.Duration(*flagScraperFailurePause)*time.Second)
 	viper.Set("scraperthrottle", int(*flagScraperThrottle))
 	viper.Set("taskretries", int(*flagTaskRetries))
+	viper.Set("taskretryfront", *flagTaskRetryFront)
 	viper.Set("verbose", *flagVerbose)
 
 	cache.InitCache()
