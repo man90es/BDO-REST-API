@@ -45,7 +45,7 @@ type TaskQueue struct {
 	tasksKey    string
 	hashesKey   string
 	clientsKey  string
-	pausedKey   string
+	pausedUntil time.Time
 }
 
 func NewTaskQueue(bufferSize int) *TaskQueue {
@@ -68,11 +68,7 @@ func NewTaskQueue(bufferSize int) *TaskQueue {
 		tasksKey:   "scraper:" + instanceID + ":tasks",
 		hashesKey:  "scraper:" + instanceID + ":hashes",
 		clientsKey: "scraper:" + instanceID + ":clients",
-		pausedKey:  "scraper:" + instanceID + ":paused",
 	}
-
-	// Unpause the queue on startup if it was left in a paused state
-	rdb.Del(queue.ctx, queue.pausedKey)
 
 	go queue.run()
 	return queue
@@ -101,36 +97,81 @@ func (q *TaskQueue) AddTask(taskClient, hash, url string, front bool, metadata m
 }
 
 func (q *TaskQueue) run() {
+	var requestTimestamps []time.Time
+	const window = 30 * time.Second
+
 	for {
-		q.mutex.Lock()
-		process := q.processFunc
-		q.mutex.Unlock()
-
-		// Ensure we don't pop tasks if there's no processor registered
-		if process == nil {
+		process := q.getProcessFunc()
+		if process == nil { // Ensure we don't pop tasks if there's no processor registered
 			time.Sleep(time.Second)
 			continue
 		}
 
-		// Check for pause state
-		if paused, _ := q.rdb.Exists(q.ctx, q.pausedKey).Result(); paused > 0 {
-			time.Sleep(time.Second)
+		if paused, until := q.isPaused(); paused {
+			time.Sleep(time.Until(until))
 			continue
 		}
 
-		// Blocking pop with timeout to allow periodic checks for the pause state
-		res, err := q.rdb.BLPop(q.ctx, 5*time.Second, q.tasksKey).Result()
-		if err != nil {
+		limit := viper.GetInt("scraperratelimit")
+		if limit > 0 {
+			requestTimestamps = q.throttle(requestTimestamps, limit, window)
+			if len(requestTimestamps) >= limit {
+				continue
+			}
+		}
+
+		task, err := q.popTask()
+		if err != nil { // Includes timeout and unmarshal errors
 			continue
 		}
 
-		var task Task
-		if err := json.Unmarshal([]byte(res[1]), &task); err != nil {
-			continue
+		if limit > 0 {
+			requestTimestamps = append(requestTimestamps, time.Now())
 		}
 
 		process(task)
 	}
+}
+
+func (q *TaskQueue) getProcessFunc() func(Task) {
+	q.mutex.Lock()
+	defer q.mutex.Unlock()
+	return q.processFunc
+}
+
+func (q *TaskQueue) isPaused() (bool, time.Time) {
+	q.mutex.Lock()
+	defer q.mutex.Unlock()
+
+	return time.Now().Before(q.pausedUntil), q.pausedUntil
+}
+
+func (q *TaskQueue) throttle(ts []time.Time, limit int, window time.Duration) []time.Time {
+	cutoff := time.Now().Add(-window)
+	n := 0
+	for _, t := range ts {
+		if t.After(cutoff) {
+			ts[n] = t
+			n++
+		}
+	}
+	ts = ts[:n]
+
+	if len(ts) >= limit {
+		q.Pause(time.Until(ts[0].Add(window)))
+	}
+	return ts
+}
+
+func (q *TaskQueue) popTask() (Task, error) {
+	res, err := q.rdb.BLPop(q.ctx, 5*time.Second, q.tasksKey).Result()
+	if err != nil {
+		return Task{}, err
+	}
+
+	var task Task
+	err = json.Unmarshal([]byte(res[1]), &task)
+	return task, err
 }
 
 func (q *TaskQueue) SetProcessFunc(f func(Task)) {
@@ -140,7 +181,12 @@ func (q *TaskQueue) SetProcessFunc(f func(Task)) {
 }
 
 func (q *TaskQueue) Pause(t time.Duration) {
-	q.rdb.Set(q.ctx, q.pausedKey, "1", t)
+	q.mutex.Lock()
+	defer q.mutex.Unlock()
+	newUntil := time.Now().Add(t)
+	if newUntil.After(q.pausedUntil) {
+		q.pausedUntil = newUntil
+	}
 }
 
 func (q *TaskQueue) CountQueuedTasksForClient(taskClient string) (count int) {
