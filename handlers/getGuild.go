@@ -12,15 +12,15 @@ import (
 )
 
 func getGuild(w http.ResponseWriter, r *http.Request) {
-	name, nameOk, nameValidationMessage := validators.ValidateGuildNameQueryParam(r.URL.Query()["guildName"])
-	if !nameOk {
-		giveBadRequestResponse(w, nameValidationMessage)
-		return
-	}
-
 	region, regionOk, regionValidationMessage := validators.ValidateRegionQueryParam(r.URL.Query()["region"])
 	if !regionOk {
 		giveBadRequestResponse(w, regionValidationMessage)
+		return
+	}
+
+	name, nameOk, nameValidationMessage := validators.ValidateGuildNameQueryParam(r.URL.Query()["guildName"], region)
+	if !nameOk {
+		giveBadRequestResponse(w, nameValidationMessage)
 		return
 	}
 

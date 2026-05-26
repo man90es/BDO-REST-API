@@ -9,15 +9,21 @@ import (
 // The naming policies in BDO are fucked up
 // This function only checks the length and allowed symbols
 // I also assumed that the allowed symbols are the same as for adventurer names
-func ValidateGuildNameQueryParam(query []string) (guildName string, ok bool, errorMessage string) {
+func ValidateGuildNameQueryParam(query []string, region string) (guildName string, ok bool, errorMessage string) {
 	if 1 > len(query) {
 		return "", false, "Guild name is missing from request"
 	}
 
 	guildName = strings.ToLower(query[0])
 
-	if len(guildName) < 3 {
-		return guildName, false, "Guild name can't be shorter than 3 symbols"
+	minLength := map[string]int{
+		"EU": 3,
+		"KR": 3,
+		"NA": 3,
+		"SA": 2,
+	}[region]
+	if len(guildName) < minLength {
+		return guildName, false, fmt.Sprintf("Guild name in %v region can't be shorter than %v symbols", region, minLength)
 	}
 
 	if len(guildName) > 16 {
@@ -43,7 +49,7 @@ func ValidateGuildNameQueryParam(query []string) (guildName string, ok bool, err
 		}
 
 		// Korean characters
-		if unicode.Is(unicode.Hangul, r) {
+		if region == "KR" && unicode.Is(unicode.Hangul, r) {
 			return false
 		}
 
