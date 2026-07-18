@@ -12,7 +12,7 @@ import (
 )
 
 var initTime = time.Now()
-var version = "1.19.2"
+var version = "1.19.3"
 
 func getStatus(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(map[string]interface{}{
