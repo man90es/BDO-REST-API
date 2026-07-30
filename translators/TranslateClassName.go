@@ -47,6 +47,7 @@ var classNameTranslationMap = map[string]string{
 	"소서러":                  "Sorceress",
 	"스칼라":                  "Scholar",
 	"아처":                   "Archer",
+	"에이전트":                 "Agent",
 	"오공":                   "Wukong",
 	"우사":                   "Woosa",
 	"워리어":                  "Warrior",
