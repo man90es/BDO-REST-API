@@ -86,12 +86,7 @@ func InitScraper() {
 		taskRegion := body.Request.Ctx.Get(metadataTaskRegion)
 		taskType := body.Request.Ctx.Get(metadataTaskType)
 
-		blocked := false
-		body.ForEachWithBreak("iframe", func(_ int, e *colly.HTMLElement) bool {
-			blocked = true
-			return false
-		})
-		if blocked {
+		if strings.Contains(body.Text, "Incapsula incident ID") {
 			handleTaskError(body.Request, true, nil)
 			return
 		}
