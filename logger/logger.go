@@ -57,9 +57,10 @@ func writeToMongo(level, message string) {
 	}
 
 	go mongoCollection.InsertOne(context.TODO(), Log{
-		CreatedAt: time.Now(),
-		Level:     level,
-		Message:   message,
+		CreatedAt:  time.Now(),
+		InstanceID: viper.GetString("instanceid"),
+		Level:      level,
+		Message:    message,
 	})
 }
 
