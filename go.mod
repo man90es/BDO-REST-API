@@ -9,7 +9,7 @@ require (
 	github.com/sa-/slicefunk v0.1.4
 	github.com/spf13/viper v1.21.0
 	github.com/ulule/limiter/v3 v3.11.2
-	go.mongodb.org/mongo-driver/v2 v2.4.1
+	go.mongodb.org/mongo-driver/v2 v2.4.2
 )
 
 require (
