@@ -58,7 +58,7 @@ func scrapeAdventurer(body *colly.HTMLElement, region, profileTarget string) {
 			text := strings.TrimSpace(e.Text)
 			translators.TranslateMisc(&text)
 
-			if text != "Not in a guild" {
+			if len(text) > 0 && text != "Not in a guild" {
 				profile.Guild = &models.GuildProfile{
 					Name: text,
 				}
