@@ -1,7 +1,9 @@
 package handlers
 
 import (
+	"context"
 	"fmt"
+	"net"
 	"net/http"
 	"time"
 
@@ -28,13 +30,25 @@ func ListenAndServe() {
 		middleware.GetRateLimitMiddleware(),
 	)
 
+	addr := fmt.Sprintf("0.0.0.0:%v", viper.GetInt("port"))
+
+	// Explicitly disable MPTCP
+	lc := net.ListenConfig{}
+	lc.SetMultipathTCP(false)
+
+	ln, err := lc.Listen(context.Background(), "tcp", addr)
+	if err != nil {
+		logger.Error(err.Error())
+		return
+	}
+
 	srv := &http.Server{
-		Addr:         fmt.Sprintf("0.0.0.0:%v", viper.GetInt("port")),
+		Addr:         addr,
 		Handler:      middlewareStack(mux),
 		IdleTimeout:  30 * time.Second,
 		ReadTimeout:  10 * time.Second,
 		WriteTimeout: 10 * time.Second,
 	}
 
-	logger.Error(srv.ListenAndServe().Error())
+	logger.Error(srv.Serve(ln).Error())
 }
